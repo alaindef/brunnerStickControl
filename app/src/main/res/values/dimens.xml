@@ -1,0 +1,9 @@
+<resources>
+    <!-- Default screen margins, per the Android Design guidelines. -->
+    <dimen name="landscape_button_text_size">14sp</dimen>
+    <dimen name="padding">20sp</dimen>
+    <dimen name="buttonWidth">40sp</dimen>
+    <dimen name="buttonHeight">40sp</dimen>
+    <dimen name="textsize">18sp</dimen>
+    <dimen name="textsmall">10sp</dimen>
+</resources>

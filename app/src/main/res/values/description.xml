@@ -1,0 +1,5 @@
+<resources>
+    <string name="photoView">photo view</string>
+    <string name="puzzle15">15-puzzle</string>
+    <string name="puzzle8">8-puzzle</string>
+</resources>

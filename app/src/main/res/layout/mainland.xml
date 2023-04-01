@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="horizontal">
+
+
+    <!--    container for buttons-->
+    <LinearLayout
+        android:id="@+id/cased"
+        android:layout_width="110dp"
+        android:layout_height="match_parent"
+        android:background="@android:color/holo_green_light"
+        android:orientation="vertical">
+
+        <Button
+            android:id="@+id/shuffle"
+            style="?android:attr/buttonBarButtonStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:onClick="shuffle"
+            android:text="@string/shuffle"
+            android:textSize="@dimen/landscape_button_text_size" />
+
+        <Button
+            android:id="@+id/reset"
+            style="?android:attr/buttonBarButtonStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:onClick="reset"
+            android:text="@string/reset_hor"
+            android:textSize="@dimen/landscape_button_text_size" />
+
+        <Button
+            android:id="@+id/solve"
+            style="?android:attr/buttonBarButtonStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:onClick="solve"
+            android:text="@string/solve"
+            android:textSize="@dimen/landscape_button_text_size" />
+
+        <Button
+            android:id="@+id/selec"
+            style="?android:attr/buttonBarButtonStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:onClick="setSize"
+            android:text="@string/puzzle8"
+            android:textSize="@dimen/landscape_button_text_size" />
+
+    </LinearLayout>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true">
+
+        <RelativeLayout
+            android:id="@+id/puzzleContainer"
+            android:layout_width="487dp"
+            android:layout_height="match_parent"
+            android:layout_alignParentLeft="true"
+            android:orientation="vertical">
+
+            <com.alaindef.puzzle.MyPuzzleView
+                android:id="@+id/puzzleView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:background="@android:color/holo_blue_light"
+                android:minHeight="0dp" />
+
+            <TextView
+                android:id="@+id/t1"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentTop="true"
+                android:background="@android:color/holo_blue_light"
+                android:gravity="center"
+                android:text="   "
+                android:textSize="@dimen/textsmall" />
+
+
+            <TextView
+                android:id="@+id/t2"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:background="@android:color/holo_blue_light"
+                android:gravity="center"
+                android:text="   "
+                android:textSize="@dimen/textsmall" />
+
+        </RelativeLayout>
+
+
+        <RelativeLayout
+            android:id="@+id/Slide"
+            android:layout_width="200dp"
+            android:layout_height="match_parent"
+            android:layout_alignParentRight="true"
+            android:orientation="vertical">
+
+            <ImageView
+                android:id="@+id/currentSlide"
+                android:layout_width="wrap_content"
+                android:layout_height="90dp"
+                android:layout_centerInParent="true"
+                android:contentDescription="@string/photoView"
+                android:longClickable="true"
+                android:onClick="show"
+                android:src="@drawable/tuin" />
+
+            <Button
+                android:id="@+id/picture"
+                style="?android:attr/buttonBarButtonStyle"
+                android:layout_width="@dimen/buttonWidth"
+                android:layout_height="@dimen/buttonHeight"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentBottom="true"
+                android:layout_marginBottom="@dimen/padding"
+                android:layout_marginLeft="@dimen/padding"
+                android:background="@drawable/camericon"
+                android:onClick="takePicture" />
+
+
+            <TextView
+                android:id="@+id/report"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentTop="true"
+                android:background="@android:color/holo_blue_light"
+                android:gravity="center"
+                android:text="@string/hint"
+                android:textSize="@dimen/textsmall" />
+
+            <TextView
+                android:id="@+id/report2"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:background="@android:color/holo_blue_light"
+                android:gravity="center"
+                android:text="fotooke"
+                android:textSize="@dimen/textsmall" />
+
+        </RelativeLayout>
+    </RelativeLayout>
+</LinearLayout>
