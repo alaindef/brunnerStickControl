@@ -29,89 +29,33 @@ import java.io.InputStreamReader
 @Suppress("unused")
 class Main : AppCompatActivity() {
     private val logTag = ">----MAIN---"
-
-    //    private final String LOG_TAG = Main.class.getSimpleName();
     private fun buttonsInit() {
         //--------------------------------------------------------------------------- PICTURE
         val slide = findViewById<View>(R.id.currentSlide) as ImageView
-//    here in the program, because it is from within the layout xml file
         slide.setOnLongClickListener {
             getTileFromGallery() //next picture
             true
         }
     }
 
-    fun View?.layoutp() {
-        mPuzzle!!.updateLayoutParams { height = 300 }
-    }
-    fun View?.shuffle() {
-        oscar.send(FSM.EV_SHUFFLE, 0, 0, null)
-    }
-
-    fun View?.solve() {
-        mPuzzle!!.solve()
-    }
-
-    fun View?.reset() {
-        oscar.send(FSM.EV_RESET, 0, 0, null)
-    }
-
-    fun setSize(view: View?) {
-        oscar.send(FSM.EV_SET_SIZE, 0, 0, view)
-    }
-
-    fun View?.show() {
-        mPuzzle!!.showTileIndex()
-    }
-
-    //    obb
-    private fun readLine1(): String {
-        obbDir.listFiles()
-        Log.e(logTag, "obbdir list ${obbDir.listFiles()}")
-        Log.e(logTag, "files dir $filesDir")
-        return obbDir.listFiles().toString()
-    }
-
-    @Suppress("unused")
-    fun readLine(): ArrayList<String> {
-//       e.g. https://www.programcreek.com/java-api-examples/android.content.res.AssetManager
-        val mLines = ArrayList<String>()
-        Log.e(logTag, "readLine from assets")
-        try {
-            val am: AssetManager = this.assets
-            Log.i(logTag, ":) teut = #teut")
-            val `is` = am.open("test1.txt")
-            val reader = BufferedReader(InputStreamReader(`is`))
-            var line: String
-            while (reader.readLine().also { line = it } != null) mLines.add(line)
-        } catch (e: Exception) {
-            // TODO Auto-generated catch block
-            e.printStackTrace()
-        }
-        return mLines
-    }
+    fun View?.layoutp() {mPuzzle!!.updateLayoutParams { height = 300 }}
+    fun View?.shuffle() {oscar.send(FSM.EV_SHUFFLE, 0, 0, null)}
+    fun View?.solve() {mPuzzle!!.solve()}
+    fun View?.reset() {oscar.send(FSM.EV_RESET, 0, 0, null)}
+    fun setSize(view: View?) {oscar.send(FSM.EV_SET_SIZE, 0, 0, view)}
+    fun View?.show() {mPuzzle!!.showTileIndex()    }
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
         outState.putString("message", "onSaveInstanceState: orientation changed")    //test of saveInstanceState
     }
 
-
-    //    obb
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         if (savedInstanceState != null) {
-            val message = savedInstanceState.getString("message") //test of saveInstanceState
-//            Toast.makeText(this, message, Toast.LENGTH_LONG).show()
-            val strings = readLine1()
-            Log.i(logTag, "savedInstanceState: orientaton changed and strings=$strings")
+            Log.i(logTag, "savedInstanceState: orientaton changed and strings=#strings")
         }
-
-// test calls                               put test calls in here
-//        new Statistics(5, 399, 1.05);   //beamsize(399) and alfa(1.05) are very sensitive parameters
-//        if (1 == 1) {return;}           //skip regular execution:
-// end test calls
 
         when (resources.configuration.orientation) {
             Configuration.ORIENTATION_PORTRAIT  -> setContentView(R.layout.mainportrait)
@@ -127,7 +71,6 @@ class Main : AppCompatActivity() {
         mPuzzle = findViewById<View>(R.id.puzzleView) as MyPuzzleView
         mPuzzle!!.init(currentSlide, backgroundtileview)
         buttonsInit()
-        mediaPlayer = MediaPlayer.create(this, R.raw.staplerk)
 //        if (!oscar.isAlive) oscar.start()
 //        adf 221022 this works better
         if (savedInstanceState == null) oscar.start()
@@ -266,8 +209,6 @@ class Main : AppCompatActivity() {
         var mContext: Context? = null
         var mContextForDummies: Context? = null
 
-        @JvmField
-        var mediaPlayer: MediaPlayer? = null
         private fun calculateInSampleSize(
             options: BitmapFactory.Options, reqWidth: Int, reqHeight: Int
         ): Int {

@@ -275,7 +275,6 @@ class MyPuzzleView : FrameLayout {
         //update mState
         for (i in 0 until len) state[sliceOfPositions[i]] = targetSliceOfTileIndices[i]
         if (goalReached()) dim(255f)
-        if (sound) Main.mediaPlayer!!.start()
     }
 
     private fun setNewState(newState: IntArray, animationLag: Int) {
