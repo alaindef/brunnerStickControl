@@ -17,18 +17,23 @@ class MainMailbox  //   messages
     override fun handleMessage(m: Message) {
         val logTAG = "---MAIN ---"
         when (m.what) {
-            TILE_CLICK -> Main.mPuzzle?.swap0(m.obj as Tile, true)
+            TILE_CLICK -> Log.wtf(logTAG, "...tile click..." + m.arg1)
+//            TILE_CLICK -> Main.mPuzzle?.swap0(m.obj as Tile, true)
             PLAY_NEXT_MOVE -> {
                 Main.mReport!!.text =
                     String.format("time: %d msec - step %d of %d", timerep, m.arg1, m.arg2)
             }
-            RESET -> Main.mPuzzle?.reset()
-            SHUFFLE -> Main.mPuzzle?.reset()
-//            SHUFFLE -> Main.mPuzzle?.shuffle()
+            RESET -> Log.wtf(logTAG, "...reset..." + m.arg1)
+            SHUFFLE -> {
+                Main.mReport!!.text =
+                    String.format("time: %d msec", 7777)
+                Log.wtf(logTAG, "...shuffle..." + m.arg1)
+            }
             REPORT_HINT_Q -> Main.mReport?.text =
                 Main.mContext?.resources?.getString(R.string.hint)
-            SET_SIZE -> Main.mPuzzle?.togglePuzzleSize(m.obj as TextView)
-            REPORT_ELAPSED_TIME -> timerep = m.arg1
+            SET_SIZE -> Log.wtf(logTAG, "...set size..." + m.arg1)
+            REPORT_ELAPSED_TIME -> {timerep = m.arg1
+                Main.mReport!!.text ="report " + m.arg1 + " " + m.obj}
             TEST -> Log.wtf(logTAG, "arg1= " + m.arg1)
             else -> Log.wtf(logTAG, "message unknown " + m.what + "/" + m.arg1)
         }

@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/slidebackgroundcolor"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@android:color/holo_green_light"
+        android:weightSum="6">
+
+        <TextView
+            android:id="@+id/shuffle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="2"
+            android:gravity="center"
+            android:onClick="shuffle"
+            android:scaleType="fitXY"
+            android:text="@string/shuffle"
+            android:textSize="@dimen/textsize" />
+
+        <TextView
+            android:id="@+id/reset"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="2"
+            android:gravity="center"
+            android:onClick="reset"
+            android:scaleType="fitXY"
+            android:text="@string/reset_hor"
+            android:textSize="@dimen/textsize" />
+
+        <TextView
+            android:id="@+id/solve"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="2"
+            android:gravity="center"
+            android:onClick="solve"
+            android:scaleType="fitXY"
+            android:text="@string/solve_ikke"
+            android:textSize="@dimen/textsize" />
+
+    </LinearLayout>
+
+
+    <TextView
+        android:id="@+id/report"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@android:color/holo_orange_light"
+        android:gravity="center"
+        android:text="@string/hint" />
+
+    <ImageView
+        android:id="@+id/currentSlide"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_gravity="center"
+        android:contentDescription="@string/photoView"
+        android:onClick="show"
+        android:src="@drawable/lotti50" />
+
+
+</LinearLayout>

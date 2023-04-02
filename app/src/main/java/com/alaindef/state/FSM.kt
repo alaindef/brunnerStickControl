@@ -65,11 +65,11 @@ class FSM : Thread() {
                     send(EV_EXTRA)
                 }
                 FST_CHECK_TAIL -> send(EV_EXTRA)
-                FST_PLAY_NXT_MOVE -> {
-                    send(EV_GO)
-                }
-                FST_RESET -> send(EV_GO)
-                FST_SHUFFLE -> send(EV_GO)
+                FST_PLAY_NXT_MOVE -> {send(EV_GO)                }
+                FST_RESET -> {mbx!!.send(MainMailbox.REPORT_ELAPSED_TIME, 5, 0, "reset dinges")
+                    send(EV_EXTRA)}
+                FST_SHUFFLE -> {mbx!!.send(MainMailbox.REPORT_ELAPSED_TIME, 6, 0, null)
+                    send(EV_EXTRA)}
                 FST_DELAYED_REPORT_HINT -> send(EV_GO)
                 FST_DISCARD -> send(EV_GO)
                 FST_STUCK -> Log.e(logTag, "State machine stopped - ERROR 12")
