@@ -7,7 +7,7 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="64dp"
         android:background="@android:color/holo_green_light"
         android:weightSum="6">
 
@@ -43,26 +43,101 @@
             android:scaleType="fitXY"
             android:text="@string/solve_ikke"
             android:textSize="@dimen/textsize" />
-
     </LinearLayout>
 
 
     <TextView
         android:id="@+id/report"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="128dp"
         android:background="@android:color/holo_orange_light"
         android:gravity="center"
         android:text="@string/hint" />
 
-    <ImageView
-        android:id="@+id/currentSlide"
-        android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        android:layout_gravity="center"
-        android:contentDescription="@string/photoView"
-        android:onClick="show"
-        android:src="@drawable/lotti50" />
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="135dp"
+        android:background="@android:color/holo_green_light"
+        android:weightSum="6">
 
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/tile1"
+            android:layout_width="135dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:background="@drawable/fluosunroundedcorner"
+            android:contentDescription="@string/photoView"
+            android:gravity="center"
+            android:tag="event1"
+            android:text="1"
+            android:textSize="100dp"
+            android:onClick="send1" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/tile2"
+            android:layout_width="135dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:background="@drawable/fluosunroundedcorner"
+            android:contentDescription="@string/photoView"
+            android:gravity="center"
+            android:tag="event2"
+            android:text="2"
+            android:textSize="100dp"
+            android:onClick="send2" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/tile3"
+            android:layout_width="135dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:background="@drawable/fluosunroundedcorner"
+            android:contentDescription="@string/photoView"
+            android:gravity="center"
+            android:tag="al den derde knop"
+            android:text="3"
+            android:textSize="100dp"
+            android:onClick="send3" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="200dp"
+        android:background="@android:color/holo_green_light"
+        android:weightSum="6">
+
+        <Button
+            android:id="@+id/tile_last"
+            android:layout_width="150dp"
+            android:layout_height="150dp"
+            android:contentDescription="@string/photoView"
+            android:background="@drawable/lotti50"
+            android:tag="FSM gaat naar state 0"
+            android:text="reset"
+            android:textAlignment="center"
+            android:textSize="35dp"
+            android:onClick="send0" />
+
+        <!--ADDED SPACER VIEW -->
+        <View
+            android:layout_width="90dp"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
+        <!-- /ADDED SPACER VIEW -->
+
+        <Button
+            android:id="@+id/polling"
+            android:layout_width="150dp"
+            android:layout_height="150dp"
+            android:background="@drawable/tuin"
+            android:tag="polmaaral"
+            android:text="polling"
+            android:textAlignment="center"
+            android:textSize="35dp"
+            android:onClick="send5" />
+
+    </LinearLayout>
 
 </LinearLayout>

@@ -5,6 +5,7 @@ import android.os.Message
 import android.util.Log
 import android.widget.TextView
 import com.example.weather_app.R
+import java.lang.Thread.sleep
 
 /**
  * Created by alaindef on 16.09.15.
@@ -33,8 +34,14 @@ class MainMailbox  //   messages
                 Main.mContext?.resources?.getString(R.string.hint)
             SET_SIZE -> Log.wtf(logTAG, "...set size..." + m.arg1)
             REPORT_ELAPSED_TIME -> {timerep = m.arg1
-                Main.mReport!!.text ="report " + m.arg1 + " " + m.obj}
+                Main.mReport!!.text ="report elapsed " + m.arg1 + " " + m.obj}
             TEST -> Log.wtf(logTAG, "arg1= " + m.arg1)
+            SLEEP -> {
+                Log.wtf(logTAG, "asleep now" + m.obj)
+                sleep(2000)
+                Log.wtf(logTAG, "awake now ..........." )
+                Main.oscar.send(FSM.EV_0, 0, 0, "...........wake now !")
+            }
             else -> Log.wtf(logTAG, "message unknown " + m.what + "/" + m.arg1)
         }
     }
@@ -57,5 +64,6 @@ class MainMailbox  //   messages
         const val SET_SIZE = 5
         const val REPORT_ELAPSED_TIME = 6
         const val TEST = 7
+        const val SLEEP = 8
     }
 }

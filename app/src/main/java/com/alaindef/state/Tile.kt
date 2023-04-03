@@ -69,7 +69,7 @@ class Tile : AppCompatTextView {
             layoutParams.setMargins(newLeft, newTop, newLeft + tileWidth, newTop + tileHeight)
             setLayoutParams(layoutParams)
             if (tileIndex == 0) {             //single move
-                Main.oscar.send(FSM.EV_MOVE_DONE) //inform oscar that next move can begin
+                Main.oscar.send(FSM.EV_3) //inform oscar that next move can begin
             }
         }
 

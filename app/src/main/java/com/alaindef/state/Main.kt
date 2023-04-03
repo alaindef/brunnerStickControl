@@ -1,64 +1,101 @@
 package com.alaindef.puzzle
 
-import android.app.Activity
 import android.content.Context
-import android.content.Intent
-import android.content.res.AssetManager
 import android.content.res.Configuration
-import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.graphics.drawable.BitmapDrawable
-import android.media.MediaPlayer
 import android.os.Bundle
-import android.provider.MediaStore
+import android.os.StrictMode
+import android.os.StrictMode.VmPolicy
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
-import android.view.ViewGroup.LayoutParams.MATCH_PARENT
-import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.updateLayoutParams
+import androidx.appcompat.widget.AppCompatTextView
 import com.example.weather_app.R
-import java.io.BufferedReader
-import java.io.InputStreamReader
+import java.lang.Thread.sleep
+
 
 @Suppress("unused")
 class Main : AppCompatActivity() {
     private val logTag = ">----MAIN---"
 
-//    fun View?.layoutp() {mPuzzle!!.updateLayoutParams { height = 300 }}
-    fun View?.shuffle() {oscar.send(FSM.EV_SHUFFLE, 0, 0, null)}
-    fun View?.solve() {Main.oscar.send(FSM.EV_SOLVE_REQ, 0, 0, null)}
-//    fun View?.solve() {mPuzzle!!.solve()}
-    fun View?.reset() {oscar.send(FSM.EV_RESET, 0, 0, null)}
-    fun setSize(view: View?) {oscar.send(FSM.EV_SET_SIZE, 0, 0, null)}
+    fun sendEvent(view: View?) {
+        var ss = view!!.tag
+        oscar.send(FSM.EV_0, 0, 0, ss)
+    }
+
+    fun send0(view: View?) {
+        var ss = view!!.tag
+        oscar.send(FSM.EV_0, 0, 0, ss)
+        mReport!!.text = ss as CharSequence?
+    }
+
+    fun send1(view: View?) {
+        var ss = view!!.tag
+        oscar.send(FSM.EV_1, 0, 0, ss)
+        mReport!!.text = ss as CharSequence?
+    }
+
+    fun send2(view: View?) {
+        var ss = view!!.tag
+        oscar.send(FSM.EV_2, 0, 0, ss)
+        mReport!!.text = ss as CharSequence?
+    }
+
+    fun send3(view: View?) {
+        var ss = view!!.tag
+        oscar.send(FSM.EV_3, 0, 0, ss)
+        mReport!!.text = ss as CharSequence?
+    }
+
+    fun send4(view: View?) {
+        var ss = view!!.tag
+        oscar.send(FSM.EV_4)
+    }
+    fun send5(view: View?) {
+        var ss = view!!.tag
+        oscar.send(FSM.EV_5)
+    }
+
     fun View?.show() {}
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-        outState.putString("message", "onSaveInstanceState: orientation changed")    //test of saveInstanceState
+        outState.putString(
+            "message",
+            "onSaveInstanceState: orientation changed"
+        )    //test of saveInstanceState
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+//        adf 230404  https://wh0.github.io/2020/08/12/closeguard.html
+        StrictMode.setVmPolicy(
+            VmPolicy.Builder(StrictMode.getVmPolicy())
+                .detectLeakedClosableObjects()
+                .build()
+        )
 
         if (savedInstanceState != null) {
             Log.i(logTag, "savedInstanceState: orientaton changed and strings=#strings")
         }
 
         when (resources.configuration.orientation) {
-            Configuration.ORIENTATION_PORTRAIT  -> setContentView(R.layout.mainportraitsimple)
+            Configuration.ORIENTATION_PORTRAIT -> setContentView(R.layout.mainportraitsimple)
             Configuration.ORIENTATION_LANDSCAPE -> setContentView(R.layout.mainland)
         }
         mainMailbox = MainMailbox()
         mContext = this.applicationContext
         mContextForDummies = this // found this, but why ???
         mReport = findViewById<View>(R.id.report) as TextView
-        val currentSlide: ImageView = findViewById<View>(R.id.currentSlide) as ImageView
+        mtile1 = findViewById<View>(R.id.tile1) as AppCompatTextView
+        mtile2 = findViewById<View>(R.id.tile2) as AppCompatTextView
+        mtile3 = findViewById<View>(R.id.tile3) as AppCompatTextView
         val backgroundtileview = ImageView(this) //fixed background (green)
         backgroundtileview.setImageResource(R.drawable.fluosunroundedcorner)
 //        mPuzzle = findViewById<View>(R.id.puzzleView) as MyPuzzleView
@@ -91,10 +128,12 @@ class Main : AppCompatActivity() {
         when (item.itemId) {
             R.id.action_help ->
                 Toast.makeText(
-                    this, """$version""".trimIndent(), Toast.LENGTH_LONG).show()
+                    this, """$version""".trimIndent(), Toast.LENGTH_LONG
+                ).show()
             R.id.action_settings ->
                 Toast.makeText(
-                    this, """Hahahahahaaaa""".trimIndent(), Toast.LENGTH_LONG).show()
+                    this, """Hahahahahaaaa""".trimIndent(), Toast.LENGTH_LONG
+                ).show()
             R.id.animation_lag_300 -> ANIMATION_LAG = 300
         }
         return super.onOptionsItemSelected(item)
@@ -114,6 +153,9 @@ class Main : AppCompatActivity() {
         @JvmField
         var mainMailbox: MainMailbox? = null    // a handler to extend UI event handling
         var mReport: TextView? = null           //pane to publish progress etc
+        var mtile1: TextView? = null
+        var mtile2: TextView? = null
+        var mtile3: TextView? = null
 
 //        var mPuzzle: MyPuzzleView? = null       //contains the puzzle
 

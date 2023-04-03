@@ -1,5 +1,5 @@
 <resources>
-    android:textSize="48sp"
+    android:textSize="64sp"
     <string name="action_settings">Settings</string>
     <string name="action_help">help</string>
     <string name="app_name">adf state</string>
@@ -12,4 +12,6 @@
     <string name="al300">animation lag 300</string>
     <string name="al500">animation lag 500</string>
     <string name="al1000">animation lag 1000</string>
+    <string name="tile">tileDinges</string>
+    <string name="tile_size">138dp</string>
 </resources>
