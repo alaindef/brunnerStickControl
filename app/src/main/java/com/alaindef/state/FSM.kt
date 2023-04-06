@@ -74,6 +74,7 @@ class FSM : Thread() {
 //                    send(EV_0)
                 }
                 FST_5 -> {
+                    Main.sendUDP("altijd")
                     mbx!!.send(MainMailbox.SLEEP, 0, 0, "sleeping")
                 }
 //                FST_5 -> {mbx!!.send(MainMailbox.REPORT_ELAPSED_TIME, 5, 0, arg3)

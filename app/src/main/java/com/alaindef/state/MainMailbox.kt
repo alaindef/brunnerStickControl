@@ -5,6 +5,7 @@ import android.os.Message
 import android.util.Log
 import android.widget.TextView
 import com.example.weather_app.R
+import kotlinx.coroutines.delay
 import java.lang.Thread.sleep
 
 /**
@@ -38,6 +39,7 @@ class MainMailbox  //   messages
             TEST -> Log.wtf(logTAG, "arg1= " + m.arg1)
             SLEEP -> {
                 Log.wtf(logTAG, "asleep now" + m.obj)
+//                delay(2000)
                 sleep(2000)
                 Log.wtf(logTAG, "awake now ..........." )
                 Main.oscar.send(FSM.EV_0, 0, 0, "...........wake now !")
@@ -45,6 +47,8 @@ class MainMailbox  //   messages
             else -> Log.wtf(logTAG, "message unknown " + m.what + "/" + m.arg1)
         }
     }
+
+
 
     fun send(what: Int, arg1: Int, arg2: Int, obj: Any?) {
         sendMessage(obtainMessage(what, arg1, arg2, obj))

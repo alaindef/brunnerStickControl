@@ -16,7 +16,21 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.AppCompatTextView
 import com.example.weather_app.R
-import java.lang.Thread.sleep
+import java.io.IOException
+import java.net.DatagramPacket
+import java.net.DatagramSocket
+import java.net.InetAddress
+
+class SoftOptions {
+    var RemoteHost: String = "192.168.1.255"
+    var RemotePort: Int = 6454
+
+    constructor()
+    init{}
+}
+
+// Global
+val Settings = SoftOptions()
 
 
 @Suppress("unused")
@@ -59,9 +73,13 @@ class Main : AppCompatActivity() {
     fun send5(view: View?) {
         var ss = view!!.tag
         oscar.send(FSM.EV_5)
+//        sleepAsync()
+//        delay(2000)
     }
 
     fun View?.show() {}
+
+
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
@@ -89,6 +107,8 @@ class Main : AppCompatActivity() {
             Configuration.ORIENTATION_PORTRAIT -> setContentView(R.layout.mainportraitsimple)
             Configuration.ORIENTATION_LANDSCAPE -> setContentView(R.layout.mainland)
         }
+
+//        sender = UDPSender()
         mainMailbox = MainMailbox()
         mContext = this.applicationContext
         mContextForDummies = this // found this, but why ???
@@ -113,6 +133,7 @@ class Main : AppCompatActivity() {
 //        mPuzzle!!.post { mPuzzle!!.resetAndSortTiles() }
 //        Toast.makeText(this, "from Main : $version", Toast.LENGTH_LONG).show()
     }
+
 
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -151,6 +172,7 @@ class Main : AppCompatActivity() {
         var oscar = FSM()
 
         @JvmField
+
         var mainMailbox: MainMailbox? = null    // a handler to extend UI event handling
         var mReport: TextView? = null           //pane to publish progress etc
         var mtile1: TextView? = null
@@ -163,7 +185,7 @@ class Main : AppCompatActivity() {
         var mContext: Context? = null
         var mContextForDummies: Context? = null
 
-        private fun calculateInSampleSize(
+         private fun calculateInSampleSize(
             options: BitmapFactory.Options, reqWidth: Int, reqHeight: Int
         ): Int {
             // Raw height and width of image
@@ -181,6 +203,27 @@ class Main : AppCompatActivity() {
             }
             return inSampleSize
         }
+
+        fun sendUDP(messageStr: String) {
+            // Hack Prevent crash (sending should be done using an async task)
+            val policy = StrictMode.ThreadPolicy.Builder().permitAll().build()
+            StrictMode.setThreadPolicy(policy)
+            try {
+                //Open a port to send the package
+                val socket = DatagramSocket()
+                socket.broadcast = true
+                val sendData = byteArrayOf(175.toByte(), 101, 108, 108, 111)
+//                val sendData = byteArrayOf('<Iiiiiiiii', 0xAE, 101, 108, 108, 111)
+//                val sendData = messageStr.toByteArray()
+                val sendPacket = DatagramPacket(sendData, sendData.size, InetAddress.getByName(Settings.RemoteHost), Settings.RemotePort)
+                socket.send(sendPacket)
+                println("fun sendBroadcast: packet sent to: " + InetAddress.getByName(Settings.RemoteHost) + ":" + Settings.RemotePort)
+            } catch (e: IOException) {
+                //            Log.e(FragmentActivity.TAG, "IOException: " + e.message)
+            }
+        }
+
+
 
         private const val RQ_PICK_PICTURE = 100
         private const val RQ_TAKE_PICTURE = 200
