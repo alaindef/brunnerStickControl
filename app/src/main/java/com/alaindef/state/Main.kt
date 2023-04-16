@@ -40,7 +40,22 @@ class Main : AppCompatActivity() {
 
     fun sendEvent(view: View?) {
         var ss = view!!.tag
-        oscar.send(FSM.EV_0, 0, 0, ss)
+        when (ss){
+            "B_poll" -> {
+                oscar.send(FSM.EV_5, 0, 0, ss)
+                mReport1!!.text = ("sendEvent: ss") as CharSequence?
+            }
+            "B_1" -> {
+                oscar.send(FSM.EV_1, 0, 0, ss)
+                mReport1!!.text = ("sendEvent: ss") as CharSequence?
+            }
+            else -> Log.wtf(logTag, "tag unknown $ss")
+        }
+//        if (ss == "B_poll"){
+//            oscar.send(FSM.EV_5, 0, 0, ss)
+//            mReport1!!.text = ("sendEvent: $ss") as CharSequence?
+//        }
+//        oscar.send(FSM.EV_0, 0, 0, ss)
     }
 
     fun send0(view: View?) {
@@ -52,7 +67,7 @@ class Main : AppCompatActivity() {
     fun send1(view: View?) {
         var ss = view!!.tag
         oscar.send(FSM.EV_1, 0, 0, ss)
-        mReport!!.text = ss as CharSequence?
+        mReport1!!.text = ss as CharSequence?
     }
 
     fun send2(view: View?) {
@@ -111,6 +126,7 @@ class Main : AppCompatActivity() {
         mContext = this.applicationContext
         mContextForDummies = this // found this, but why ???
         mReport = findViewById<View>(R.id.report) as TextView
+        mReport1 = findViewById<View>(R.id.report1) as TextView
         mtile1 = findViewById<View>(R.id.tile1) as AppCompatTextView
         mtile2 = findViewById<View>(R.id.tile2) as AppCompatTextView
         mtile3 = findViewById<View>(R.id.tile3) as AppCompatTextView
@@ -170,6 +186,7 @@ class Main : AppCompatActivity() {
 
         var mainMailbox: MainMailbox? = null    // a handler to extend UI event handling
         var mReport: TextView? = null           //pane to publish progress etc
+        var mReport1: TextView? = null           //pane to publish progress etc
         var mtile1: TextView? = null
         var mtile2: TextView? = null
         var mtile3: TextView? = null

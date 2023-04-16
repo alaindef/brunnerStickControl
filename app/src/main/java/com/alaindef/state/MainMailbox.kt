@@ -16,6 +16,9 @@ class MainMailbox  //   messages
     override fun handleMessage(m: Message) {
         val logTAG = "---MAIN ---"
         when (m.what) {
+            MBX_0 -> {
+                omer.send(PollMaster.EV_0)
+            }
             PLAY_NEXT_MOVE -> {
                 Main.mReport!!.text =
                     String.format("time: %d msec - step %d of %d", timerep, m.arg1, m.arg2)
@@ -31,11 +34,9 @@ class MainMailbox  //   messages
             TEST -> Log.wtf(logTAG, "arg1= " + m.arg1)
             SENDPACKET -> {
                 Log.wtf(logTAG, "sending udp" + m.obj)
-//                delay(2000)
 //                UDPSender.main()
-                sleep(2000)
+//                sleep(2000)
                 Log.wtf(logTAG, "awake now ..........." )
-                oscar.send(FSM.EV_0, 0, 0, "...........wake now !")
                 omer.send(PollMaster.EV_0)
             }
             else -> Log.wtf(logTAG, "message unknown " + m.what + "/" + m.arg1)
@@ -54,6 +55,7 @@ class MainMailbox  //   messages
 
     companion object {
         //    messages
+        const val MBX_0 = 0
         const val PLAY_NEXT_MOVE = 1
         const val RESET = 2
         const val SHUFFLE = 3

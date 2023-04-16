@@ -50,9 +50,19 @@
         android:id="@+id/report"
         android:layout_width="match_parent"
         android:layout_height="128dp"
+        android:layout_gravity="center"
         android:background="@android:color/holo_orange_light"
         android:gravity="center"
         android:text="@string/hint" />
+
+    <TextView
+        android:id="@+id/report1"
+        android:layout_width="match_parent"
+        android:layout_height="128dp"
+        android:background="@android:color/holo_orange_light"
+        android:gravity="center"
+        android:layout_gravity="center"
+        android:text="polling" />
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -69,10 +79,10 @@
             android:background="@drawable/fluosunroundedcorner"
             android:contentDescription="@string/photoView"
             android:gravity="center"
-            android:tag="event1"
+            android:tag="B_1"
             android:text="1"
             android:textSize="100dp"
-            android:onClick="send1" />
+            android:onClick="sendEvent" />
 
         <androidx.appcompat.widget.AppCompatTextView
             android:id="@+id/tile2"
@@ -145,11 +155,11 @@
             android:layout_width="150dp"
             android:layout_height="150dp"
             android:background="@drawable/tuin"
-            android:tag="polmaaral"
+            android:tag="B_poll"
             android:text="polling"
             android:textAlignment="center"
             android:textSize="35dp"
-            android:onClick="send5" />
+            android:onClick="sendEvent" />
 
     </LinearLayout>
 

@@ -60,15 +60,15 @@ class PollMaster : Thread() {
                 logTag,
                 "incoming message: " + events[incomingMessage.what] + ", " + incomingMessage.arg1 + ", " + incomingMessage.arg2 + ", " + incomingMessage.obj
             )
-            val repString = "${fstates[fOldState].trim()} + ${events[event]}+ ==> + ${fstates[fState]}"
+            val repString =
+                "${fstates[fOldState].trim()} + ${events[event]}+ ==> + ${fstates[fState]}"
             Log.w(logTag, fstates[fOldState] + " + " + events[event] + " ==>   " + fstates[fState])
-            Main.mReport!!.text = logTag + cnt++
+            Main.mReport1!!.text = logTag + "\n" + cnt++
 
             when (fState) {
                 FST_0 -> {
-                    val snaptime = System.nanoTime()
-                    Thread.sleep(2000)
-                    send(EV_0)
+//                    Thread.sleep(2000)            //adf 230416 not good. timing of other processes jeapardized
+                    Handler().postDelayed({send(EV_0)},100)
                 }
                 FST_1, FST_2, FST_3 -> {}
                 FST_4 -> {
@@ -96,8 +96,10 @@ class PollMaster : Thread() {
         const val EV_3 = 3
         const val EV_4 = 4
         const val EV_5 = 5
-//        const val EV_GO = 5
-        private val events = arrayOf("event_0", "event_1", "event_2", "event_3", "event_4", "event_5")
+
+        //        const val EV_GO = 5
+        private val events =
+            arrayOf("event_0", "event_1", "event_2", "event_3", "event_4", "event_5")
         private val MAX_EVENT = events.size
         private const val FST_0 = 0
         private const val FST_1 = 1
