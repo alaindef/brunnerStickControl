@@ -9,7 +9,7 @@
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning">
         <activity
-            android:name="com.alaindef.puzzle.Main"
+            android:name="com.alaindef.state.Main"
             android:configChanges="orientation"
             android:exported="true"
             android:largeHeap="true"

@@ -1,4 +1,4 @@
-package com.alaindef.puzzle
+package com.alaindef.state
 
 import android.content.Context
 import android.graphics.Bitmap
@@ -94,11 +94,11 @@ class MyPuzzleView : FrameLayout {
             mTiles.add(tile)
             if (tileIndex == 0) {
                 tile.setOnClickListener { v ->
-                    Main.oscar.send(FSM.EV_4, 0, 0, state)
+                    oscar.send(FSM.EV_4, 0, 0, state)
                     Log.i(logTag, "--------" + (v as Tile).tileIndex)
                 }
             } else {
-                tile.setOnClickListener { v -> Main.oscar.send(FSM.EV_2, 0, 0, v) }
+                tile.setOnClickListener { v -> oscar.send(FSM.EV_2, 0, 0, v) }
             }
         }
         hak(slide)
@@ -245,7 +245,7 @@ class MyPuzzleView : FrameLayout {
         val sliceOfPositions = slice(tilePos)
         val len = sliceOfPositions.size
         if (len == 0) {                                  //tile 0 not in same row or col
-            Main.oscar.send(FSM.EV_3)
+            oscar.send(FSM.EV_3)
             return
         }
         val targetSliceOfTileIndices = rotate(sliceOfPositions, len)
@@ -374,7 +374,7 @@ class MyPuzzleView : FrameLayout {
     }
 
     fun solve() {
-        Main.oscar.send(FSM.EV_1, 0, 0, state)
+        oscar.send(FSM.EV_1, 0, 0, state)
     }
 
 

@@ -76,7 +76,7 @@
             android:gravity="center"
             android:onClick="setSize"
             android:scaleType="fitXY"
-            android:text="@string/set_size_hor"
+            android:text=""
             android:textSize="@dimen/textsize" />
 
 

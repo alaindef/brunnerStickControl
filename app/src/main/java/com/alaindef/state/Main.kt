@@ -1,4 +1,4 @@
-package com.alaindef.puzzle
+package com.alaindef.state
 
 import android.content.Context
 import android.content.res.Configuration
@@ -31,6 +31,7 @@ class SoftOptions {
 
 // Global
 val Settings = SoftOptions()
+
 
 
 @Suppress("unused")
@@ -69,12 +70,11 @@ class Main : AppCompatActivity() {
     fun send4(view: View?) {
         var ss = view!!.tag
         oscar.send(FSM.EV_4)
+        mReport!!.text = ss as CharSequence?
     }
     fun send5(view: View?) {
         var ss = view!!.tag
         oscar.send(FSM.EV_5)
-//        sleepAsync()
-//        delay(2000)
     }
 
     fun View?.show() {}
@@ -91,8 +91,6 @@ class Main : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-//        adf 230404  https://wh0.github.io/2020/08/12/closeguard.html
         StrictMode.setVmPolicy(
             VmPolicy.Builder(StrictMode.getVmPolicy())
                 .detectLeakedClosableObjects()
@@ -108,7 +106,7 @@ class Main : AppCompatActivity() {
             Configuration.ORIENTATION_LANDSCAPE -> setContentView(R.layout.mainland)
         }
 
-//        sender = UDPSender()
+//        sender = com.alaindef.state.UDPSender()
         mainMailbox = MainMailbox()
         mContext = this.applicationContext
         mContextForDummies = this // found this, but why ???
@@ -118,10 +116,11 @@ class Main : AppCompatActivity() {
         mtile3 = findViewById<View>(R.id.tile3) as AppCompatTextView
         val backgroundtileview = ImageView(this) //fixed background (green)
         backgroundtileview.setImageResource(R.drawable.fluosunroundedcorner)
-//        mPuzzle = findViewById<View>(R.id.puzzleView) as MyPuzzleView
-//        mPuzzle!!.init(currentSlide, backgroundtileview)
 
-        if (savedInstanceState == null) oscar.start()
+        if (savedInstanceState == null) {
+            oscar.start()
+            omer.start()
+        }
         else {
             oscar.interrupt()       // kill him!
             oscar = FSM()           // new one
@@ -129,9 +128,8 @@ class Main : AppCompatActivity() {
         }
 
         Log.i(logTag, "bundle created ...................")
-
-//        mPuzzle!!.post { mPuzzle!!.resetAndSortTiles() }
-//        Toast.makeText(this, "from Main : $version", Toast.LENGTH_LONG).show()
+        Log.i(logTag, dinges.greet("ikke").toString())
+//        omer.send(0)                //crash!
     }
 
 
@@ -167,9 +165,6 @@ class Main : AppCompatActivity() {
         // between 0 and 255 for imageview
         @JvmField
         var ANIMATION_LAG = 300
-
-        @JvmField
-        var oscar = FSM()
 
         @JvmField
 
@@ -229,3 +224,8 @@ class Main : AppCompatActivity() {
         private const val RQ_TAKE_PICTURE = 200
     }
 }
+
+@JvmField
+var oscar = FSM()
+var omer  = PollMaster()
+

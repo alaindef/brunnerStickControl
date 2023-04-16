@@ -63,7 +63,7 @@
 
         <androidx.appcompat.widget.AppCompatTextView
             android:id="@+id/tile1"
-            android:layout_width="135dp"
+            android:layout_width="100dp"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:background="@drawable/fluosunroundedcorner"
@@ -76,7 +76,7 @@
 
         <androidx.appcompat.widget.AppCompatTextView
             android:id="@+id/tile2"
-            android:layout_width="135dp"
+            android:layout_width="100dp"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:background="@drawable/fluosunroundedcorner"
@@ -89,7 +89,7 @@
 
         <androidx.appcompat.widget.AppCompatTextView
             android:id="@+id/tile3"
-            android:layout_width="135dp"
+            android:layout_width="100dp"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:background="@drawable/fluosunroundedcorner"
@@ -99,6 +99,19 @@
             android:text="3"
             android:textSize="100dp"
             android:onClick="send3" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/tile4"
+            android:layout_width="100dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:background="@drawable/fluosunroundedcorner"
+            android:contentDescription="@string/photoView"
+            android:gravity="center"
+            android:tag="al den vierde knop"
+            android:text="4"
+            android:textSize="100dp"
+            android:onClick="send4" />
 
     </LinearLayout>
 

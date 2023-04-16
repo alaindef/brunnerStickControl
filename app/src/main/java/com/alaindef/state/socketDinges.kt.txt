@@ -1,5 +1,5 @@
 // form https://stackoverflow.com/questions/56874545/how-to-get-udp-data-constant-listening-on-kotlin
-package com.alaindef.puzzle
+package com.alaindef.state.Main
 
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle

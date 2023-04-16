@@ -9,9 +9,10 @@ import android.util.Log
  * 160915 created by alaindef
  * to kotlin
  */
-class FSM : Thread() {
+class PollMaster : Thread() {
     var fState: Int = 0
     var event: Int = 0
+    var cnt = 0
     private var mHandler: ZeHandler? = null
 
     //    public Handler mHandler;    //both work
@@ -42,7 +43,7 @@ class FSM : Thread() {
 
         override fun handleMessage(incomingMessage: Message) {
             // process incoming messages here
-            val logTag = ">---OSCAR---"
+            val logTag = ">---OMER---"
             val arg1 = incomingMessage.arg1
             val arg2 = incomingMessage.arg2
             val arg3 = incomingMessage.obj
@@ -59,14 +60,17 @@ class FSM : Thread() {
                 logTag,
                 "incoming message: " + events[incomingMessage.what] + ", " + incomingMessage.arg1 + ", " + incomingMessage.arg2 + ", " + incomingMessage.obj
             )
-
             val repString = "${fstates[fOldState].trim()} + ${events[event]}+ ==> + ${fstates[fState]}"
             Log.w(logTag, fstates[fOldState] + " + " + events[event] + " ==>   " + fstates[fState])
-            Main.mReport!!.text = repString
-            Log.i(logTag, "oscar at work!")
+            Main.mReport!!.text = logTag + cnt++
 
             when (fState) {
-                FST_0, FST_1, FST_2, FST_3  -> {}
+                FST_0 -> {
+                    val snaptime = System.nanoTime()
+                    Thread.sleep(2000)
+                    send(EV_0)
+                }
+                FST_1, FST_2, FST_3 -> {}
                 FST_4 -> {
                     val snaptime = System.nanoTime()
                     sleep(1000)
@@ -119,8 +123,8 @@ class FSM : Thread() {
         private val fsm_table: Array<IntArray> = arrayOf(
 //                      0   1   2   3   4   5
 //                    rst   1   2   3 lop pol
-            intArrayOf( 0,  1,  2,  1,  1,  5), // 0  FST_IDLE"
-            intArrayOf( 0,  1,  2,  2,  2,  5), // 1  FST_
+            intArrayOf( 0,  1,  2,  3,  1,  5), // 0  FST_IDLE"
+            intArrayOf( 0,  1,  2,  3,  2,  5), // 1  FST_
             intArrayOf( 0,  1,  2,  3,  3,  5), // 2  FST_
             intArrayOf( 0,  0,  2,  3,  4,  5), // 3  FST_
             intArrayOf( 0,  0,  0,  0,  0,  0), // 4  FST_
