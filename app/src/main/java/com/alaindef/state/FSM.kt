@@ -68,7 +68,7 @@ class FSM : Thread() {
                 FST_0, FST_1, FST_2, FST_3  -> {}
                 FST_4 -> {
                     val snaptime = System.nanoTime()
-                    Handler().postDelayed({send(PollMaster.EV_0)},2000)
+                    Handler().postDelayed({send(PollMaster2.ev_poll_and_repeat)},2000)
                     val elapsed = ((System.nanoTime() - snaptime) / 1000000).toInt()
                     mbx!!.send(MainMailbox.REPORT_ELAPSED_TIME, elapsed, 0, null)
                     send(EV_0)

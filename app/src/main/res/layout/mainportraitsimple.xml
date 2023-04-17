@@ -5,51 +5,10 @@
     android:background="@color/slidebackgroundcolor"
     android:orientation="vertical">
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="64dp"
-        android:background="@android:color/holo_green_light"
-        android:weightSum="6">
-
-        <TextView
-            android:id="@+id/shuffle"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_weight="2"
-            android:gravity="center"
-            android:onClick="shuffle"
-            android:scaleType="fitXY"
-            android:text="@string/shuffle"
-            android:textSize="@dimen/textsize" />
-
-        <TextView
-            android:id="@+id/reset"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_weight="2"
-            android:gravity="center"
-            android:onClick="reset"
-            android:scaleType="fitXY"
-            android:text="@string/reset_hor"
-            android:textSize="@dimen/textsize" />
-
-        <TextView
-            android:id="@+id/solve"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_weight="2"
-            android:gravity="center"
-            android:onClick="solve"
-            android:scaleType="fitXY"
-            android:text="@string/solve_ikke"
-            android:textSize="@dimen/textsize" />
-    </LinearLayout>
-
-
     <TextView
         android:id="@+id/report"
         android:layout_width="match_parent"
-        android:layout_height="128dp"
+        android:layout_height="64dp"
         android:layout_gravity="center"
         android:background="@android:color/holo_orange_light"
         android:gravity="center"
@@ -58,11 +17,29 @@
     <TextView
         android:id="@+id/report1"
         android:layout_width="match_parent"
-        android:layout_height="128dp"
+        android:layout_height="64dp"
         android:background="@android:color/holo_orange_light"
         android:gravity="center"
         android:layout_gravity="center"
         android:text="polling" />
+
+    <TextView
+        android:id="@+id/report2"
+        android:layout_width="match_parent"
+        android:layout_height="64dp"
+        android:background="@android:color/holo_orange_light"
+        android:gravity="center"
+        android:layout_gravity="center"
+        android:text="extra info" />
+
+    <TextView
+        android:id="@+id/report3"
+        android:layout_width="match_parent"
+        android:layout_height="64dp"
+        android:background="@android:color/holo_orange_light"
+        android:gravity="center"
+        android:layout_gravity="center"
+        android:text="socket data" />
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -79,8 +56,8 @@
             android:background="@drawable/fluosunroundedcorner"
             android:contentDescription="@string/photoView"
             android:gravity="center"
-            android:tag="B_1"
-            android:text="1"
+            android:tag="B_4"
+            android:text="4"
             android:textSize="100dp"
             android:onClick="sendEvent" />
 
@@ -92,10 +69,10 @@
             android:background="@drawable/fluosunroundedcorner"
             android:contentDescription="@string/photoView"
             android:gravity="center"
-            android:tag="event2"
-            android:text="2"
+            android:tag="B_5"
+            android:text="5"
             android:textSize="100dp"
-            android:onClick="send2" />
+            android:onClick="sendEvent" />
 
         <androidx.appcompat.widget.AppCompatTextView
             android:id="@+id/tile3"
@@ -105,10 +82,10 @@
             android:background="@drawable/fluosunroundedcorner"
             android:contentDescription="@string/photoView"
             android:gravity="center"
-            android:tag="al den derde knop"
-            android:text="3"
+            android:tag="B_6"
+            android:text="6"
             android:textSize="100dp"
-            android:onClick="send3" />
+            android:onClick="sendEvent" />
 
         <androidx.appcompat.widget.AppCompatTextView
             android:id="@+id/tile4"
@@ -118,10 +95,10 @@
             android:background="@drawable/fluosunroundedcorner"
             android:contentDescription="@string/photoView"
             android:gravity="center"
-            android:tag="al den vierde knop"
-            android:text="4"
+            android:tag="B_7"
+            android:text="7"
             android:textSize="100dp"
-            android:onClick="send4" />
+            android:onClick="sendEvent" />
 
     </LinearLayout>
 
@@ -137,11 +114,11 @@
             android:layout_height="150dp"
             android:contentDescription="@string/photoView"
             android:background="@drawable/lotti50"
-            android:tag="FSM gaat naar state 0"
+            android:tag="B_RES"
             android:text="reset"
             android:textAlignment="center"
             android:textSize="35dp"
-            android:onClick="send0" />
+            android:onClick="sendEvent" />
 
         <!--ADDED SPACER VIEW -->
         <View

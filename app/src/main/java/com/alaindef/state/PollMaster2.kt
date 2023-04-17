@@ -34,7 +34,6 @@ class PollMaster2 : Thread() {
         https://developer.android.com/reference/android/os/Handler
 */
         (looper: Looper?) : Handler(looper!!) {
-        private var seq = 0
         private var steps = 0
         private val mbx = Main.mainMailbox
 
@@ -55,18 +54,17 @@ class PollMaster2 : Thread() {
                 logTag,
                 "incoming message: " + events[incomingMessage.what] + ", " + incomingMessage.arg1 + ", " + incomingMessage.arg2 + ", " + incomingMessage.obj
             )
-            Log.w(logTag, events[event] + " ==>   " )
+//            Log.w(logTag, events[event] + " ==>   " )
             Main.mReport1!!.text = logTag + "\n" + cnt++
 
             when (event) {
-                EV_0 -> {
+                ev_poll_and_repeat -> {
 //                    Thread.sleep(2000)            //adf 230416 not good. timing of other processes jeapardized
-                    Handler().postDelayed({send(EV_0)},100)
+                    Handler().postDelayed({send(ev_poll_and_repeat)},100)
                 }
-                EV_1 -> {}
                 EV_5 -> {
                     mbx!!.send(MainMailbox.SENDPACKET, 0, 0, " welwel")
-                    send(EV_0)
+                    send(ev_poll_and_repeat)
                 }
                 else -> Log.wtf(logTag, "event unknown $event")
             }
@@ -75,7 +73,7 @@ class PollMaster2 : Thread() {
 
 
     companion object {
-        const val EV_0 = 0
+        const val ev_poll_and_repeat = 0
         const val EV_1 = 1
         const val EV_2 = 2
         const val EV_3 = 3

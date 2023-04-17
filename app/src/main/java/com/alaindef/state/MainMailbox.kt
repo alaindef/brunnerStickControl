@@ -3,12 +3,8 @@ package com.alaindef.state
 import android.os.Handler
 import android.os.Message
 import android.util.Log
-import java.lang.Thread.sleep
 
-/**
- * Created by alaindef on 16.09.15.
- * changed
- */
+/** Created by alaindef on 230417 */
 class MainMailbox  //   messages
     : Handler() {
     //    private final WeakReference<Main> currentActivity;
@@ -17,7 +13,7 @@ class MainMailbox  //   messages
         val logTAG = "---MAIN ---"
         when (m.what) {
             MBX_0 -> {
-                omer.send(PollMaster.EV_0)
+                omer.send(PollMaster2.ev_poll_and_repeat)
             }
             PLAY_NEXT_MOVE -> {
                 Main.mReport!!.text =
@@ -34,10 +30,9 @@ class MainMailbox  //   messages
             TEST -> Log.wtf(logTAG, "arg1= " + m.arg1)
             SENDPACKET -> {
                 Log.wtf(logTAG, "sending udp" + m.obj)
-//                UDPSender.main()
-//                sleep(2000)
+                udpSender.sendMessage(0)
                 Log.wtf(logTAG, "awake now ..........." )
-                omer.send(PollMaster.EV_0)
+//                omer.send(PollMaster2.ev_poll_and_repeat)
             }
             else -> Log.wtf(logTAG, "message unknown " + m.what + "/" + m.arg1)
         }

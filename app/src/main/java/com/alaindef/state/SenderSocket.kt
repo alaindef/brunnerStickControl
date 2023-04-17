@@ -1,38 +1,60 @@
 package com.alaindef.state
 
-import android.util.Log
+import android.os.StrictMode
+import android.os.StrictMode.ThreadPolicy
 import java.net.DatagramPacket
 import java.net.DatagramSocket
 import java.net.InetAddress
+import java.nio.ByteBuffer
 
 
-val logTAG = "---MAIN ---"
+class UdpSender(private val ipAddress: String, private val port: Int) {
 
-object UDPSender {
-    @Throws(Exception::class)
-    @JvmStatic
-    fun main() {
-        fun byteArrayOfInts(vararg ints: Int) = ByteArray(ints.size) { pos -> ints[pos].toByte() }
-//                https://stackoverflow.com/questions/51403881/creating-bytearray-in-kotlin
-//        val message = "amai, das wa" // message to send
-        val message = byteArrayOfInts( 174,0,0,0,0, 0x00,0x00,0x00,0x00,0x00,0x00,0x00,0xd5,0xfe,0xff,0xff,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00) // message to send
-//        val message = "b'\\xae\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\xd5\\xfe\\xff\\xff\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00'" // message to send
-        Main.mReport!!.text ="message len = " + message.size
-        Log.wtf(logTAG, "message len = " + message.size + " mRep= " + Main.mReport!!.text)
-        val port = 15090 // port number to send the packet
-        val address = InetAddress.getByName("192.0.0.203") // destination address
-//        val address = InetAddress.getByName("localhost") // destination address
 
-        // create a datagram socket
-        val socket = DatagramSocket()
+    fun little2big(word: Int): Int {
+        return (word and 0xff shl 24) or (word and 0xff00 shl 8) or (word and 0xff0000 shr 8) or (word shr 24 and 0xff)
+    }
 
-        // create a datagram packet to hold the message
-        val packet = DatagramPacket(message, message.size, address, port)
+    fun convertTheIndians(ints: IntArray): ByteArray {
+        val byteBuffer = ByteBuffer.allocate(ints.size * 4)
+        val intBuffer = byteBuffer.asIntBuffer()
+        for (i in 0 until ints.size) {
+            intBuffer.put(little2big(ints[i]))
+        }
+        return byteBuffer.array()
+    }
 
-        // send the packet
-        socket.send(packet)
+    fun convertToInts(bytes: ByteArray, nbrOfInts: Int): IntArray {
+        val byteBuffer = ByteBuffer.allocate(nbrOfInts * 4)
+        val intBuffer = byteBuffer.asIntBuffer()
+        val result = IntArray(nbrOfInts)
 
-        // close the socket
-        socket.close()
+        for (i in 0 until nbrOfInts) {
+            byteBuffer.put(bytes[4 * i + 3])
+            byteBuffer.put(bytes[4 * i + 2])
+            byteBuffer.put(bytes[4 * i + 1])
+            byteBuffer.put(bytes[4 * i + 0])
+        }
+        for (i in 0 until nbrOfInts) {
+            result[i] = intBuffer.get()
+        }
+        return result
+    }
+    fun sendMessage(forceX: Int) {
+        val policy = ThreadPolicy.Builder().permitAll().build()
+        StrictMode.setThreadPolicy(policy)
+
+        val byteMessage = convertTheIndians(intArrayOf(0xAE, 0, 0, forceX, 0, 0, 0, 0, 0))
+        try {
+            val socketS = DatagramSocket()
+            val ip = InetAddress.getByName(ipAddress)
+
+            val request = DatagramPacket(byteMessage, byteMessage.size, ip, port)
+            socketS.send(request)
+
+            socketS.close()
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
     }
 }

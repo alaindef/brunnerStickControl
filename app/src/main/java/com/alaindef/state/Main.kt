@@ -15,7 +15,6 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.AppCompatTextView
-import com.example.weather_app.R
 import java.io.IOException
 import java.net.DatagramPacket
 import java.net.DatagramSocket
@@ -39,58 +38,38 @@ class Main : AppCompatActivity() {
     private val logTag = ">----MAIN---"
 
     fun sendEvent(view: View?) {
-        var ss = view!!.tag
-        when (ss){
+        when (val ss = view!!.tag){
             "B_poll" -> {
-                oscar.send(FSM.EV_5, 0, 0, ss)
+                omer.send(PollMaster.EV_3_PR, 0, 0, ss)
+//                omer.send(PollMaster2.ev_poll$_and_repeat, 0, 0, ss)
+//                oscar.send(FSM.EV_5, 0, 0, ss)
                 mReport1!!.text = ("sendEvent: ss") as CharSequence?
             }
-            "B_1" -> {
-                oscar.send(FSM.EV_1, 0, 0, ss)
-                mReport1!!.text = ("sendEvent: ss") as CharSequence?
+            "B_RES" -> {
+                omer.send(PollMaster.EV_0, 0, 0, ss)
+                mReport1!!.text = ("sendEvent: $ss") as CharSequence?
+            }
+            "B_4" -> {
+                omer.send(PollMaster.EV_4, 0, 0, ss)
+                mReport1!!.text = ("sendEvent: $ss") as CharSequence?
+            }
+            "B_5" -> {
+                omer.send(PollMaster.EV_5, 0, 0, ss)
+                mReport1!!.text = ("sendEvent: $ss") as CharSequence?
+            }
+            "B_6" -> {
+                omer.send(PollMaster.EV_6, 0, 0, ss)
+                mReport3!!.text = ("from button $ss") as CharSequence?
+            }
+            "B_7" -> {
+                omer.send(PollMaster.EV_7, 0, 0, ss)
+                mReport3!!.text = ("from Button $ss") as CharSequence?
             }
             else -> Log.wtf(logTag, "tag unknown $ss")
         }
-//        if (ss == "B_poll"){
-//            oscar.send(FSM.EV_5, 0, 0, ss)
-//            mReport1!!.text = ("sendEvent: $ss") as CharSequence?
-//        }
 //        oscar.send(FSM.EV_0, 0, 0, ss)
     }
 
-    fun send0(view: View?) {
-        var ss = view!!.tag
-        oscar.send(FSM.EV_0, 0, 0, ss)
-        mReport!!.text = ss as CharSequence?
-    }
-
-    fun send1(view: View?) {
-        var ss = view!!.tag
-        oscar.send(FSM.EV_1, 0, 0, ss)
-        mReport1!!.text = ss as CharSequence?
-    }
-
-    fun send2(view: View?) {
-        var ss = view!!.tag
-        oscar.send(FSM.EV_2, 0, 0, ss)
-        mReport!!.text = ss as CharSequence?
-    }
-
-    fun send3(view: View?) {
-        var ss = view!!.tag
-        oscar.send(FSM.EV_3, 0, 0, ss)
-        mReport!!.text = ss as CharSequence?
-    }
-
-    fun send4(view: View?) {
-        var ss = view!!.tag
-        oscar.send(FSM.EV_4)
-        mReport!!.text = ss as CharSequence?
-    }
-    fun send5(view: View?) {
-        var ss = view!!.tag
-        oscar.send(FSM.EV_5)
-    }
 
     fun View?.show() {}
 
@@ -121,12 +100,13 @@ class Main : AppCompatActivity() {
             Configuration.ORIENTATION_LANDSCAPE -> setContentView(R.layout.mainland)
         }
 
-//        sender = com.alaindef.state.UDPSender()
         mainMailbox = MainMailbox()
         mContext = this.applicationContext
         mContextForDummies = this // found this, but why ???
         mReport = findViewById<View>(R.id.report) as TextView
         mReport1 = findViewById<View>(R.id.report1) as TextView
+        mReport2 = findViewById<View>(R.id.report2) as TextView
+        mReport3 = findViewById<View>(R.id.report3) as TextView
         mtile1 = findViewById<View>(R.id.tile1) as AppCompatTextView
         mtile2 = findViewById<View>(R.id.tile2) as AppCompatTextView
         mtile3 = findViewById<View>(R.id.tile3) as AppCompatTextView
@@ -144,7 +124,6 @@ class Main : AppCompatActivity() {
         }
 
         Log.i(logTag, "bundle created ...................")
-        Log.i(logTag, dinges.greet("ikke").toString())
 //        omer.send(0)                //crash!
     }
 
@@ -184,9 +163,12 @@ class Main : AppCompatActivity() {
 
         @JvmField
 
+
         var mainMailbox: MainMailbox? = null    // a handler to extend UI event handling
         var mReport: TextView? = null           //pane to publish progress etc
         var mReport1: TextView? = null           //pane to publish progress etc
+        var mReport2: TextView? = null           //pane to publish progress etc
+        var mReport3: TextView? = null           //pane to publish progress etc
         var mtile1: TextView? = null
         var mtile2: TextView? = null
         var mtile3: TextView? = null
@@ -245,4 +227,5 @@ class Main : AppCompatActivity() {
 @JvmField
 var oscar = FSM()
 var omer  = PollMaster()
+val udpSender: UdpSender = UdpSender("192.168.0.203",15090)
 

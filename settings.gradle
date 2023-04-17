@@ -1,2 +1,2 @@
 include ':app'
-rootProject.name = "adfState"
+rootProject.name = "adfBrunner"
