@@ -20,6 +20,8 @@ import java.net.DatagramPacket
 import java.net.DatagramSocket
 import java.net.InetAddress
 
+//adf
+import android.widget.SeekBar
 class SoftOptions {
     var RemoteHost: String = "192.168.1.255"
     var RemotePort: Int = 6454
@@ -97,7 +99,7 @@ class Main : AppCompatActivity() {
 
         when (resources.configuration.orientation) {
             Configuration.ORIENTATION_PORTRAIT -> setContentView(R.layout.mainportraitsimple)
-            Configuration.ORIENTATION_LANDSCAPE -> setContentView(R.layout.mainland)
+//            Configuration.ORIENTATION_LANDSCAPE -> setContentView(R.layout.mainland)
         }
 
         mainMailbox = MainMailbox()
@@ -110,6 +112,32 @@ class Main : AppCompatActivity() {
         mtile1 = findViewById<View>(R.id.tile1) as AppCompatTextView
         mtile2 = findViewById<View>(R.id.tile2) as AppCompatTextView
         mtile3 = findViewById<View>(R.id.tile3) as AppCompatTextView
+
+//adf
+        seekBar =  findViewById(R.id.seek)
+
+        // Set an event listener for the SeekBar
+        com.alaindef.state.Main.Companion.seekBar?.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+            override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
+                // Do something when the SeekBar value changes
+                mReport!!.text = progress.toString()
+                omer.forceX = (50 - progress) * 10
+//                omer.send(PollMaster.EV_2_Ext, progress, 0, null)
+            }
+
+            override fun onStartTrackingTouch(seekBar: SeekBar?) {
+                // Do something when the user starts touching the SeekBar
+            }
+
+            override fun onStopTrackingTouch(seekBar: SeekBar?) {
+                // Do something when the user stops touching the SeekBar
+            }
+        })
+
+
+//adf
+
+
         val backgroundtileview = ImageView(this) //fixed background (green)
         backgroundtileview.setImageResource(R.drawable.fluosunroundedcorner)
 
@@ -172,6 +200,9 @@ class Main : AppCompatActivity() {
         var mtile1: TextView? = null
         var mtile2: TextView? = null
         var mtile3: TextView? = null
+
+//adf
+var seekBar: SeekBar? = null
 
 //        var mPuzzle: MyPuzzleView? = null       //contains the puzzle
 

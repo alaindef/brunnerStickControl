@@ -8,16 +8,16 @@
     <TextView
         android:id="@+id/report"
         android:layout_width="match_parent"
-        android:layout_height="64dp"
+        android:layout_height="36dp"
         android:layout_gravity="center"
         android:background="@android:color/holo_orange_light"
         android:gravity="center"
-        android:text="@string/hint" />
+        android:text="report" />
 
     <TextView
         android:id="@+id/report1"
         android:layout_width="match_parent"
-        android:layout_height="64dp"
+        android:layout_height="36dp"
         android:background="@android:color/holo_orange_light"
         android:gravity="center"
         android:layout_gravity="center"
@@ -26,7 +26,7 @@
     <TextView
         android:id="@+id/report2"
         android:layout_width="match_parent"
-        android:layout_height="64dp"
+        android:layout_height="36dp"
         android:background="@android:color/holo_orange_light"
         android:gravity="center"
         android:layout_gravity="center"
@@ -35,7 +35,7 @@
     <TextView
         android:id="@+id/report3"
         android:layout_width="match_parent"
-        android:layout_height="64dp"
+        android:layout_height="36dp"
         android:background="@android:color/holo_orange_light"
         android:gravity="center"
         android:layout_gravity="center"
@@ -43,7 +43,7 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="135dp"
+        android:layout_height="130dp"
         android:background="@android:color/holo_green_light"
         android:weightSum="6">
 
@@ -137,6 +137,44 @@
             android:textAlignment="center"
             android:textSize="35dp"
             android:onClick="sendEvent" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="200dp"
+        android:background="@android:color/holo_green_light"
+        android:weightSum="6">
+
+        <android.widget.SeekBar
+            android:id="@+id/seek"
+            android:layout_width="300dp"
+            android:layout_height="300dp"
+            android:background="@drawable/lotti50"
+            android:gravity="center"
+            android:tag="B_poll"
+            android:text="XY"
+            android:textAlignment="center"
+            android:textSize="35dp" />
+
+        <!--ADDED SPACER VIEW -->
+        <View
+            android:layout_width="10dp"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
+        <!-- /ADDED SPACER VIEW -->
+        <android.widget.ImageView
+            android:id="@+id/pad"
+            android:layout_width="300dp"
+            android:layout_height="300dp"
+            android:background="@drawable/lotti50"
+            android:gravity="center"
+            android:tag="B_poll"
+            android:text="XY"
+            android:textAlignment="center"
+            android:textSize="35dp" />
+
+
 
     </LinearLayout>
 

@@ -53,11 +53,15 @@ class PollMaster : Thread() {
             }
 
             when (event){
+                EV_2_Ext -> {
+                    forceX = (arg1-50) * 10
+                    Main.mReport2!!.text = "$logTag\n from seekBar forceX = $forceX"
+                }
                 else -> {
                     val fOldState = fState
                     fState = fsm_table[fState][event]
-                    if (event != EV_0) {
-//                    if (event != EV_1_GO) {
+//                    if (event != EV_0) {
+                    if (event != EV_1_GO) {                 // avoid too many entries
                         val repString = "${fstates[fOldState].trim()} + (${events[event]} $arg1 $arg2 $arg3) ==> + ${fstates[fState]}"
                         Log.w(logTag, repString)
                     }
