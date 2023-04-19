@@ -17,6 +17,7 @@ class PollMaster : Thread() {
     var cnt = 0
     var delta_t = 100
     var forceX = 0
+    var forceY = 0
     private var mHandler: ZeHandler? = null
 
     //    public Handler mHandler;    //both work
@@ -72,8 +73,8 @@ class PollMaster : Thread() {
                             Handler().postDelayed({ send(EV_1_GO) }, delta_t.toLong())
                         }
                         FST_2 -> {
-                            Main.mReport!!.text = "UDP packet sent with force = $forceX"
-                            udpSender.sendMessage(forceX)
+                            Main.mReport!!.text = "UDP packet sent force = ($forceX $forceY)"
+                            udpSender.sendMessage(forceX, forceY)
 //                    send(EV_0)                            // one time only
                             send(EV_1_GO)
                         }
@@ -115,6 +116,7 @@ class PollMaster : Thread() {
         const val EV_5 = 5
         const val EV_6 = 6
         const val EV_7 = 7
+        const val EV_8 = 8
 
         private val events =
             arrayOf("ev_0", "ev_1", "ev_2", "ev_3", "ev_4", "ev_5", "ev_6", "ev_7")

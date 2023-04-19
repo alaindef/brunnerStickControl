@@ -1,38 +1,44 @@
 package com.alaindef.state
 
+//adf
 import android.content.Context
 import android.content.res.Configuration
 import android.graphics.BitmapFactory
+import android.opengl.ETC1.getWidth
 import android.os.Bundle
 import android.os.StrictMode
 import android.os.StrictMode.VmPolicy
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
+import android.view.MotionEvent
 import android.view.View
 import android.widget.ImageView
+import android.widget.SeekBar
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.AppCompatTextView
 import java.io.IOException
+import java.lang.Integer.max
+import java.lang.Integer.min
 import java.net.DatagramPacket
 import java.net.DatagramSocket
 import java.net.InetAddress
+import kotlin.math.roundToInt
 
-//adf
-import android.widget.SeekBar
+
 class SoftOptions {
     var RemoteHost: String = "192.168.1.255"
     var RemotePort: Int = 6454
 
     constructor()
-    init{}
+
+    init {}
 }
 
 // Global
 val Settings = SoftOptions()
-
 
 
 @Suppress("unused")
@@ -40,7 +46,7 @@ class Main : AppCompatActivity() {
     private val logTag = ">----MAIN---"
 
     fun sendEvent(view: View?) {
-        when (val ss = view!!.tag){
+        when (val ss = view!!.tag) {
             "B_poll" -> {
                 omer.send(PollMaster.EV_3_PR, 0, 0, ss)
 //                omer.send(PollMaster2.ev_poll$_and_repeat, 0, 0, ss)
@@ -74,7 +80,6 @@ class Main : AppCompatActivity() {
 
 
     fun View?.show() {}
-
 
 
     override fun onSaveInstanceState(outState: Bundle) {
@@ -114,10 +119,11 @@ class Main : AppCompatActivity() {
         mtile3 = findViewById<View>(R.id.tile3) as AppCompatTextView
 
 //adf
-        seekBar =  findViewById(R.id.seek)
+        seekBar = findViewById(R.id.seek)
 
         // Set an event listener for the SeekBar
-        com.alaindef.state.Main.Companion.seekBar?.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+        com.alaindef.state.Main.Companion.seekBar?.setOnSeekBarChangeListener(object :
+            SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
                 // Do something when the SeekBar value changes
                 mReport!!.text = progress.toString()
@@ -137,6 +143,43 @@ class Main : AppCompatActivity() {
 
 //adf
 
+        var pad: ImageView? = null
+        pad = findViewById(R.id.pad)
+
+//        pad?.setOnTouchListener(object : View.OnTouchListener {
+//            override fun onTouch(v: View?, event: MotionEvent?): Boolean {
+//                when (event?.action) {
+//                    MotionEvent.ACTION_DOWN -> {
+//                        val x = event.x
+//                        val y = event.y
+//                        mReport!!.text = " touch ${x.toString()} touch ${x.toString()}"
+//                    }
+//                }
+//
+//                return v?.onTouchEvent(event) ?: true
+//            }
+//        })
+        pad?.setOnTouchListener(object : View.OnTouchListener {
+            override fun onTouch(v: View?, event: MotionEvent): Boolean {
+                when (event?.action) {
+                    MotionEvent.ACTION_MOVE -> {
+                        Log.d(logTag, "moving ${event.x}")
+                        val x = event.x
+                        val y = event.y
+                        val padWidth = pad.width
+                        val padHeight = pad.height
+                        val xRel = min(max(((x *100) /padWidth).roundToInt(),0),100)
+                        val yRel = min(max(((y *100) /padHeight).roundToInt(),0),100)
+                        omer.forceX = (50 - xRel) * 10
+                        omer.forceY = (50 - yRel) * 30
+                        mReport2!!.text = " move ${x.toString()}  ${y.toString()} xrel ${xRel.toString()} yrel ${yRel.toString()}"
+                    }
+                }
+
+                return true   //not  return v?.onTouchEvent(event) ?: true
+            }
+        })
+
 
         val backgroundtileview = ImageView(this) //fixed background (green)
         backgroundtileview.setImageResource(R.drawable.fluosunroundedcorner)
@@ -144,8 +187,7 @@ class Main : AppCompatActivity() {
         if (savedInstanceState == null) {
             oscar.start()
             omer.start()
-        }
-        else {
+        } else {
             oscar.interrupt()       // kill him!
             oscar = FSM()           // new one
             oscar.start()
@@ -154,7 +196,6 @@ class Main : AppCompatActivity() {
         Log.i(logTag, "bundle created ...................")
 //        omer.send(0)                //crash!
     }
-
 
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -201,8 +242,8 @@ class Main : AppCompatActivity() {
         var mtile2: TextView? = null
         var mtile3: TextView? = null
 
-//adf
-var seekBar: SeekBar? = null
+        //adf
+        var seekBar: SeekBar? = null
 
 //        var mPuzzle: MyPuzzleView? = null       //contains the puzzle
 
@@ -210,7 +251,7 @@ var seekBar: SeekBar? = null
         var mContext: Context? = null
         var mContextForDummies: Context? = null
 
-         private fun calculateInSampleSize(
+        private fun calculateInSampleSize(
             options: BitmapFactory.Options, reqWidth: Int, reqHeight: Int
         ): Int {
             // Raw height and width of image
@@ -240,14 +281,18 @@ var seekBar: SeekBar? = null
                 val sendData = byteArrayOf(175.toByte(), 101, 108, 108, 111)
 //                val sendData = byteArrayOf('<Iiiiiiiii', 0xAE, 101, 108, 108, 111)
 //                val sendData = messageStr.toByteArray()
-                val sendPacket = DatagramPacket(sendData, sendData.size, InetAddress.getByName(Settings.RemoteHost), Settings.RemotePort)
+                val sendPacket = DatagramPacket(
+                    sendData,
+                    sendData.size,
+                    InetAddress.getByName(Settings.RemoteHost),
+                    Settings.RemotePort
+                )
                 socket.send(sendPacket)
                 println("fun sendBroadcast: packet sent to: " + InetAddress.getByName(Settings.RemoteHost) + ":" + Settings.RemotePort)
             } catch (e: IOException) {
                 //            Log.e(FragmentActivity.TAG, "IOException: " + e.message)
             }
         }
-
 
 
         private const val RQ_PICK_PICTURE = 100
@@ -257,6 +302,6 @@ var seekBar: SeekBar? = null
 
 @JvmField
 var oscar = FSM()
-var omer  = PollMaster()
-val udpSender: UdpSender = UdpSender("192.168.0.203",15090)
+var omer = PollMaster()
+val udpSender: UdpSender = UdpSender("192.168.0.203", 15090)
 
