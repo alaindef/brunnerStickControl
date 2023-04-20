@@ -10,9 +10,9 @@
         android:layout_width="match_parent"
         android:layout_height="36dp"
         android:layout_gravity="center"
-        android:background="@android:color/holo_orange_light"
+        android:background="@android:color/holo_blue_light"
         android:gravity="center"
-        android:text="report" />
+        android:text="state transitions" />
 
     <TextView
         android:id="@+id/report1"
@@ -21,16 +21,16 @@
         android:background="@android:color/holo_orange_light"
         android:gravity="center"
         android:layout_gravity="center"
-        android:text="polling" />
+        android:text="polling cnt" />
 
     <TextView
         android:id="@+id/report2"
         android:layout_width="match_parent"
         android:layout_height="36dp"
-        android:background="@android:color/holo_orange_light"
+        android:background="@android:color/holo_blue_light"
         android:gravity="center"
         android:layout_gravity="center"
-        android:text="extra info" />
+        android:text="mouse moves" />
 
     <TextView
         android:id="@+id/report3"
@@ -39,12 +39,30 @@
         android:background="@android:color/holo_orange_light"
         android:gravity="center"
         android:layout_gravity="center"
-        android:text="socket data" />
+        android:text="polling delay" />
+
+    <TextView
+        android:id="@+id/report4"
+        android:layout_width="match_parent"
+        android:layout_height="36dp"
+        android:background="@android:color/holo_blue_light"
+        android:gravity="center"
+        android:layout_gravity="center"
+        android:text="forces" />
+
+    <TextView
+        android:id="@+id/report5"
+        android:layout_width="match_parent"
+        android:layout_height="36dp"
+        android:background="@android:color/holo_orange_light"
+        android:gravity="center"
+        android:layout_gravity="center"
+        android:text="divers messages" />
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="130dp"
-        android:background="@android:color/holo_green_light"
+        android:background="@android:color/holo_blue_light"
         android:weightSum="6">
 
 

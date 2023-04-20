@@ -2,14 +2,30 @@ package com.alaindef.state
 
 import android.os.StrictMode
 import android.os.StrictMode.ThreadPolicy
+import android.util.Log
 import java.net.DatagramPacket
 import java.net.DatagramSocket
 import java.net.InetAddress
 import java.nio.ByteBuffer
 
 
-class UdpSender(private val ipAddress: String, private val port: Int) {
+class UdpSender(private val ipAddress: String, private val portSender: Int) {
 
+    val socketS = DatagramSocket()
+    val ip = InetAddress.getByName(ipAddress)
+    val logTag = ">---UdpSender---"
+
+    private fun close() {
+        try {
+            socketS.close()
+        } catch (e: Exception) {
+            Log.w(logTag, "socket close failed")
+        }
+    }
+    // finalize() method is called when the object is garbage collected
+    protected fun finalize() {
+        close()
+    }
 
     fun little2big(word: Int): Int {
         return (word and 0xff shl 24) or (word and 0xff00 shl 8) or (word and 0xff0000 shr 8) or (word shr 24 and 0xff)
@@ -46,10 +62,8 @@ class UdpSender(private val ipAddress: String, private val port: Int) {
 
         val byteMessage = convertTheIndians(intArrayOf(0xAE, 0, 0, forceX, 0, 0, 0, 0, 0))
         try {
-            val socketS = DatagramSocket()
-            val ip = InetAddress.getByName(ipAddress)
 
-            val request = DatagramPacket(byteMessage, byteMessage.size, ip, port)
+            val request = DatagramPacket(byteMessage, byteMessage.size, ip, portSender)
             socketS.send(request)
 
             socketS.close()
@@ -67,7 +81,7 @@ class UdpSender(private val ipAddress: String, private val port: Int) {
             val socketS = DatagramSocket()
             val ip = InetAddress.getByName(ipAddress)
 
-            val request = DatagramPacket(byteMessage, byteMessage.size, ip, port)
+            val request = DatagramPacket(byteMessage, byteMessage.size, ip, portSender)
             socketS.send(request)
 
             socketS.close()

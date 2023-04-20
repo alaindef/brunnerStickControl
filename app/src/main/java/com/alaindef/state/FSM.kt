@@ -39,7 +39,7 @@ class FSM : Thread() {
         private var seq = 0
         private var steps = 0
         private val mbx = Main.mainMailbox
-
+        @Override
         override fun handleMessage(incomingMessage: Message) {
             // process incoming messages here
             val logTag = ">---OSCAR---"
@@ -52,6 +52,10 @@ class FSM : Thread() {
                 Log.e(logTag, "EVENT unknown")
                 return
 
+            }
+            if (event == EV_1){
+                udpReceiver.get()
+                return
             }
             val fOldState = fState
             fState = fsm_table[fState][event]
@@ -67,11 +71,6 @@ class FSM : Thread() {
             when (fState) {
                 FST_0, FST_1, FST_2, FST_3  -> {}
                 FST_4 -> {
-                    val snaptime = System.nanoTime()
-                    Handler().postDelayed({send(PollMaster2.ev_poll_and_repeat)},2000)
-                    val elapsed = ((System.nanoTime() - snaptime) / 1000000).toInt()
-                    mbx!!.send(MainMailbox.REPORT_ELAPSED_TIME, elapsed, 0, null)
-                    send(EV_0)
                 }
                 FST_5 -> {
                     mbx!!.send(MainMailbox.SENDPACKET, 0, 0, " welwel")

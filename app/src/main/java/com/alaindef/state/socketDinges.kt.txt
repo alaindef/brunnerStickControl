@@ -106,3 +106,28 @@ class udp_DataArrival: Runnable, MainActivity() {
         }
     }
 }
+
+//adf-code snippets and save things
+//is lambda geworden (_, event -> ....
+        pad?.setOnTouchListener(object : View.OnTouchListener {
+            override fun onTouch(v: View?, event: MotionEvent): Boolean {
+                when (event?.action) {
+                    MotionEvent.ACTION_MOVE -> {
+                        Log.d(logTag, "moving ${event.x}")
+                        val x = event.x
+                        val y = event.y
+                        val padWidth = pad.width
+                        val padHeight = pad.height
+                        val xRel = min(max(((x *100) /padWidth).roundToInt(),0),100)
+                        val yRel = min(max(((y *100) /padHeight).roundToInt(),0),100)
+                        omer.forceX = (50 - xRel) * 10
+                        omer.forceY = (50 - yRel) * 30
+                        mReport2!!.text = " move ${x.toString()}  ${y.toString()} xrel ${xRel.toString()} yrel ${yRel.toString()}"
+                    }
+                }
+
+                return true   //not  return v?.onTouchEvent(event) ?: true
+            }
+        })
+
+
