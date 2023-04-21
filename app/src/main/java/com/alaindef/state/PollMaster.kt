@@ -56,7 +56,8 @@ class PollMaster : Thread() {
         }
         return result
     }
-    fun getResponse()  = runBlocking<Unit>{
+
+    fun getResponse() = runBlocking<Unit> {
 
         val policy = StrictMode.ThreadPolicy.Builder().permitAll().build()
         StrictMode.setThreadPolicy(policy)
@@ -97,8 +98,6 @@ class PollMaster : Thread() {
 
     inner class ZeHandler  /*  https://developer.android.com/reference/android/os/Handler */
         (looper: Looper?) : Handler(looper!!) {
-        private var seq = 0
-        private var steps = 0
         private val mbx = Main.mainMailbox
 
         override fun handleMessage(incomingMessage: Message) {
@@ -116,25 +115,22 @@ class PollMaster : Thread() {
                 return
             }
 
-            when (event){
+            when (event) {
                 EV_2_Ext -> {
-                    forceX = (arg1-50) * 10
+                    forceX = (arg1 - 50) * 10
                     Main.mReport4!!.text = "$logTag\n from seekBar forceX = $forceX"
-                }
-                EV_7 -> {
-                    Main.mainMailbox!!.send(MainMailbox.RECEIVE)
-//                    getResponse()
                 }
                 else -> {
                     val fOldState = fState
                     fState = fsm_table[fState][event]
 //                    if (event != EV_0) {
                     if (event != EV_1_GO) {                 // avoid too many entries
-                        val repString = "${fstates[fOldState].trim()} + (${events[event]} $arg1 $arg2 $arg3) ==> + ${fstates[fState]}"
+                        val repString =
+                            "${fstates[fOldState].trim()} + (${events[event]} $arg1 $arg2 $arg3) ==> + ${fstates[fState]}"
                         Log.w(logTag, repString)
                     }
                     when (fState) {
-                        FST_0-> {}
+                        FST_0 -> {}
                         FST_1 -> {
                             Main.mReport1!!.text = logTag + "\n" + cnt++
                             Handler().postDelayed({ send(EV_1_GO) }, delta_t.toLong())
@@ -154,7 +150,7 @@ class PollMaster : Thread() {
 //                            getResponse()
 //                            udpReceiver.get()
 //                            mbx!!.send(MainMailbox.RECEIVE)
-                            Runnable{  }
+//                            Runnable { }
                             send(EV_1_GO)
                         }
                         FST_4 -> {
@@ -164,7 +160,7 @@ class PollMaster : Thread() {
                             fState = fOldState
                         }
                         FST_5 -> {
-                            if (delta_t <  100) delta_t += 10 else delta_t += 100
+                            if (delta_t < 100) delta_t += 10 else delta_t += 100
                             Main.mReport3!!.text = "$logTag\ndt = $delta_t"
                             fState = fOldState
                         }
@@ -177,6 +173,25 @@ class PollMaster : Thread() {
                             forceX += 100
                             Main.mReport2!!.text = "$logTag\nforceX = $forceX"
                             fState = fOldState
+                        }
+                        FST_8 -> {
+                            forceX = 0
+                            forceY = 0
+                            udpSender.sendMessage(forceX, forceY)
+                            Main.mReport2!!.text = "$logTag\n  forceX = $forceX  forceY = $forceY"
+                            fState = fOldState
+                        }
+                        FST_9 -> {
+                            forceX = 0
+                            forceY = 0
+                            cnt = 0
+                            delta_t = 100
+
+                            udpSender.sendMessage(forceX, forceY)
+                            Main.mReport2!!.text = "$logTag\n  forceX = $forceX  forceY = $forceY"
+                            Main.mReport1!!.text = logTag + "\n" + cnt
+                            Main.mReport3!!.text = "$logTag\ndt = $delta_t"
+                            send(EV_1_GO)
                         }
                         else -> Log.wtf(logTag, "state or event unknown $event")
                     }
@@ -195,9 +210,10 @@ class PollMaster : Thread() {
         const val EV_5 = 5
         const val EV_6 = 6
         const val EV_7 = 7
+        const val EV_8 = 8
 
         private val events =
-            arrayOf("ev_0", "ev_1", "ev_2", "ev_3", "ev_4", "ev_5", "ev_6", "ev_7")
+            arrayOf("ev_0", "ev_1", "ev_2", "ev_3", "ev_4", "ev_5", "ev_6", "ev_7", "ev_8")
         private val MAX_EVENT = events.size
         private const val FST_0 = 0
         private const val FST_1 = 1
@@ -207,6 +223,8 @@ class PollMaster : Thread() {
         private const val FST_5 = 5
         private const val FST_6 = 6
         private const val FST_7 = 7
+        private const val FST_8 = 8
+        private const val FST_9 = 9
         private val fstates = arrayOf(
             "0  FST_IDLE      ",
             "1  FST_1_delay  ",
@@ -215,22 +233,26 @@ class PollMaster : Thread() {
             "4  FST_4_deltaT-",
             "5  FST_5_deltaT+",
             "6  FST_6_",
-            "7  FST_7_"
+            "7  FST_7_",
+            "8  FST_8_reset",
+            "9  FST_8_full_reset"
         )
 
 //@formatter:off
 
         private val fsm_table: Array<IntArray> = arrayOf(
-//                      0   1   2   3   4   5   6   7
+//                      0   1   2   3   4   5   6   7  8
 //                    rst  go ext  PR
-            intArrayOf( 0,  0,  4,  1,  4,  5,  6,  7), // 0  FST_IDLE"
-            intArrayOf( 0,  2,  0,  0,  4,  5,  6,  7), // 1  FST_delay
-            intArrayOf( 0,  3,  0,  0,  4,  5,  6,  7), // 2  FST_send
-            intArrayOf( 0,  1,  0,  0,  4,  5,  6,  7), // 3  FST_recv
-            intArrayOf( 0,  0,  0,  0,  4,  5,  6,  7), // 4  FST_deltaT-
-            intArrayOf( 0,  0,  0,  0,  4,  5,  6,  7), // 5  FST_deltaT+
-            intArrayOf( 0,  0,  0,  0,  4,  5,  6,  7), // 6  FST_forceX-
-            intArrayOf( 0,  0,  0,  0,  4,  5,  6,  7), // 7  FST_forceX+
+            intArrayOf( 8,  0,  4,  1,  4,  5,  6,  7,  9), // 0  FST_IDLE"
+            intArrayOf( 8,  2,  0,  0,  4,  5,  6,  7,  9), // 1  FST_delay
+            intArrayOf( 8,  3,  0,  0,  4,  5,  6,  7,  9), // 2  FST_send
+            intArrayOf( 8,  1,  0,  0,  4,  5,  6,  7,  9), // 3  FST_recv
+            intArrayOf( 0,  0,  0,  0,  4,  5,  6,  7,  9), // 4  FST_deltaT-
+            intArrayOf( 0,  0,  0,  0,  4,  5,  6,  7,  9), // 5  FST_deltaT+
+            intArrayOf( 0,  0,  0,  0,  4,  5,  6,  7,  9), // 6  FST_forceX-
+            intArrayOf( 0,  0,  0,  0,  4,  5,  6,  7,  9), // 7  FST_forceX+
+            intArrayOf( 0,  0,  0,  0,  0,  0,  0,  0,  9), // 8  FST_reset
+            intArrayOf( 0,  0,  0,  0,  0,  0,  0,  0,  9), // 9  FST_full_reset
         )
 //@formatter:on
     }

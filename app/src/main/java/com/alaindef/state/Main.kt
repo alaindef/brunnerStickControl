@@ -12,6 +12,7 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.MotionEvent
 import android.view.View
+import android.widget.Button
 import android.widget.ImageView
 import android.widget.SeekBar
 import android.widget.TextView
@@ -34,7 +35,8 @@ class Main : AppCompatActivity() {
 //                oscar.send(FSM.EV_5, 0, 0, ss)
             }
             "B_RES" -> {
-                omer.send(PollMaster.EV_0, 0, 0, ss)
+//                omer.send(PollMaster.EV_0, 0, 0, ss)  //handled by onclick listener
+//                because long press is also used
             }
             "B_4" -> {
                 omer.send(PollMaster.EV_4, 0, 0, ss)
@@ -99,6 +101,17 @@ class Main : AppCompatActivity() {
         mReport4 = findViewById<View>(R.id.report4) as TextView
         mReport5 = findViewById<View>(R.id.report5) as TextView
 
+        mReset = findViewById<View>(R.id.reset) as Button
+        mReset?.setOnClickListener{
+            omer.send(PollMaster.EV_0)
+            true
+        }
+        mReset?.setOnLongClickListener{
+            omer.send(PollMaster.EV_8)
+            true
+        }
+
+
 //adf
         seekBar = findViewById(R.id.seek)
 
@@ -121,25 +134,8 @@ class Main : AppCompatActivity() {
             }
         })
 
-
-//adf
-
         var pad: ImageView? = null
         pad = findViewById(R.id.pad)
-
-//        pad?.setOnTouchListener(object : View.OnTouchListener {
-//            override fun onTouch(v: View?, event: MotionEvent?): Boolean {
-//                when (event?.action) {
-//                    MotionEvent.ACTION_DOWN -> {
-//                        val x = event.x
-//                        val y = event.y
-//                        mReport!!.text = " touch ${x.toString()} touch ${x.toString()}"
-//                    }
-//                }
-//
-//                return v?.onTouchEvent(event) ?: true
-//            }
-//        })
         pad?.setOnTouchListener { _, event ->
             when (event?.action) {
                 MotionEvent.ACTION_MOVE -> {
@@ -154,6 +150,19 @@ class Main : AppCompatActivity() {
                     omer.forceY = (50 - yRel) * 30
                     mReport2!!.text =
                         " move ${x.toString()}  ${y.toString()} xrel ${xRel.toString()} yrel ${yRel.toString()}"
+                }
+                MotionEvent.ACTION_DOWN  -> {
+                    val x = event.x
+                    val y = event.y
+                    val padWidth = pad.width
+                    val padHeight = pad.height
+                    val xRel = min(max(((x * 100) / padWidth).roundToInt(), 0), 100)
+                    val yRel = min(max(((y * 100) / padHeight).roundToInt(), 0), 100)
+                    omer.forceX = (50 - xRel) * 10
+                    omer.forceY = (50 - yRel) * 30
+                    mReport2!!.text =
+                        " dowwn ${x.toString()}  ${y.toString()} xrel ${xRel.toString()} yrel ${yRel.toString()}"
+
                 }
             }
             true   //not  return v?.onTouchEvent(event) ?: true
@@ -220,6 +229,7 @@ class Main : AppCompatActivity() {
         @JvmField  var mainMailbox: MainMailbox? = null    // a handler to extend UI event handling
         @SuppressLint("StaticFieldLeak")
         var mReport: TextView? = null
+        @SuppressLint("StaticFieldLeak") var mReset: Button? = null
         @SuppressLint("StaticFieldLeak") var mReport1: TextView? = null
         @SuppressLint("StaticFieldLeak") var mReport2: TextView? = null
         @SuppressLint("StaticFieldLeak") var mReport3: TextView? = null
@@ -230,11 +240,12 @@ class Main : AppCompatActivity() {
         @SuppressLint("StaticFieldLeak") var mContextForDummies: Context? = null
         //adf
         @SuppressLint("StaticFieldLeak") var seekBar: SeekBar? = null
+
     }
 }
 
 @JvmField
-val portR = 8080
+val portR = 15095
 
 var oscar = PollMaster()
 var omer = PollMaster()
