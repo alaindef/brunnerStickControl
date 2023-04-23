@@ -62,7 +62,6 @@ class UdpSender(private val ipAddress: String, private val portSender: Int) {
 
         val byteMessage = convertTheIndians(intArrayOf(0xAE, 0, 0, forceX, 0, 0, 0, 0, 0))
         try {
-
             val request = DatagramPacket(byteMessage, byteMessage.size, ip, portSender)
             socketS.send(request)
 

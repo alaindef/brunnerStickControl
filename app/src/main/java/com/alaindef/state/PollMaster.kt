@@ -117,8 +117,7 @@ class PollMaster : Thread() {
 
             when (event) {
                 EV_2_Ext -> {
-                    forceX = (arg1 - 50) * 10
-                    Main.mReport4!!.text = "$logTag\n from seekBar forceX = $forceX"
+                    getResponse()
                 }
                 else -> {
                     val fOldState = fState
@@ -146,7 +145,8 @@ class PollMaster : Thread() {
                             send(EV_1_GO)
                         }
                         FST_3 -> {
-//                            oscar.send(FSM.EV_1,0,0,null)
+//                            Log.i(logTag, "trying ???????????")
+                            oscar.send(PollMaster.EV_2_Ext,0,0,null)
 //                            getResponse()
 //                            udpReceiver.get()
 //                            mbx!!.send(MainMailbox.RECEIVE)
