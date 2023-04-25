@@ -30,7 +30,8 @@ class Main : AppCompatActivity() {
     fun sendEvent(view: View?) {
         when (val ss = view!!.tag) {
             "B_poll" -> {
-                omer.send(PollMaster.EV_3_PR, 0, 0, ss)
+                omer.send(PollMaster.EV_2_start_stop)
+//                omer.send(PollMaster.EV_3_PR, 0, 0, ss)
 //                omer.send(PollMaster2.ev_poll$_and_repeat, 0, 0, ss)
 //                oscar.send(FSM.EV_5, 0, 0, ss)
             }
@@ -39,18 +40,16 @@ class Main : AppCompatActivity() {
 //                because long press is also used
             }
             "B_4" -> {
-                omer.send(PollMaster.EV_4, 0, 0, ss)
+                omer.send(PollMaster.EV_11_dt_min, 0, 0, ss)
             }
             "B_5" -> {
-                omer.send(PollMaster.EV_5, 0, 0, ss)
+                omer.send(PollMaster.EV_12_dt_plus, 0, 0, ss)
             }
             "B_6" -> {
-                omer.send(PollMaster.EV_6, 0, 0, ss)
+                omer.send(PollMaster.EV_13_force_min, 0, 0, ss)
             }
             "B_7" -> {
-                omer.send(PollMaster.EV_7, 0, 0, ss)
-//                tcon.babble(arrayOf("17"))
-
+                omer.send(PollMaster.EV_14_force_plus, 0, 0, ss)
             }
             else -> Log.wtf(logTag, "tag unknown $ss")
         }
@@ -103,11 +102,11 @@ class Main : AppCompatActivity() {
 
         mReset = findViewById<View>(R.id.reset) as Button
         mReset?.setOnClickListener{
-            omer.send(PollMaster.EV_0)
+            omer.send(PollMaster.EV_0_reset)
             true
         }
         mReset?.setOnLongClickListener{
-            omer.send(PollMaster.EV_8)
+            omer.send(PollMaster.EV_1_full_reset)
             true
         }
 

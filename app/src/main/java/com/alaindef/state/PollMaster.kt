@@ -5,7 +5,6 @@ import android.os.Looper
 import android.os.Message
 import android.os.StrictMode
 import android.util.Log
-import android.widget.TextView
 import kotlinx.coroutines.runBlocking
 import java.io.IOException
 import java.lang.Integer.max
@@ -19,7 +18,6 @@ import java.nio.ByteBuffer
 /** 230417 created by alaindef */
 class PollMaster : Thread() {
 
-    var fState: Int = 0
     var event: Int = 0
     var cnt = 0
     var delta_t = 100
@@ -27,7 +25,6 @@ class PollMaster : Thread() {
     var forceY = 0
     private var mHandler: ZeHandler? = null
 
-    //    public Handler mHandler;    //both work
     override fun run() {
         mHandler = ZeHandler(Looper.getMainLooper())
     }
@@ -107,94 +104,64 @@ class PollMaster : Thread() {
             val arg2 = incomingMessage.arg2
             val arg3 = incomingMessage.obj
 
-
             event = incomingMessage.what
-
-            if (event >= MAX_EVENT) {
-                Log.e(logTag, "EVENT unknown")
-                return
-            }
-
             when (event) {
-                EV_2_Ext -> {
-                    getResponse()
+                EV_0_reset -> {
+                    forceX = 0
+                    forceY = 0
+                    udpSender.sendMessage(forceX, forceY)
+                    Main.mReport2!!.text = "$logTag\n  forceX = $forceX  forceY = $forceY"
+                    return
+                }
+                EV_1_full_reset -> {
+                    running = false
+                    Main.mReport!!.text = ""
+                    forceX = 0
+                    forceY = 0
+                    cnt = 0
+                    delta_t = 100
+                    udpSender.sendMessage(forceX, forceY)
+                    Main.mReport2!!.text = "$logTag\n  forceX = $forceX  forceY = $forceY"
+                    Main.mReport1!!.text = logTag + "\n" + cnt
+                    Main.mReport3!!.text = "$logTag\ndt = $delta_t"
+                    return
+                }
+                EV_2_start_stop -> {
+                    if (running) {
+                        running = false
+                        Main.mReport!!.text = ""
+                    } else {
+                        running = true
+                        send(EV_3_next_round)
+                    }
+                }
+                EV_3_next_round -> {
+                    if (running) {
+                        Main.mReport!!.text = "running ..."
+                        Main.mReport1!!.text = logTag + "\n" + cnt++
+                        udpSender.sendMessage(forceX, forceY)
+                        Handler().postDelayed({ send(EV_3_next_round) }, delta_t.toLong())
+                    }
+                }
+                EV_11_dt_min -> {
+                    if (delta_t <= 100) delta_t -= 10 else delta_t -= 100
+                    delta_t = max(delta_t, 10)
+                    Main.mReport3!!.text = "$logTag\ndt = $delta_t"
+                }
+                EV_12_dt_plus -> {
+                    if (delta_t < 100) delta_t += 10 else delta_t += 100
+                    Main.mReport3!!.text = "$logTag\ndt = $delta_t"
+                }
+                EV_13_force_min -> {
+                    forceX -= 100
+                    Main.mReport2!!.text = "$logTag\nforceX = $forceX"
+                }
+                EV_14_force_plus -> {
+                    forceX += 100
+                    Main.mReport2!!.text = "$logTag\nforceX = $forceX"
                 }
                 else -> {
-                    val fOldState = fState
-                    fState = fsm_table[fState][event]
-//                    if (event != EV_0) {
-                    if (event != EV_1_GO) {                 // avoid too many entries
-                        val repString =
-                            "${fstates[fOldState].trim()} + (${events[event]} $arg1 $arg2 $arg3) ==> + ${fstates[fState]}"
-                        Log.w(logTag, repString)
-                    }
-                    when (fState) {
-                        FST_0 -> {}
-                        FST_1 -> {
-                            Main.mReport1!!.text = logTag + "\n" + cnt++
-                            Handler().postDelayed({ send(EV_1_GO) }, delta_t.toLong())
-                        }
-                        FST_2 -> {
-                            Main.mReport4!!.text = "UDP packet sent force = ($forceX $forceY)"
-                            udpSender.sendMessage(forceX, forceY)
-//                            oscar.send(PollMaster.EV_7)
-//                            getResponse()
-//                            udpReceiver.get()
-//                            mbx!!.send(MainMailbox.RECEIVE)
-//                    send(EV_0)                            // one time only
-                            send(EV_1_GO)
-                        }
-                        FST_3 -> {
-//                            Log.i(logTag, "trying ???????????")
-                            oscar.send(PollMaster.EV_2_Ext,0,0,null)
-//                            getResponse()
-//                            udpReceiver.get()
-//                            mbx!!.send(MainMailbox.RECEIVE)
-//                            Runnable { }
-                            send(EV_1_GO)
-                        }
-                        FST_4 -> {
-                            if (delta_t <= 100) delta_t -= 10 else delta_t -= 100
-                            delta_t = max(delta_t, 10)
-                            Main.mReport3!!.text = "$logTag\ndt = $delta_t"
-                            fState = fOldState
-                        }
-                        FST_5 -> {
-                            if (delta_t < 100) delta_t += 10 else delta_t += 100
-                            Main.mReport3!!.text = "$logTag\ndt = $delta_t"
-                            fState = fOldState
-                        }
-                        FST_6 -> {
-                            forceX -= 100
-                            Main.mReport2!!.text = "$logTag\nforceX = $forceX"
-                            fState = fOldState
-                        }
-                        FST_7 -> {
-                            forceX += 100
-                            Main.mReport2!!.text = "$logTag\nforceX = $forceX"
-                            fState = fOldState
-                        }
-                        FST_8 -> {
-                            forceX = 0
-                            forceY = 0
-                            udpSender.sendMessage(forceX, forceY)
-                            Main.mReport2!!.text = "$logTag\n  forceX = $forceX  forceY = $forceY"
-                            fState = fOldState
-                        }
-                        FST_9 -> {
-                            forceX = 0
-                            forceY = 0
-                            cnt = 0
-                            delta_t = 100
-
-                            udpSender.sendMessage(forceX, forceY)
-                            Main.mReport2!!.text = "$logTag\n  forceX = $forceX  forceY = $forceY"
-                            Main.mReport1!!.text = logTag + "\n" + cnt
-                            Main.mReport3!!.text = "$logTag\ndt = $delta_t"
-                            send(EV_1_GO)
-                        }
-                        else -> Log.wtf(logTag, "state or event unknown $event")
-                    }
+                    Log.e(logTag, "EVENT $event unknown")
                 }
             }
         }
@@ -202,58 +169,14 @@ class PollMaster : Thread() {
 
 
     companion object {
-        const val EV_0 = 0
-        const val EV_1_GO = 1
-        const val EV_2_Ext = 2
-        const val EV_3_PR = 3
-        const val EV_4 = 4
-        const val EV_5 = 5
-        const val EV_6 = 6
-        const val EV_7 = 7
-        const val EV_8 = 8
-
-        private val events =
-            arrayOf("ev_0", "ev_1", "ev_2", "ev_3", "ev_4", "ev_5", "ev_6", "ev_7", "ev_8")
-        private val MAX_EVENT = events.size
-        private const val FST_0 = 0
-        private const val FST_1 = 1
-        private const val FST_2 = 2
-        private const val FST_3 = 3
-        private const val FST_4 = 4
-        private const val FST_5 = 5
-        private const val FST_6 = 6
-        private const val FST_7 = 7
-        private const val FST_8 = 8
-        private const val FST_9 = 9
-        private val fstates = arrayOf(
-            "0  FST_IDLE      ",
-            "1  FST_1_delay  ",
-            "2  FST_2_send",
-            "3  FST_3_recv",
-            "4  FST_4_deltaT-",
-            "5  FST_5_deltaT+",
-            "6  FST_6_",
-            "7  FST_7_",
-            "8  FST_8_reset",
-            "9  FST_8_full_reset"
-        )
-
-//@formatter:off
-
-        private val fsm_table: Array<IntArray> = arrayOf(
-//                      0   1   2   3   4   5   6   7  8
-//                    rst  go ext  PR
-            intArrayOf( 8,  0,  4,  1,  4,  5,  6,  7,  9), // 0  FST_IDLE"
-            intArrayOf( 8,  2,  0,  0,  4,  5,  6,  7,  9), // 1  FST_delay
-            intArrayOf( 8,  3,  0,  0,  4,  5,  6,  7,  9), // 2  FST_send
-            intArrayOf( 8,  1,  0,  0,  4,  5,  6,  7,  9), // 3  FST_recv
-            intArrayOf( 0,  0,  0,  0,  4,  5,  6,  7,  9), // 4  FST_deltaT-
-            intArrayOf( 0,  0,  0,  0,  4,  5,  6,  7,  9), // 5  FST_deltaT+
-            intArrayOf( 0,  0,  0,  0,  4,  5,  6,  7,  9), // 6  FST_forceX-
-            intArrayOf( 0,  0,  0,  0,  4,  5,  6,  7,  9), // 7  FST_forceX+
-            intArrayOf( 0,  0,  0,  0,  0,  0,  0,  0,  9), // 8  FST_reset
-            intArrayOf( 0,  0,  0,  0,  0,  0,  0,  0,  9), // 9  FST_full_reset
-        )
-//@formatter:on
+        const val EV_0_reset = 0
+        const val EV_1_full_reset = 1
+        const val EV_2_start_stop = 2
+        const val EV_3_next_round = 3
+        const val EV_11_dt_min = 11
+        const val EV_12_dt_plus = 12
+        const val EV_13_force_min = 13
+        const val EV_14_force_plus = 14
+        private var running = false
     }
 }
