@@ -16,7 +16,7 @@ import java.nio.ByteBuffer
 
 
 /** 230417 created by alaindef */
-class PollMaster : Thread() {
+class RecMaster : Thread() {
 
     var event: Int = 0
     var cnt = 0
@@ -66,18 +66,20 @@ class PollMaster : Thread() {
 
             socketR = DatagramSocket(portR, InetAddress.getByName("0.0.0.0"))
             socketR.broadcast = true
-            socketR.soTimeout = 2000
-            Main.mReport5!!.text = "waiting ........................"
+            socketR.soTimeout = 10
+            Main.mReport5b!!.text = "waiting .............."
 
             val response =
                 DatagramPacket(buffer, buffer.size)
 //            Log.d("---OMER-", "connected? ${socketR!!.isConnected}")         dit moet false zijn (zie idea testcon project
 //            Main.mReport5!!.text = "connected? ${socketR!!.isConnected}"
             socketR.receive(response)
+
             val quote = convertToInts(response.data, 9)
             val x = java.lang.Float.intBitsToFloat(quote[3])
             val y = java.lang.Float.intBitsToFloat(quote[1])
             Main.mReport5!!.text = "received ( $x $y )"
+            Main.mReport5b!!.text = "-----------------------"
 //                println("chat x y: $x  $y  from ${response.address}")
 
 
@@ -99,76 +101,19 @@ class PollMaster : Thread() {
 
         override fun handleMessage(incomingMessage: Message) {
             // process incoming messages here
-            val logTag = ">---OMER---"
+            val logTag = ">---oscar---"
 //            val arg1 = incomingMessage.arg1
 //            val arg2 = incomingMessage.arg2
 //            val arg3 = incomingMessage.obj
 
             event = incomingMessage.what
             when (event) {
-                EV_0_reset -> {
-                    forceX = 0
-                    forceY = 0
-                    udpSender.sendMessage(forceX, forceY)
-                    Main.mReport2!!.text = "$logTag\n  forceX = $forceX  forceY = $forceY"
-                    return
+                EV_0 -> {
+                    getResponse()
+                    Log.d(logTag, "msg EV_0  reveived ")
+
                 }
-                EV_1_full_reset -> {
-                    running = false
-                    Main.mReport!!.text = ""
-                    forceX = 0
-                    forceY = 0
-                    cnt = 0
-                    delta_t = 100
-                    udpSender.sendMessage(forceX, forceY)
-                    Main.mReport2!!.text = "$logTag\n  forceX = $forceX  forceY = $forceY"
-                    Main.mReport1!!.text = logTag + "\n" + cnt
-                    Main.mReport3!!.text = "$logTag\ndt = $delta_t"
-                    return
-                }
-                EV_2_start_stop -> {
-                    if (running) {
-                        running = false
-                        Main.mReport!!.text = ""
-                    } else {
-                        running = true
-                        send(EV_3_next_round)
-                    }
-                }
-                EV_3_next_round -> {
-                    if (running) {
-                        Main.mReport!!.text = "running ..."
-                        Main.mReport1!!.text = logTag + "\n" + cnt++
-                        var elapsed = System.nanoTime()
-                        udpSender.sendMessage(forceX, forceY)
-                        var elapsed1 = System.nanoTime() - elapsed
-                        Main.mReport5!!.text = " elapsed = $elapsed1"                   //ca 2 msec
-//                        Handler().postDelayed({ mbx!!.send(MainMailbox.RECEIVE) }, 10.toLong())
-                        var elapsed2 = System.nanoTime() - elapsed
-                        Log.d("---OMER-", "RECEIVE elapsed2 = $elapsed2")       //ca 6 msec
-                        Handler().postDelayed({ send(EV_3_next_round) }, delta_t.toLong())
-                        var elapsed3 = System.nanoTime() - elapsed
-                        Log.d("---OMER-", "RECEIVE elapsed3 = $elapsed3")      //ca 6 msec
-                        oscar.send(RecMaster.EV_0)
-                    }
-                }
-                EV_11_dt_min -> {
-                    if (delta_t <= 100) delta_t -= 10 else delta_t -= 100
-                    delta_t = max(delta_t, 10)
-                    Main.mReport3!!.text = "$logTag\ndt = $delta_t"
-                }
-                EV_12_dt_plus -> {
-                    if (delta_t < 100) delta_t += 10 else delta_t += 100
-                    Main.mReport3!!.text = "$logTag\ndt = $delta_t"
-                }
-                EV_13_force_min -> {
-                    forceX -= 100
-                    Main.mReport2!!.text = "$logTag\nforceX = $forceX"
-                }
-                EV_14_force_plus -> {
-                    forceX += 100
-                    Main.mReport2!!.text = "$logTag\nforceX = $forceX"
-                }
+
                 else -> {
                     Log.e(logTag, "EVENT $event unknown")
                 }
@@ -178,14 +123,6 @@ class PollMaster : Thread() {
 
 
     companion object {
-        const val EV_0_reset = 0
-        const val EV_1_full_reset = 1
-        const val EV_2_start_stop = 2
-        const val EV_3_next_round = 3
-        const val EV_11_dt_min = 11
-        const val EV_12_dt_plus = 12
-        const val EV_13_force_min = 13
-        const val EV_14_force_plus = 14
-        private var running = false
+        const val EV_0 = 0
     }
 }

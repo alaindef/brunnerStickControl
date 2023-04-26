@@ -23,7 +23,7 @@ class MainMailbox  //   messages
             MBX_0 -> {
             }
             RECEIVE -> {
-//                getResponse()
+                getResponse()
             }
             TEST -> Log.wtf(logTAG, "arg1= " + m.arg1)
             SENDPACKET -> {

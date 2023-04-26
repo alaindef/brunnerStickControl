@@ -99,6 +99,7 @@ class Main : AppCompatActivity() {
         mReport3 = findViewById<View>(R.id.report3) as TextView
         mReport4 = findViewById<View>(R.id.report4) as TextView
         mReport5 = findViewById<View>(R.id.report5) as TextView
+        mReport5b = findViewById<View>(R.id.report5b) as TextView
 
         mReset = findViewById<View>(R.id.reset) as Button
         mReset?.setOnClickListener{
@@ -190,9 +191,6 @@ class Main : AppCompatActivity() {
         else {
             Log.e(logTag, "omer is dead")
         }
-
-        Log.i(logTag, "bundle created ...................")
-//        omer.send(0)                //crash!
     }
 
 
@@ -234,6 +232,7 @@ class Main : AppCompatActivity() {
         @SuppressLint("StaticFieldLeak") var mReport3: TextView? = null
         @SuppressLint("StaticFieldLeak") var mReport4: TextView? = null
         @SuppressLint("StaticFieldLeak") var mReport5: TextView? = null
+        @SuppressLint("StaticFieldLeak") var mReport5b: TextView? = null
         @SuppressLint("StaticFieldLeak") var mReport6: TextView? = null
         @SuppressLint("StaticFieldLeak") var mContext: Context? = null
         @SuppressLint("StaticFieldLeak") var mContextForDummies: Context? = null
@@ -246,7 +245,7 @@ class Main : AppCompatActivity() {
 @JvmField
 val portR = 15095
 
-var oscar = PollMaster()
+var oscar = RecMaster()
 var omer = PollMaster()
 val udpSender: UdpSender = UdpSender("192.168.0.203", 15090)
 val udpReceiver: UdpReceiver = UdpReceiver(portR)
