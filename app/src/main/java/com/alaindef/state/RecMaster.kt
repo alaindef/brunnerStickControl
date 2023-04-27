@@ -5,7 +5,6 @@ import android.os.Looper
 import android.os.Message
 import android.os.StrictMode
 import android.util.Log
-import kotlinx.coroutines.runBlocking
 import java.io.IOException
 import java.net.DatagramPacket
 import java.net.DatagramSocket
@@ -65,15 +64,17 @@ class RecMaster : Thread() {
         var x = 0f
         var y = 0f
         try {
-            Main.mReport5b!!.text = "$cnt: waiting for incomming UDP"
+//            Main.mReport5b!!.text = "$cnt: waiting for incomming UDP"
             val response = DatagramPacket(buffer, buffer.size)
             socketR!!.receive(response)
 
             val quote = convertToInts(response.data, 9)
             x = java.lang.Float.intBitsToFloat(quote[3])
             y = java.lang.Float.intBitsToFloat(quote[1])
-
-            omer.send(PollMaster.EV_4_current_pos)
+            Main.mReport1!!.text = "CURRENT: (${String.format("%.${2}f", x)}  ${String.format("%.${2}f", y)})"
+            omer.xCurrent = x
+            omer.yCurrent = y
+            omer.send(PollMaster.EV_5_current_pos)
 //            omer.send(PollMaster.EV_4_current_pos, x, y,null)
         } catch (ex: SocketTimeoutException) {
             println("$cnt: Timeout error: " + ex.message)

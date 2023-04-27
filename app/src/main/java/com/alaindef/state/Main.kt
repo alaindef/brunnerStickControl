@@ -87,6 +87,7 @@ class Main : AppCompatActivity() {
         mReport2 = findViewById<View>(R.id.report2) as TextView
         mReport3 = findViewById<View>(R.id.report3) as TextView
         mReport4 = findViewById<View>(R.id.report4) as TextView
+        mReport4b = findViewById<View>(R.id.report4b) as TextView
         mReport5 = findViewById<View>(R.id.report5) as TextView
         mReport5b = findViewById<View>(R.id.report5b) as TextView
 
@@ -109,9 +110,9 @@ class Main : AppCompatActivity() {
             SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
                 // Do something when the SeekBar value changes
-                mReport5!!.text = "seekbar:"
-                mReport5b!!.text = "$progress"
-//                omer.forceX = (50 - progress) * 10
+                mReport4!!.text = "seekbar:"
+                mReport4b!!.text = "$progress"
+                omer.alfa = progress
             }
 
             override fun onStartTrackingTouch(seekBar: SeekBar?) {
@@ -131,12 +132,14 @@ class Main : AppCompatActivity() {
         fun useTargetXY(pad: ImageView, x: Float, y: Float): Vector {
             val padWidth = pad.width.toFloat()
             val padHeight = pad.height
-            val xRel = 100F - minOf(maxOf(((x * 200F) / padWidth), 0F), 200F)
-            val yRel = 100F - minOf(maxOf(((y * 200F) / padHeight), 0F), 200F)
-            omer.forceX = (xRel * 20F).toInt()
-            omer.forceY = (yRel * 60).toInt()
+            val xRel = (minOf(maxOf(((x * 100F) / padWidth), 0F), 100F))/100f
+            val yRel = (minOf(maxOf(((y * 100F) / padHeight), 0F), 100F))/100f
+
+            omer.xTarget = xRel
+            omer.yTarget = yRel
+            omer.send(PollMaster.EV_4_target_pos)
             mReport2!!.text =
-                "coord (${String.format("%.${0}f", x)}  ${String.format("%.${0}f", y)})  relative: ${String.format("%.${0}f", xRel)}  ${String.format("%.${0}f", yRel)})"
+                "TARGET: ${String.format("%.${2}f", xRel)}  ${String.format("%.${2}f", yRel)})"
             return Vector(xRel, yRel)
         }
 
@@ -144,7 +147,7 @@ class Main : AppCompatActivity() {
 //            we use the finger position on the pad as target position of the stick
             when (event?.action) {
                 MotionEvent.ACTION_MOVE -> {
-                    val xT = event.x
+                    val xT = event.x            // event.x is Float
                     val yT = event.y
                     useTargetXY(pad, xT, yT)
                 }
@@ -198,6 +201,9 @@ class Main : AppCompatActivity() {
 
         @SuppressLint("StaticFieldLeak")
         var mReport4: TextView? = null
+
+        @SuppressLint("StaticFieldLeak")
+        var mReport4b: TextView? = null
 
         @SuppressLint("StaticFieldLeak")
         var mReport5: TextView? = null

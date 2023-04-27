@@ -41,14 +41,35 @@
         android:gravity="center"
         android:text="polling delay" />
 
-    <TextView
-        android:id="@+id/report4"
+
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="36dp"
-        android:layout_gravity="center"
         android:background="@android:color/holo_blue_light"
-        android:gravity="center"
-        android:text="forces" />
+        android:weightSum="8">
+
+        <TextView
+            android:id="@+id/report4"
+            android:layout_width="0dp"
+            android:layout_weight="4"
+            android:layout_height="match_parent"
+            android:layout_gravity="center"
+            android:background="@android:color/holo_blue_light"
+            android:gravity="center"
+            android:text="report 4" />
+
+        <TextView
+            android:id="@+id/report4b"
+            android:layout_width="0dp"
+            android:layout_weight="4"
+            android:layout_height="36dp"
+            android:layout_gravity="center"
+            android:background="@android:color/holo_blue_light"
+            android:gravity="center"
+            android:text="report 4b" />
+
+    </LinearLayout>
+
 
     <LinearLayout
         android:layout_width="match_parent"
