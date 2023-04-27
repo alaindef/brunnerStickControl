@@ -31,9 +31,7 @@ class Main : AppCompatActivity() {
         when (val ss = view!!.tag) {
             "B_poll" -> {
                 omer.send(PollMaster.EV_2_start_stop)
-//                omer.send(PollMaster.EV_3_PR, 0, 0, ss)
-//                omer.send(PollMaster2.ev_poll$_and_repeat, 0, 0, ss)
-//                oscar.send(FSM.EV_5, 0, 0, ss)
+//                omer.send(PollMaster.EV_2_start_stop)
             }
             "B_RES" -> {
 //                omer.send(PollMaster.EV_0, 0, 0, ss)  //handled by onclick listener
@@ -90,7 +88,6 @@ class Main : AppCompatActivity() {
 //            Configuration.ORIENTATION_LANDSCAPE -> setContentView(R.layout.mainland)
         }
 
-        mainMailbox = MainMailbox()
         mContext = this.applicationContext
         mContextForDummies = this // found this, but why ???
         mReport = findViewById<View>(R.id.report) as TextView
@@ -146,8 +143,8 @@ class Main : AppCompatActivity() {
                     val padHeight = pad.height
                     val xRel = min(max(((x * 100) / padWidth).roundToInt(), 0), 100)
                     val yRel = min(max(((y * 100) / padHeight).roundToInt(), 0), 100)
-                    omer.forceX = (50 - xRel) * 10
-                    omer.forceY = (50 - yRel) * 30
+                    omer.forceX = (50 - xRel) * 20
+                    omer.forceY = (50 - yRel) * 60
                     mReport2!!.text =
                         " move ${x.toString()}  ${y.toString()} xrel ${xRel.toString()} yrel ${yRel.toString()}"
                 }
@@ -158,8 +155,8 @@ class Main : AppCompatActivity() {
                     val padHeight = pad.height
                     val xRel = min(max(((x * 100) / padWidth).roundToInt(), 0), 100)
                     val yRel = min(max(((y * 100) / padHeight).roundToInt(), 0), 100)
-                    omer.forceX = (50 - xRel) * 10
-                    omer.forceY = (50 - yRel) * 30
+                    omer.forceX = (50 - xRel) * 20
+                    omer.forceY = (50 - yRel) * 60
                     mReport2!!.text =
                         " dowwn ${x.toString()}  ${y.toString()} xrel ${xRel.toString()} yrel ${yRel.toString()}"
 
@@ -200,21 +197,6 @@ class Main : AppCompatActivity() {
         return true
     }
 
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        when (item.itemId) {
-            R.id.action_help ->
-                Toast.makeText(
-                    this, """$version""".trimIndent(), Toast.LENGTH_LONG
-                ).show()
-            R.id.action_settings ->
-                Toast.makeText(
-                    this, """Hahahahahaaaa""".trimIndent(), Toast.LENGTH_LONG
-                ).show()
-            R.id.animation_lag_300 -> ANIMATION_LAG = 300
-        }
-        return super.onOptionsItemSelected(item)
-    }
-
     companion object {
         const val version = 43
         const val DIM: Float = 0.5f // for Alpha, between 0 and 1 for textview
@@ -223,7 +205,6 @@ class Main : AppCompatActivity() {
         @JvmField
         var ANIMATION_LAG = 300
 
-        @JvmField  var mainMailbox: MainMailbox? = null    // a handler to extend UI event handling
         @SuppressLint("StaticFieldLeak")
         var mReport: TextView? = null
         @SuppressLint("StaticFieldLeak") var mReset: Button? = null
@@ -249,8 +230,4 @@ var oscar = RecMaster()
 var omer = PollMaster()
 val udpSender: UdpSender = UdpSender("192.168.0.203", 15090)
 val udpReceiver: UdpReceiver = UdpReceiver(portR)
-
-
-//new
-val tcon = Testcon()
 

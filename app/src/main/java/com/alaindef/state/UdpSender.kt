@@ -56,22 +56,8 @@ class UdpSender(private val ipAddress: String, private val portSender: Int) {
         }
         return result
     }
-    fun sendMessage(forceX: Int) {
-        val policy = ThreadPolicy.Builder().permitAll().build()
-        StrictMode.setThreadPolicy(policy)
 
-        val byteMessage = convertTheIndians(intArrayOf(0xAE, 0, 0, forceX, 0, 0, 0, 0, 0))
-        try {
-            val request = DatagramPacket(byteMessage, byteMessage.size, ip, portSender)
-            socketS.send(request)
-
-            socketS.close()
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
-    }
-
-    fun sendMessage(forceX: Int, forceY: Int) {
+    fun sendUDP(forceX: Int, forceY: Int) {
         val policy = ThreadPolicy.Builder().permitAll().build()
         StrictMode.setThreadPolicy(policy)
 

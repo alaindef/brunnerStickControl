@@ -3,16 +3,8 @@ package com.alaindef.state
 import android.os.Handler
 import android.os.Looper
 import android.os.Message
-import android.os.StrictMode
 import android.util.Log
-import kotlinx.coroutines.runBlocking
-import java.io.IOException
 import java.lang.Integer.max
-import java.net.DatagramPacket
-import java.net.DatagramSocket
-import java.net.InetAddress
-import java.net.SocketTimeoutException
-import java.nio.ByteBuffer
 
 
 /** 230417 created by alaindef */
@@ -37,65 +29,9 @@ class PollMaster : Thread() {
         mHandler!!.sendMessage(mHandler!!.obtainMessage(what, 0, 0, null))
     }
 
-    private fun convertToInts(bytes: ByteArray, nbrOfInts: Int): IntArray {
-        val byteBuffer = ByteBuffer.allocate(nbrOfInts * 4)
-        val intBuffer = byteBuffer.asIntBuffer()
-        val result = IntArray(nbrOfInts)
-
-        for (i in 0 until nbrOfInts) {
-            byteBuffer.put(bytes[4 * i + 3])
-            byteBuffer.put(bytes[4 * i + 2])
-            byteBuffer.put(bytes[4 * i + 1])
-            byteBuffer.put(bytes[4 * i + 0])
-        }
-        for (i in 0 until nbrOfInts) {
-            result[i] = intBuffer.get()
-        }
-        return result
-    }
-
-    fun getResponse() = runBlocking<Unit> {
-
-        val policy = StrictMode.ThreadPolicy.Builder().permitAll().build()
-        StrictMode.setThreadPolicy(policy)
-
-        val buffer = ByteArray(4096)
-        var socketR: DatagramSocket? = null
-
-        try {
-
-            socketR = DatagramSocket(portR, InetAddress.getByName("0.0.0.0"))
-            socketR.broadcast = true
-            socketR.soTimeout = 2000
-            Main.mReport5!!.text = "waiting ........................"
-
-            val response =
-                DatagramPacket(buffer, buffer.size)
-//            Log.d("---OMER-", "connected? ${socketR!!.isConnected}")         dit moet false zijn (zie idea testcon project
-//            Main.mReport5!!.text = "connected? ${socketR!!.isConnected}"
-            socketR.receive(response)
-            val quote = convertToInts(response.data, 9)
-            val x = java.lang.Float.intBitsToFloat(quote[3])
-            val y = java.lang.Float.intBitsToFloat(quote[1])
-            Main.mReport5!!.text = "received ( $x $y )"
-//                println("chat x y: $x  $y  from ${response.address}")
-
-
-        } catch (ex: SocketTimeoutException) {
-            println("Timeout error: " + ex.message)
-//        ex.printStackTrace()
-        } catch (ex: IOException) {
-            println("Client error: " + ex.message)
-            ex.printStackTrace()
-        } catch (ex: InterruptedException) {
-            ex.printStackTrace()
-        }
-        socketR!!.close()
-    }
 
     inner class ZeHandler  /*  https://developer.android.com/reference/android/os/Handler */
         (looper: Looper?) : Handler(looper!!) {
-        private val mbx = Main.mainMailbox
 
         override fun handleMessage(incomingMessage: Message) {
             // process incoming messages here
@@ -103,14 +39,13 @@ class PollMaster : Thread() {
 //            val arg1 = incomingMessage.arg1
 //            val arg2 = incomingMessage.arg2
 //            val arg3 = incomingMessage.obj
-
             event = incomingMessage.what
             when (event) {
                 EV_0_reset -> {
                     forceX = 0
                     forceY = 0
-                    udpSender.sendMessage(forceX, forceY)
-                    Main.mReport2!!.text = "$logTag\n  forceX = $forceX  forceY = $forceY"
+                    udpSender.sendUDP(forceX, forceY)
+                    Main.mReport4!!.text = "$logTag\n  forceX = $forceX  forceY = $forceY"
                     return
                 }
                 EV_1_full_reset -> {
@@ -120,10 +55,10 @@ class PollMaster : Thread() {
                     forceY = 0
                     cnt = 0
                     delta_t = 100
-                    udpSender.sendMessage(forceX, forceY)
-                    Main.mReport2!!.text = "$logTag\n  forceX = $forceX  forceY = $forceY"
-                    Main.mReport1!!.text = logTag + "\n" + cnt
-                    Main.mReport3!!.text = "$logTag\ndt = $delta_t"
+                    udpSender.sendUDP(forceX, forceY)
+                    Main.mReport4!!.text = "$logTag   forceX = $forceX  forceY = $forceY"
+                    Main.mReport1!!.text = "$logTag   $cnt "
+                    Main.mReport3!!.text = "$logTag   dt = $delta_t"
                     return
                 }
                 EV_2_start_stop -> {
@@ -137,20 +72,16 @@ class PollMaster : Thread() {
                 }
                 EV_3_next_round -> {
                     if (running) {
-                        Main.mReport!!.text = "running ..."
-                        Main.mReport1!!.text = logTag + "\n" + cnt++
-                        var elapsed = System.nanoTime()
-                        udpSender.sendMessage(forceX, forceY)
-                        var elapsed1 = System.nanoTime() - elapsed
-                        Main.mReport5!!.text = " elapsed = $elapsed1"                   //ca 2 msec
-//                        Handler().postDelayed({ mbx!!.send(MainMailbox.RECEIVE) }, 10.toLong())
-                        var elapsed2 = System.nanoTime() - elapsed
-                        Log.d("---OMER-", "RECEIVE elapsed2 = $elapsed2")       //ca 6 msec
-                        Handler().postDelayed({ send(EV_3_next_round) }, delta_t.toLong())
-                        var elapsed3 = System.nanoTime() - elapsed
-                        Log.d("---OMER-", "RECEIVE elapsed3 = $elapsed3")      //ca 6 msec
+                        cnt++
+                        Main.mReport1!!.text = "$cnt: running ..."
+                        udpSender.sendUDP(forceX, forceY)
+//                        Handler().postDelayed({ send(EV_3_next_round) }, delta_t.toLong())
+                        Main.mReport4!!.text = "$cnt: forces ($forceX $forceY)"
                         oscar.send(RecMaster.EV_0)
                     }
+                }
+                EV_4_response_ok -> {
+                    send(EV_3_next_round)
                 }
                 EV_11_dt_min -> {
                     if (delta_t <= 100) delta_t -= 10 else delta_t -= 100
@@ -163,11 +94,11 @@ class PollMaster : Thread() {
                 }
                 EV_13_force_min -> {
                     forceX -= 100
-                    Main.mReport2!!.text = "$logTag\nforceX = $forceX"
+                    Main.mReport4!!.text = "$logTag\nforceX = $forceX"
                 }
                 EV_14_force_plus -> {
                     forceX += 100
-                    Main.mReport2!!.text = "$logTag\nforceX = $forceX"
+                    Main.mReport4!!.text = "$logTag\nforceX = $forceX"
                 }
                 else -> {
                     Log.e(logTag, "EVENT $event unknown")
@@ -182,7 +113,10 @@ class PollMaster : Thread() {
         const val EV_1_full_reset = 1
         const val EV_2_start_stop = 2
         const val EV_3_next_round = 3
+        const val EV_4_response_ok = 4
+        const val EV_4_extra = 9
         const val EV_11_dt_min = 11
+
         const val EV_12_dt_plus = 12
         const val EV_13_force_min = 13
         const val EV_14_force_plus = 14

@@ -54,50 +54,50 @@ class RecMaster : Thread() {
         return result
     }
 
+    var socketR: DatagramSocket? = null
     fun getResponse() = runBlocking<Unit> {
 
         val policy = StrictMode.ThreadPolicy.Builder().permitAll().build()
         StrictMode.setThreadPolicy(policy)
 
         val buffer = ByteArray(4096)
-        var socketR: DatagramSocket? = null
 
         try {
-
-            socketR = DatagramSocket(portR, InetAddress.getByName("0.0.0.0"))
-            socketR.broadcast = true
-            socketR.soTimeout = 10
-            Main.mReport5b!!.text = "waiting .............."
+            Main.mReport5b!!.text = "$cnt: waiting for incomming UDP"
 
             val response =
                 DatagramPacket(buffer, buffer.size)
 //            Log.d("---OMER-", "connected? ${socketR!!.isConnected}")         dit moet false zijn (zie idea testcon project
 //            Main.mReport5!!.text = "connected? ${socketR!!.isConnected}"
-            socketR.receive(response)
+            socketR!!.receive(response)
 
             val quote = convertToInts(response.data, 9)
             val x = java.lang.Float.intBitsToFloat(quote[3])
             val y = java.lang.Float.intBitsToFloat(quote[1])
-            Main.mReport5!!.text = "received ( $x $y )"
+            Main.mReport5!!.text = "$cnt: received ( $x $y )"
             Main.mReport5b!!.text = "-----------------------"
-//                println("chat x y: $x  $y  from ${response.address}")
 
 
         } catch (ex: SocketTimeoutException) {
-            println("Timeout error: " + ex.message)
+            println("$cnt: Timeout error: " + ex.message)
 //        ex.printStackTrace()
         } catch (ex: IOException) {
-            println("Client error: " + ex.message)
+            println("$cnt: Client error: " + ex.message)
             ex.printStackTrace()
         } catch (ex: InterruptedException) {
             ex.printStackTrace()
         }
-        socketR!!.close()
+//        socketR!!.close()
     }
 
     inner class ZeHandler  /*  https://developer.android.com/reference/android/os/Handler */
         (looper: Looper?) : Handler(looper!!) {
-        private val mbx = Main.mainMailbox
+
+        init {
+            socketR = DatagramSocket(portR, InetAddress.getByName("0.0.0.0"))
+            socketR!!.broadcast = true
+            socketR!!.soTimeout = 4000
+        }
 
         override fun handleMessage(incomingMessage: Message) {
             // process incoming messages here
@@ -106,16 +106,17 @@ class RecMaster : Thread() {
 //            val arg2 = incomingMessage.arg2
 //            val arg3 = incomingMessage.obj
 
+            cnt++
             event = incomingMessage.what
             when (event) {
                 EV_0 -> {
                     getResponse()
-                    Log.d(logTag, "msg EV_0  reveived ")
-
+                    omer.send(PollMaster.EV_4_response_ok)
+                    Log.d(logTag, "$cnt: msg EV_0  reveived ")
                 }
 
                 else -> {
-                    Log.e(logTag, "EVENT $event unknown")
+                    Log.e(logTag, "$cnt: EVENT $event unknown")
                 }
             }
         }
