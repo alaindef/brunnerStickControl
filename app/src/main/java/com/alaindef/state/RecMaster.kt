@@ -7,7 +7,6 @@ import android.os.StrictMode
 import android.util.Log
 import kotlinx.coroutines.runBlocking
 import java.io.IOException
-import java.lang.Integer.max
 import java.net.DatagramPacket
 import java.net.DatagramSocket
 import java.net.InetAddress
@@ -20,7 +19,6 @@ class RecMaster : Thread() {
 
     var event: Int = 0
     var cnt = 0
-    var delta_t = 100
     var forceX = 0
     var forceY = 0
     private var mHandler: ZeHandler? = null
@@ -55,39 +53,36 @@ class RecMaster : Thread() {
     }
 
     var socketR: DatagramSocket? = null
-    fun getResponse() = runBlocking<Unit> {
 
+
+    data class Vector(val x: Float, val y: Float)
+
+    fun getCoordinates(): Vector {
         val policy = StrictMode.ThreadPolicy.Builder().permitAll().build()
         StrictMode.setThreadPolicy(policy)
 
         val buffer = ByteArray(4096)
-
+        var x = 0f
+        var y = 0f
         try {
             Main.mReport5b!!.text = "$cnt: waiting for incomming UDP"
-
-            val response =
-                DatagramPacket(buffer, buffer.size)
-//            Log.d("---OMER-", "connected? ${socketR!!.isConnected}")         dit moet false zijn (zie idea testcon project
-//            Main.mReport5!!.text = "connected? ${socketR!!.isConnected}"
+            val response = DatagramPacket(buffer, buffer.size)
             socketR!!.receive(response)
 
             val quote = convertToInts(response.data, 9)
-            val x = java.lang.Float.intBitsToFloat(quote[3])
-            val y = java.lang.Float.intBitsToFloat(quote[1])
-            Main.mReport5!!.text = "$cnt: received ( $x $y )"
-            Main.mReport5b!!.text = "-----------------------"
+            x = java.lang.Float.intBitsToFloat(quote[3])
+            y = java.lang.Float.intBitsToFloat(quote[1])
 
-
+            omer.send(PollMaster.EV_4_current_pos)
+//            omer.send(PollMaster.EV_4_current_pos, x, y,null)
         } catch (ex: SocketTimeoutException) {
             println("$cnt: Timeout error: " + ex.message)
-//        ex.printStackTrace()
         } catch (ex: IOException) {
             println("$cnt: Client error: " + ex.message)
-            ex.printStackTrace()
         } catch (ex: InterruptedException) {
             ex.printStackTrace()
         }
-//        socketR!!.close()
+        return Vector(x, y)
     }
 
     inner class ZeHandler  /*  https://developer.android.com/reference/android/os/Handler */
@@ -110,11 +105,8 @@ class RecMaster : Thread() {
             event = incomingMessage.what
             when (event) {
                 EV_0 -> {
-                    getResponse()
-                    omer.send(PollMaster.EV_4_response_ok)
-                    Log.d(logTag, "$cnt: msg EV_0  reveived ")
+                    getCoordinates()
                 }
-
                 else -> {
                     Log.e(logTag, "$cnt: EVENT $event unknown")
                 }

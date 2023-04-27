@@ -8,15 +8,12 @@ import android.os.Bundle
 import android.os.StrictMode
 import android.os.StrictMode.VmPolicy
 import android.util.Log
-import android.view.Menu
-import android.view.MenuItem
 import android.view.MotionEvent
 import android.view.View
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.SeekBar
 import android.widget.TextView
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import java.lang.Integer.max
 import java.lang.Integer.min
@@ -26,7 +23,6 @@ import kotlin.math.roundToInt
 @Suppress("unused")
 class Main : AppCompatActivity() {
     private val logTag = ">----MAIN---"
-
     fun sendEvent(view: View?) {
         when (val ss = view!!.tag) {
             "B_poll" -> {
@@ -51,11 +47,7 @@ class Main : AppCompatActivity() {
             }
             else -> Log.wtf(logTag, "tag unknown $ss")
         }
-//        oscar.send(FSM.EV_0, 0, 0, ss)
     }
-
-
-    fun View?.show() {}
 
     override fun onDestroy() {
         super.onDestroy()
@@ -99,11 +91,11 @@ class Main : AppCompatActivity() {
         mReport5b = findViewById<View>(R.id.report5b) as TextView
 
         mReset = findViewById<View>(R.id.reset) as Button
-        mReset?.setOnClickListener{
+        mReset?.setOnClickListener {
             omer.send(PollMaster.EV_0_reset)
             true
         }
-        mReset?.setOnLongClickListener{
+        mReset?.setOnLongClickListener {
             omer.send(PollMaster.EV_1_full_reset)
             true
         }
@@ -113,13 +105,13 @@ class Main : AppCompatActivity() {
         seekBar = findViewById(R.id.seek)
 
         // Set an event listener for the SeekBar
-        com.alaindef.state.Main.Companion.seekBar?.setOnSeekBarChangeListener(object :
+        seekBar?.setOnSeekBarChangeListener(object :
             SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
                 // Do something when the SeekBar value changes
-                mReport2!!.text = progress.toString()
-                omer.forceX = (50 - progress) * 10
-//                omer.send(PollMaster.EV_2_Ext, progress, 0, null)
+                mReport5!!.text = "seekbar:"
+                mReport5b!!.text = "$progress"
+//                omer.forceX = (50 - progress) * 10
             }
 
             override fun onStartTrackingTouch(seekBar: SeekBar?) {
@@ -133,33 +125,33 @@ class Main : AppCompatActivity() {
 
         var pad: ImageView? = null
         pad = findViewById(R.id.pad)
+
+        data class Vector(val x: Float, val y: Float)
+
+        fun useTargetXY(pad: ImageView, x: Float, y: Float): Vector {
+            val padWidth = pad.width.toFloat()
+            val padHeight = pad.height
+            val xRel = 100F - minOf(maxOf(((x * 200F) / padWidth), 0F), 200F)
+            val yRel = 100F - minOf(maxOf(((y * 200F) / padHeight), 0F), 200F)
+            omer.forceX = (xRel * 20F).toInt()
+            omer.forceY = (yRel * 60).toInt()
+            mReport2!!.text =
+                "coord (${String.format("%.${0}f", x)}  ${String.format("%.${0}f", y)})  relative: ${String.format("%.${0}f", xRel)}  ${String.format("%.${0}f", yRel)})"
+            return Vector(xRel, yRel)
+        }
+
         pad?.setOnTouchListener { _, event ->
+//            we use the finger position on the pad as target position of the stick
             when (event?.action) {
                 MotionEvent.ACTION_MOVE -> {
-//                    Log.d(logTag, "moving ${event.x}")
-                    val x = event.x
-                    val y = event.y
-                    val padWidth = pad.width
-                    val padHeight = pad.height
-                    val xRel = min(max(((x * 100) / padWidth).roundToInt(), 0), 100)
-                    val yRel = min(max(((y * 100) / padHeight).roundToInt(), 0), 100)
-                    omer.forceX = (50 - xRel) * 20
-                    omer.forceY = (50 - yRel) * 60
-                    mReport2!!.text =
-                        " move ${x.toString()}  ${y.toString()} xrel ${xRel.toString()} yrel ${yRel.toString()}"
+                    val xT = event.x
+                    val yT = event.y
+                    useTargetXY(pad, xT, yT)
                 }
-                MotionEvent.ACTION_DOWN  -> {
-                    val x = event.x
-                    val y = event.y
-                    val padWidth = pad.width
-                    val padHeight = pad.height
-                    val xRel = min(max(((x * 100) / padWidth).roundToInt(), 0), 100)
-                    val yRel = min(max(((y * 100) / padHeight).roundToInt(), 0), 100)
-                    omer.forceX = (50 - xRel) * 20
-                    omer.forceY = (50 - yRel) * 60
-                    mReport2!!.text =
-                        " dowwn ${x.toString()}  ${y.toString()} xrel ${xRel.toString()} yrel ${yRel.toString()}"
-
+                MotionEvent.ACTION_DOWN -> {
+                    val xT = event.x
+                    val yT = event.y
+                    useTargetXY(pad, xT, yT)
                 }
             }
             true   //not  return v?.onTouchEvent(event) ?: true
@@ -172,29 +164,13 @@ class Main : AppCompatActivity() {
             oscar.start()
             omer.start()
         } else {
-//            oscar.interrupt()       // kill him!
-//            oscar = FSM()           // new one
-//            oscar.start()
         }
 
-        if (oscar.isAlive)
-            Log.e(logTag, "oscar lives")
-        else {
-            Log.e(logTag, "oscar is dead")
-        }
+        if (oscar.isAlive) Log.e(logTag, "oscar lives")
+        else Log.e(logTag, "oscar is dead")
 
-        if (omer.isAlive)
-            Log.e(logTag, "omer lives")
-        else {
-            Log.e(logTag, "omer is dead")
-        }
-    }
-
-
-    override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        menuInflater.inflate(R.menu.menu_main, menu)
-        return true
+        if (omer.isAlive) Log.e(logTag, "omer lives")
+        else Log.e(logTag, "omer is dead")
     }
 
     companion object {
@@ -207,18 +183,40 @@ class Main : AppCompatActivity() {
 
         @SuppressLint("StaticFieldLeak")
         var mReport: TextView? = null
-        @SuppressLint("StaticFieldLeak") var mReset: Button? = null
-        @SuppressLint("StaticFieldLeak") var mReport1: TextView? = null
-        @SuppressLint("StaticFieldLeak") var mReport2: TextView? = null
-        @SuppressLint("StaticFieldLeak") var mReport3: TextView? = null
-        @SuppressLint("StaticFieldLeak") var mReport4: TextView? = null
-        @SuppressLint("StaticFieldLeak") var mReport5: TextView? = null
-        @SuppressLint("StaticFieldLeak") var mReport5b: TextView? = null
-        @SuppressLint("StaticFieldLeak") var mReport6: TextView? = null
-        @SuppressLint("StaticFieldLeak") var mContext: Context? = null
-        @SuppressLint("StaticFieldLeak") var mContextForDummies: Context? = null
+
+        @SuppressLint("StaticFieldLeak")
+        var mReset: Button? = null
+
+        @SuppressLint("StaticFieldLeak")
+        var mReport1: TextView? = null
+
+        @SuppressLint("StaticFieldLeak")
+        var mReport2: TextView? = null
+
+        @SuppressLint("StaticFieldLeak")
+        var mReport3: TextView? = null
+
+        @SuppressLint("StaticFieldLeak")
+        var mReport4: TextView? = null
+
+        @SuppressLint("StaticFieldLeak")
+        var mReport5: TextView? = null
+
+        @SuppressLint("StaticFieldLeak")
+        var mReport5b: TextView? = null
+
+        @SuppressLint("StaticFieldLeak")
+        var mReport6: TextView? = null
+
+        @SuppressLint("StaticFieldLeak")
+        var mContext: Context? = null
+
+        @SuppressLint("StaticFieldLeak")
+        var mContextForDummies: Context? = null
+
         //adf
-        @SuppressLint("StaticFieldLeak") var seekBar: SeekBar? = null
+        @SuppressLint("StaticFieldLeak")
+        var seekBar: SeekBar? = null
 
     }
 }

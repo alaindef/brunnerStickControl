@@ -45,7 +45,7 @@ class PollMaster : Thread() {
                     forceX = 0
                     forceY = 0
                     udpSender.sendUDP(forceX, forceY)
-                    Main.mReport4!!.text = "$logTag\n  forceX = $forceX  forceY = $forceY"
+                    Main.mReport3!!.text = "$logTag\n  forceX = $forceX  forceY = $forceY"
                     return
                 }
                 EV_1_full_reset -> {
@@ -56,9 +56,10 @@ class PollMaster : Thread() {
                     cnt = 0
                     delta_t = 100
                     udpSender.sendUDP(forceX, forceY)
-                    Main.mReport4!!.text = "$logTag   forceX = $forceX  forceY = $forceY"
-                    Main.mReport1!!.text = "$logTag   $cnt "
-                    Main.mReport3!!.text = "$logTag   dt = $delta_t"
+                    Main.mReport3!!.text = "$logTag   forceX = $forceX  forceY = $forceY"
+                    Main.mReport!!.text = "$logTag   $cnt "
+                    Main.mReport5!!.text = "$logTag   delta_t"
+                    Main.mReport5b!!.text = "$delta_t"
                     return
                 }
                 EV_2_start_stop -> {
@@ -73,32 +74,34 @@ class PollMaster : Thread() {
                 EV_3_next_round -> {
                     if (running) {
                         cnt++
-                        Main.mReport1!!.text = "$cnt: running ..."
+                        Main.mReport!!.text = "$cnt: running ..."
                         udpSender.sendUDP(forceX, forceY)
 //                        Handler().postDelayed({ send(EV_3_next_round) }, delta_t.toLong())
-                        Main.mReport4!!.text = "$cnt: forces ($forceX $forceY)"
+                        Main.mReport3!!.text = "$cnt: forces ($forceX $forceY)"
                         oscar.send(RecMaster.EV_0)
                     }
                 }
-                EV_4_response_ok -> {
+                EV_4_current_pos -> {
                     send(EV_3_next_round)
                 }
-                EV_11_dt_min -> {
+                EV_11_dt_min -> {       // not used
                     if (delta_t <= 100) delta_t -= 10 else delta_t -= 100
                     delta_t = max(delta_t, 10)
-                    Main.mReport3!!.text = "$logTag\ndt = $delta_t"
+                    Main.mReport5!!.text = "$logTag   delta_t"
+                    Main.mReport5b!!.text = "$delta_t"
                 }
-                EV_12_dt_plus -> {
+                EV_12_dt_plus -> {       // not used
                     if (delta_t < 100) delta_t += 10 else delta_t += 100
-                    Main.mReport3!!.text = "$logTag\ndt = $delta_t"
+                    Main.mReport5!!.text = "$logTag   delta_t"
+                    Main.mReport5b!!.text = "$delta_t"
                 }
                 EV_13_force_min -> {
                     forceX -= 100
-                    Main.mReport4!!.text = "$logTag\nforceX = $forceX"
+                    Main.mReport3!!.text = "$logTag\nforceX = $forceX"
                 }
                 EV_14_force_plus -> {
                     forceX += 100
-                    Main.mReport4!!.text = "$logTag\nforceX = $forceX"
+                    Main.mReport3!!.text = "$logTag\nforceX = $forceX"
                 }
                 else -> {
                     Log.e(logTag, "EVENT $event unknown")
@@ -113,7 +116,7 @@ class PollMaster : Thread() {
         const val EV_1_full_reset = 1
         const val EV_2_start_stop = 2
         const val EV_3_next_round = 3
-        const val EV_4_response_ok = 4
+        const val EV_4_current_pos = 4
         const val EV_4_extra = 9
         const val EV_11_dt_min = 11
 
