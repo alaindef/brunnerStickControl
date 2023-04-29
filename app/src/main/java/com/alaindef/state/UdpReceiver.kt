@@ -1,5 +1,6 @@
 package com.alaindef.state
 
+import android.util.Log
 import java.net.DatagramPacket
 import java.net.DatagramSocket
 import java.net.InetAddress
@@ -11,26 +12,9 @@ import java.net.SocketTimeoutException
 
 class UdpReceiver(val portReceiver: Int) {
 
-//    val socketR = DatagramSocket(port)
+    //    val socketR = DatagramSocket(port)
 //    val ip = InetAddress.getByName("0.0.0.0")
     val logTag = ">---UdpReceiver---"
-
-//    fun init() {
-//        socketR.bind(ip, port)
-//    }
-
-//    private fun close() {
-//        try {
-//            socketR.close()
-//        } catch (e: Exception) {
-//            Log.w(logTag, "socket close failed")
-//        }
-//    }
-
-    // finalize() method is called when the object is garbage collected
-//    protected fun finalize() {
-//        close()
-//    }
 
     fun little2big(word: Int): Int {
         return (word and 0xff shl 24) or (word and 0xff00 shl 8) or (word and 0xff0000 shr 8) or (word shr 24 and 0xff)
@@ -80,8 +64,8 @@ class UdpReceiver(val portReceiver: Int) {
             val quote = convertToInts(response.data, 9)
             val x = java.lang.Float.intBitsToFloat(quote[3])
             val y = java.lang.Float.intBitsToFloat(quote[1])
-            Main.mReport5!!.text = "received ( $x $y )"
-//                println("chat x y: $x  $y  from ${response.address}")
+            Main.mReport4!!.text = "received ( $x $y )"
+            Log.i(logTag, "chat x y: $x  $y ")
 
 
         } catch (ex: SocketTimeoutException) {

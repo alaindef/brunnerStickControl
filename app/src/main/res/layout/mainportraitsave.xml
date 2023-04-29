@@ -192,10 +192,16 @@
             <com.alaindef.state.PadView
                 android:id="@+id/pad"
                 android:layout_width="0dp"
+                android:layout_height="match_parent"  />
+
+            <android.widget.ImageView
+                android:id="@+id/pad1"
+                android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="7"
                 android:background="@drawable/carthesius"
                 android:gravity="center" />
+
 
             <Button
                 android:id="@+id/reset"
@@ -219,6 +225,8 @@
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="2"
+            android:progress="50"
+            android:max="100"
             android:background="@drawable/tuin"
             android:gravity="bottom" />
     </LinearLayout>

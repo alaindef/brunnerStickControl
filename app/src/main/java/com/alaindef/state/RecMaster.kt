@@ -5,12 +5,16 @@ import android.os.Looper
 import android.os.Message
 import android.os.StrictMode
 import android.util.Log
+import android.view.View
+import android.widget.ImageView
 import java.io.IOException
 import java.net.DatagramPacket
 import java.net.DatagramSocket
 import java.net.InetAddress
 import java.net.SocketTimeoutException
 import java.nio.ByteBuffer
+
+import com.alaindef.state.PadView
 
 
 /** 230417 created by alaindef */
@@ -63,6 +67,7 @@ class RecMaster : Thread() {
         val buffer = ByteArray(4096)
         var x = 0f
         var y = 0f
+
         try {
 //            Main.mReport5b!!.text = "$cnt: waiting for incomming UDP"
             val response = DatagramPacket(buffer, buffer.size)
@@ -71,11 +76,14 @@ class RecMaster : Thread() {
             val quote = convertToInts(response.data, 9)
             x = java.lang.Float.intBitsToFloat(quote[3])
             y = java.lang.Float.intBitsToFloat(quote[1])
+//            Main.mPad!!.
             Main.mReport1!!.text = "CURRENT: (${String.format("%.${2}f", x)}  ${String.format("%.${2}f", y)})"
-            omer.xCurrent = x
-            omer.yCurrent = y
-            omer.send(PollMaster.EV_5_current_pos)
-//            omer.send(PollMaster.EV_4_current_pos, x, y,null)
+            sendy.xCurrent = x
+            sendy.yCurrent = y
+            sendy.send(PollMaster.EV_5_current_pos)
+
+
+
         } catch (ex: SocketTimeoutException) {
             println("$cnt: Timeout error: " + ex.message)
         } catch (ex: IOException) {
@@ -97,7 +105,7 @@ class RecMaster : Thread() {
 
         override fun handleMessage(incomingMessage: Message) {
             // process incoming messages here
-            val logTag = ">---oscar---"
+            val logTag = ">---Recky---"
 //            val arg1 = incomingMessage.arg1
 //            val arg2 = incomingMessage.arg2
 //            val arg3 = incomingMessage.obj
