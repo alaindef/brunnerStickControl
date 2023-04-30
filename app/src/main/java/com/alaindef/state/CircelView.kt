@@ -9,17 +9,27 @@ import android.view.View
 
 class CircleView(context: Context, attrs: AttributeSet?) : View(context, attrs) {
 
-    private val paint = Paint()
+    // Store the x and y coordinates
+    private var xCoord = 0f
+    private var yCoord = 0f
 
+    // Override onDraw to draw the circle
     override fun onDraw(canvas: Canvas?) {
         super.onDraw(canvas)
-        canvas?.let {
-            paint.color = Color.RED
-            paint.style = Paint.Style.FILL
-            val radius = 100f
-            val x = width / 2f
-            val y = height / 2f
-            canvas.drawCircle(x, y, radius, paint)
-        }
+
+        // Set the paint color and style
+        val paint = Paint()
+//        paint.color = Color.RED
+        paint.style = Paint.Style.FILL
+
+        canvas?.drawCircle(xCoord, yCoord, 20f, paint)
+    }
+
+    // Public method to set the x and y coordinates
+    fun setCoordinates(x: Float, y: Float) {
+        xCoord = x
+        yCoord = y
+        invalidate()
+        invalidate()
     }
 }

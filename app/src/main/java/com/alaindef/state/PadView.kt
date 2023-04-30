@@ -8,10 +8,7 @@ import android.view.MotionEvent
 class PadView(context: Context, attrs: AttributeSet) :
     androidx.appcompat.widget.AppCompatImageView(context, attrs) {
 
-//    private val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
-//    private val canvas = Canvas(bitmap)
-
-    public val path = Path()
+    private val path = Path()
     private val paint = Paint().apply {
         isAntiAlias = true
         isDither = true
@@ -21,14 +18,14 @@ class PadView(context: Context, attrs: AttributeSet) :
         strokeWidth = 6f
         color = Color.BLUE
     }
-
-    private fun drawPoint(x: Float, y: Float) {
-        val paint = Paint()
-        paint.color = Color.RED
-        paint.strokeWidth = 10f
-
-//        canvas.drawPoint(x, y, paint)
-        invalidate()
+    private val paintRed = Paint().apply {
+        isAntiAlias = true
+        isDither = true
+        style = Paint.Style.STROKE
+        strokeJoin = Paint.Join.ROUND
+        strokeCap = Paint.Cap.ROUND
+        strokeWidth = 6f
+        color = Color.MAGENTA
     }
 
     data class Vector(val x: Float, val y: Float)
@@ -46,9 +43,11 @@ class PadView(context: Context, attrs: AttributeSet) :
     }
 
     override fun onDraw(canvas: Canvas) {
+        val padWidth = width.toFloat()
+        val padHeight = height.toFloat()
         super.onDraw(canvas)
         canvas.drawPath(path, paint)
-//        canvas?.drawBitmap(bitmap, 0f, 0f, null)
+        canvas?.drawCircle(sendy.xCurrent  * padWidth, sendy.yCurrent * padHeight,15f, paintRed)
     }
 
     override fun onTouchEvent(event: MotionEvent): Boolean {
@@ -60,20 +59,22 @@ class PadView(context: Context, attrs: AttributeSet) :
         when (event.action) {
             MotionEvent.ACTION_DOWN -> {
                 useTargetXY(x, y, padWidth, padHeight)
-
                 path.moveTo(x, y)
                 return true
             }
             MotionEvent.ACTION_MOVE -> {
                 useTargetXY(x, y, padWidth, padHeight)
+                paint.setColor(Color.BLUE)
                 path.lineTo(x, y)
+//                paint.setColor(Color.BLUE)
             }
             MotionEvent.ACTION_UP -> {
                 path.reset()
                 val xView = minOf(padWidth, maxOf(0f, x))
                 val yView = minOf(padHeight, maxOf(0f, y))
+//          draw a small circle to show the target position
+                paint.setColor(Color.RED)
                 path.addCircle(xView, yView, 15f, Path.Direction.CCW)
-//                Main.mReport4!!.text = "xt ======"
                 Main.mReport4b!!.text = "$x"
 
                 val xci = sendy.xCurrent
@@ -83,8 +84,8 @@ class PadView(context: Context, attrs: AttributeSet) :
                 Main.mReport5!!.text = "current pos"
                 Main.mReport5b!!.text = "($x $y)    ($xci $yci)    ($xc $yc)"
                 paint.setColor(Color.BLUE)
-                path.addCircle(xc, yc, 15f, Path.Direction.CCW)
-                paint.setColor(Color.RED)
+//                path.addCircle(xc, yc, 15f, Path.Direction.CCW)
+//                paint.setColor(Color.RED)
             }
             else -> return false
         }

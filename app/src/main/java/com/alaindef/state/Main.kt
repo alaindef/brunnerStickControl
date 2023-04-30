@@ -93,31 +93,19 @@ class Main : AppCompatActivity() {
 
         mContext = this.applicationContext
         mContextForDummies = this // found this, but why ???
-        mReport     = findViewById<View>(R.id.report) as TextView
-        mReport1    = findViewById<View>(R.id.report1) as TextView
-        mReport2    = findViewById<View>(R.id.report2) as TextView
-        mReport3    = findViewById<View>(R.id.report3) as TextView
-        mReport4    = findViewById<View>(R.id.report4) as TextView
-        mReport4b   = findViewById<View>(R.id.report4b) as TextView
-        mReport5    = findViewById<View>(R.id.report5) as TextView
-        mReport5b   = findViewById<View>(R.id.report5b) as TextView
-        mPad        = findViewById<View>(R.id.pad) as ImageView
-
-        val circleView = CircleView(this, null)
-        mPad!!.setImageDrawable(circleView.background)
-        circleView.visibility = View.GONE
-
-
-
-//        circleView.apply {
-//            val radius = 5f
-//            visibility = View.VISIBLE
-//            val params = layoutParams as LinearLayout.LayoutParams
-//            params.leftMargin = (x - radius).toInt()
-//            params.topMargin = (y - radius).toInt()
-//            layoutParams = params
-//        }
-
+        mReport = findViewById<View>(R.id.report) as TextView
+        mReport1 = findViewById<View>(R.id.report1) as TextView
+        mReport2 = findViewById<View>(R.id.report2) as TextView
+        mReport3 = findViewById<View>(R.id.report3) as TextView
+        mReport4 = findViewById<View>(R.id.report4) as TextView
+        mReport4b = findViewById<View>(R.id.report4b) as TextView
+        mReport5 = findViewById<View>(R.id.report5) as TextView
+        mReport5b = findViewById<View>(R.id.report5b) as TextView
+        mPad = findViewById<View>(R.id.pad) as ImageView
+        mContext = this.applicationContext
+        mCircleView = CircleView(this, null)
+        mPad!!.setImageDrawable(mCircleView!!.background)
+        mCircleView!!.visibility = View.GONE
 
         mReset = findViewById<View>(R.id.reset) as Button
 
@@ -130,17 +118,12 @@ class Main : AppCompatActivity() {
             true
         }
 
-
-//adf
         seekBar = findViewById(R.id.seek)
 
         // Set an event listener for the SeekBar
         seekBar?.setOnSeekBarChangeListener(object :
             SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
-                // Do something when the SeekBar value changes
-                mReport4!!.text = "seekbar:"
-                mReport4b!!.text = "$progress"
                 sendy.alfa = progress
             }
 
@@ -152,13 +135,11 @@ class Main : AppCompatActivity() {
                 // Do something when the user stops touching the SeekBar
             }
         })
-
         if (savedInstanceState == null) {
             recky.start()
             sendy.start()
         } else {
         }
-
         if (recky.isAlive) Log.e(logTag, "oscar lives") else Log.e(logTag, "oscar is dead")
 
         if (sendy.isAlive) Log.e(logTag, "omer lives") else Log.e(logTag, "omer is dead")
@@ -167,8 +148,6 @@ class Main : AppCompatActivity() {
     companion object {
         const val version = 43
         const val DIM: Float = 0.5f // for Alpha, between 0 and 1 for textview
-
-
 
         // between 0 and 255 for imageview
         @JvmField
@@ -213,21 +192,21 @@ class Main : AppCompatActivity() {
         @SuppressLint("StaticFieldLeak")
         var mContextForDummies: Context? = null
 
-        //adf
         @SuppressLint("StaticFieldLeak")
         var seekBar: SeekBar? = null
+
+        @SuppressLint("StaticFieldLeak")
+        var mCircleView: CircleView? = null
 
     }
 }
 
-@JvmField
-val portR = 15095
+const val portR = 15095
+const val brunnerAddress = "192.168.0.203"
 
 var recky = RecMaster()
 var sendy = PollMaster()
-val udpSender: UdpSender = UdpSender("192.168.0.203", 15090)
-val udpReceiver: UdpReceiver = UdpReceiver(portR)
-
+val udpSender: UdpSender = UdpSender(brunnerAddress, 15090)
 
 
 

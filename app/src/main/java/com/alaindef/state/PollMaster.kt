@@ -39,19 +39,22 @@ class PollMaster : Thread() {
         mHandler!!.sendMessage(mHandler!!.obtainMessage(what, 0, 0, null))
     }
 
-    fun calculateForces(){
+    fun calculateForcesSave() {
         forceX = alfa * (30 * abs(xTarget - xCurrent)).toInt()
-        if (xTarget > xCurrent) forceX = - forceX
+        if (xTarget > xCurrent) forceX = -forceX
         forceY = alfa * min(170, abs(70 * (yTarget - yCurrent)).toInt())
-        val sq = (1+yCurrent)*(1+yCurrent)
-        forceY = (forceY * ( 1 + kotlin.math.abs(sq) / 10)).toInt()
-        if (yTarget > yCurrent) forceY = - forceY
-//        Main.mReport5!!.text = "calculated"
-//        Main.mReport5b!!.text = "($forceX $forceY)"
-//        forceX = 0
-//        forceY = 0
+        val sq = (1 + yCurrent) * (1 + yCurrent)
+        forceY = (forceY * (1 + kotlin.math.abs(sq) / 10)).toInt()
+        if (yTarget > yCurrent) forceY = -forceY
     }
-
+    fun calculateForces() {
+        forceX = alfa * (50 * abs(xTarget - xCurrent)).toInt()
+        if (xTarget > xCurrent) forceX = -forceX
+        forceY = alfa * min(250, abs(120 * (yTarget - yCurrent)).toInt())
+        val sq = (1 + yCurrent) * (1 + yCurrent)
+        forceY = (forceY * (1 + kotlin.math.abs(sq) / 10)).toInt()
+        if (yTarget > yCurrent) forceY = -forceY
+    }
 
     inner class ZeHandler  /*  https://developer.android.com/reference/android/os/Handler */
         (looper: Looper?) : Handler(looper!!) {
@@ -77,12 +80,10 @@ class PollMaster : Thread() {
                     forceX = 0
                     forceY = 0
                     cnt = 0
-                    delta_t = 100
+                    delta_t = 100   //not used: after sending forces, receiver waits for input immediately, with timeout
                     udpSender.sendUDP(forceX, forceY)
                     Main.mReport3!!.text = "forces  ($forceX $forceY)"
                     Main.mReport!!.text = "$logTag   $cnt "
-//                    Main.mReport5!!.text = "$logTag   delta_t"
-//                    Main.mReport5b!!.text = "$delta_t"
                     return
                 }
                 EV_2_start_stop -> {
@@ -99,11 +100,11 @@ class PollMaster : Thread() {
                         cnt++
                         Main.mReport!!.text = "$cnt: running ..."
                         calculateForces()
-//                        if(currentPosReceived && targetPosReceived) udpSender.sendUDP(forceX, forceY)
                         udpSender.sendUDP(forceX, forceY)
 //                        Handler().postDelayed({ send(EV_3_next_round) }, delta_t.toLong())
                         Main.mReport3!!.text = "forces ($forceX $forceY)"
                         recky.send(RecMaster.EV_0)
+                        Main.mPad!!.invalidate()
                     }
                 }
                 EV_4_target_pos -> {
@@ -116,13 +117,9 @@ class PollMaster : Thread() {
                 EV_11_dt_min -> {       // not used
                     if (delta_t <= 100) delta_t -= 10 else delta_t -= 100
                     delta_t = max(delta_t, 10)
-//                    Main.mReport5!!.text = "$logTag   delta_t"
-//                    Main.mReport5b!!.text = "$delta_t"
                 }
                 EV_12_dt_plus -> {       // not used
                     if (delta_t < 100) delta_t += 10 else delta_t += 100
-//                    Main.mReport5!!.text = "$logTag   delta_t"
-//                    Main.mReport5b!!.text = "$delta_t"
                 }
                 EV_13_force_min -> {
                     forceX -= 100
