@@ -1,5 +1,7 @@
 package com.alaindef.state
 
+/** 230417 created by alaindef */
+
 import android.os.StrictMode
 import android.os.StrictMode.ThreadPolicy
 import android.util.Log
@@ -8,25 +10,10 @@ import java.net.DatagramSocket
 import java.net.InetAddress
 import java.nio.ByteBuffer
 
-
-
 class UdpSender(private val ipAddress: String, private val portSender: Int) {
 
     val socketS = DatagramSocket()
-    val ip = InetAddress.getByName(ipAddress)
     val logTag = ">---UdpSender---"
-
-    private fun close() {
-        try {
-            socketS.close()
-        } catch (e: Exception) {
-            Log.w(logTag, "socket close failed")
-        }
-    }
-    // finalize() method is called when the object is garbage collected
-    protected fun finalize() {
-        close()
-    }
 
     fun little2big(word: Int): Int {
         return (word and 0xff shl 24) or (word and 0xff00 shl 8) or (word and 0xff0000 shr 8) or (word shr 24 and 0xff)
@@ -41,33 +28,15 @@ class UdpSender(private val ipAddress: String, private val portSender: Int) {
         return byteBuffer.array()
     }
 
-    fun convertToInts(bytes: ByteArray, nbrOfInts: Int): IntArray {
-        val byteBuffer = ByteBuffer.allocate(nbrOfInts * 4)
-        val intBuffer = byteBuffer.asIntBuffer()
-        val result = IntArray(nbrOfInts)
-
-        for (i in 0 until nbrOfInts) {
-            byteBuffer.put(bytes[4 * i + 3])
-            byteBuffer.put(bytes[4 * i + 2])
-            byteBuffer.put(bytes[4 * i + 1])
-            byteBuffer.put(bytes[4 * i + 0])
-        }
-        for (i in 0 until nbrOfInts) {
-            result[i] = intBuffer.get()
-        }
-        return result
-    }
-
-    fun sendUDP(forceX: Int, forceY: Int) {
+    fun sendUDP(forceX: Int, forceY: Int, IP: InetAddress, port: Int) {
         val policy = ThreadPolicy.Builder().permitAll().build()
         StrictMode.setThreadPolicy(policy)
 
         val byteMessage = convertTheIndians(intArrayOf(0xAE, forceY, 0, forceX, 0, 0, 0, 0, 0))
         try {
             val socketS = DatagramSocket()
-//            val ip = InetAddress.getByName(ipAddress)
 
-            val request = DatagramPacket(byteMessage, byteMessage.size, ip, portSender)
+            val request = DatagramPacket(byteMessage, byteMessage.size, IP, port)
             socketS.send(request)
 
             socketS.close()

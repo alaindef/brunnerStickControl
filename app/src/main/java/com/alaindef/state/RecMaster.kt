@@ -1,23 +1,12 @@
 package com.alaindef.state
 
+/** 230417 created by alaindef */
 import android.os.Handler
 import android.os.Looper
 import android.os.Message
-import android.os.StrictMode
 import android.util.Log
-import android.view.View
-import android.widget.ImageView
-import java.io.IOException
-import java.net.DatagramPacket
-import java.net.DatagramSocket
-import java.net.InetAddress
-import java.net.SocketTimeoutException
-import java.nio.ByteBuffer
-
-import com.alaindef.state.PadView
 
 
-/** 230417 created by alaindef */
 class RecMaster : Thread() {
 
     var event: Int = 0
@@ -29,7 +18,7 @@ class RecMaster : Thread() {
     }
 
     fun send(what: Int, arg1: Int, arg2: Int, obj: Any?) {
-        mHandler!!.sendMessage(mHandler!!.obtainMessage(what, arg1, arg2, obj)) //todo why 0 ?
+        mHandler!!.sendMessage(mHandler!!.obtainMessage(what, arg1, arg2, obj))
     }
 
     fun send(what: Int) {
@@ -43,15 +32,14 @@ class RecMaster : Thread() {
         override fun handleMessage(incomingMessage: Message) {
             // process incoming messages here
             val logTag = ">---Recky---"
-//            val arg1 = incomingMessage.arg1
-//            val arg2 = incomingMessage.arg2
-//            val arg3 = incomingMessage.obj
 
             cnt++
             event = incomingMessage.what
             when (event) {
                 EV_0 -> {
-                    UdpRecObject.getCoordinates()
+                    val res = UdpRecObject.getCoordinates()
+                    // return the result to sendy
+                    sendy.send(PollMaster.EV_6_current_pos, 0, 0, res)
                 }
                 else -> {
                     Log.e(logTag, "$cnt: EVENT $event unknown")

@@ -1,7 +1,7 @@
 package com.alaindef.state
 
+/** 230417 created by alaindef */
 import android.os.StrictMode
-import android.util.Log
 import java.net.DatagramPacket
 import java.net.DatagramSocket
 import java.net.InetAddress
@@ -36,7 +36,6 @@ object UdpRecObject {
         return result
     }
 
-    data class Vector(val x: Float, val y: Float)
 
     fun getCoordinates(): Vector {
         val policy = StrictMode.ThreadPolicy.Builder().permitAll().build()
@@ -54,14 +53,13 @@ object UdpRecObject {
             x = java.lang.Float.intBitsToFloat(quote[3])
             y = java.lang.Float.intBitsToFloat(quote[1])
             Main.mReport1!!.text =
-                "CURRENT: (${String.format("%.${2}f", x)}  ${String.format("%.${2}f", y)})"
-            sendy.xCurrent = x
-            sendy.yCurrent = y
-            sendy.send(PollMaster.EV_5_current_pos)
+                "(${String.format("%.${2}f", x)}  ${String.format("%.${2}f", y)})"
         } catch (ex: SocketTimeoutException) {
-            println("cnt: Timeout error: " + ex.message)
+            Main.mReport5!!.text = ex.message
+            Main.mReport5a!!.text = "Timeout error"
         } catch (ex: IOException) {
-            println("cnt: Client error: " + ex.message)
+            Main.mReport5!!.text = ex.message
+            Main.mReport5a!!.text = "Client error"
         } catch (ex: InterruptedException) {
             ex.printStackTrace()
         }

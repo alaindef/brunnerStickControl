@@ -1,45 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:background="@color/slidebackgroundcolor"
+    android:layout_height="match_parent"
+    android:background="@android:color/darker_gray"
     android:orientation="vertical">
-
-    <TextView
-        android:id="@+id/report"
-        android:layout_width="match_parent"
-        android:layout_height="36dp"
-        android:layout_gravity="center"
-        android:background="@android:color/holo_blue_light"
-        android:gravity="center"
-        android:text="state transitions" />
-
-    <TextView
-        android:id="@+id/report1"
-        android:layout_width="match_parent"
-        android:layout_height="36dp"
-        android:layout_gravity="center"
-        android:background="@android:color/holo_orange_light"
-        android:gravity="center"
-        android:text="polling cnt" />
-
-    <TextView
-        android:id="@+id/report2"
-        android:layout_width="match_parent"
-        android:layout_height="36dp"
-        android:layout_gravity="center"
-        android:background="@android:color/holo_blue_light"
-        android:gravity="center"
-        android:text="mouse moves" />
-
-    <TextView
-        android:id="@+id/report3"
-        android:layout_width="match_parent"
-        android:layout_height="36dp"
-        android:layout_gravity="center"
-        android:background="@android:color/holo_orange_light"
-        android:gravity="center"
-        android:text="polling delay" />
 
 
     <LinearLayout
@@ -48,25 +12,115 @@
         android:background="@android:color/holo_blue_light"
         android:weightSum="8">
 
-        <TextView
-            android:id="@+id/report4"
+
+        <EditText
+            android:id="@+id/IPDialog"
             android:layout_width="0dp"
-            android:layout_weight="4"
             android:layout_height="match_parent"
             android:layout_gravity="center"
-            android:background="@android:color/holo_blue_light"
+            android:layout_weight="4"
             android:gravity="center"
-            android:text="report 4" />
+            android:text="192.168.0.203" />
 
         <TextView
-            android:id="@+id/report4b"
+            android:id="@+id/report0"
             android:layout_width="0dp"
-            android:layout_weight="4"
-            android:layout_height="36dp"
+            android:layout_height="match_parent"
             android:layout_gravity="center"
-            android:background="@android:color/holo_blue_light"
+            android:layout_weight="4"
             android:gravity="center"
-            android:text="report 4b" />
+            android:text=""
+            android:textSize="12dp"
+            android:textColor="@android:color/white"/>
+
+    </LinearLayout>
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="36dp"
+        android:background="@android:color/holo_orange_light"
+        android:weightSum="8">
+
+
+        <TextView
+            android:id="@+id/report1a"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_gravity="center"
+            android:layout_weight="4"
+            android:gravity="center"
+            android:text="current position" />
+
+        <TextView
+            android:id="@+id/report1"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_gravity="center"
+            android:layout_weight="4"
+            android:gravity="center"
+            android:text=""
+            android:textSize="20dp"
+            android:textColor="@android:color/white" />
+
+    </LinearLayout>
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="36dp"
+        android:background="@android:color/holo_blue_light"
+        android:weightSum="8">
+
+
+        <TextView
+            android:id="@+id/report2a"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_gravity="center"
+            android:layout_weight="4"
+            android:gravity="center"
+            android:text="target position" />
+
+        <TextView
+            android:id="@+id/report2"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_gravity="center"
+            android:layout_weight="4"
+            android:gravity="center"
+            android:text=""
+            android:textSize="20dp"
+            android:textColor="@android:color/white" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="36dp"
+        android:background="@android:color/holo_orange_light"
+        android:weightSum="8">
+
+
+        <TextView
+            android:id="@+id/report3a"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_gravity="center"
+            android:layout_weight="4"
+            android:gravity="center"
+            android:text="forces" />
+
+        <TextView
+            android:id="@+id/report3"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_gravity="center"
+            android:layout_weight="4"
+            android:gravity="center"
+            android:text=""
+            android:textSize="20dp"
+            android:textColor="@android:color/white" />
 
     </LinearLayout>
 
@@ -78,24 +132,51 @@
         android:weightSum="8">
 
         <TextView
-            android:id="@+id/report5"
+            android:id="@+id/report4a"
             android:layout_width="0dp"
-            android:layout_weight="4"
             android:layout_height="match_parent"
             android:layout_gravity="center"
+            android:layout_weight="4"
+            android:gravity="center"
+            android:text="polling interval" />
+
+        <TextView
+            android:id="@+id/report4"
+            android:layout_width="0dp"
+            android:layout_height="36dp"
+            android:layout_gravity="center"
+            android:layout_weight="4"
+            android:gravity="center"
+            android:text="" />
+
+    </LinearLayout>
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="36dp"
+        android:background="@android:color/holo_blue_light"
+        android:weightSum="8">
+
+        <TextView
+            android:id="@+id/report5a"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_gravity="center"
+            android:layout_weight="4"
             android:background="@android:color/holo_orange_light"
             android:gravity="center"
             android:text="divers messages" />
 
         <TextView
-            android:id="@+id/report5b"
+            android:id="@+id/report5"
             android:layout_width="0dp"
-            android:layout_weight="4"
             android:layout_height="match_parent"
             android:layout_gravity="center"
+            android:layout_weight="4"
             android:background="@android:color/holo_orange_light"
             android:gravity="center"
-            android:text="things" />
+            android:text="" />
 
     </LinearLayout>
 
@@ -173,8 +254,9 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="8"
-            android:orientation="horizontal">
+            android:layout_weight="9"
+            android:orientation="horizontal"
+            android:weightSum="8">
 
 
             <Button
@@ -193,7 +275,7 @@
                 android:id="@+id/pad"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
-                android:layout_weight="7"
+                android:layout_weight="6"
                 android:background="@drawable/carthesius"
                 android:gravity="center" />
 
@@ -211,16 +293,55 @@
                 android:textAlignment="center"
                 android:textSize="35dp" />
 
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:background="@android:color/holo_blue_light"
+            android:gravity="bottom"
+            android:weightSum="8">
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/seekFill"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_gravity="center"
+                android:layout_weight="1"
+                android:background="@drawable/krokus"
+                android:contentDescription="@string/photoView"
+                android:gravity="center"
+                android:onClick="sendEvent"
+                android:tag="B_seek"
+                android:textColor="@android:color/white"
+                android:textSize="50dp" />
+
+            <android.widget.SeekBar
+                android:id="@+id/seek"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="6"
+                android:background="@drawable/tuin"
+                android:gravity="bottom" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/seekreport"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_gravity="center"
+                android:layout_weight="1"
+                android:background="@drawable/britain22"
+                android:contentDescription="@string/photoView"
+                android:gravity="center"
+                android:onClick="sendEvent"
+                android:tag="B_seek"
+                android:text=""
+                android:textColor="@android:color/white"
+                android:textSize="50dp" />
 
         </LinearLayout>
 
-        <android.widget.SeekBar
-            android:id="@+id/seek"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="2"
-            android:background="@drawable/tuin"
-            android:gravity="bottom" />
     </LinearLayout>
 
 </LinearLayout>

@@ -1,18 +1,20 @@
 package com.alaindef.state
 
-//adf
+/** 230417 created by alaindef */
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.res.Configuration
-import android.graphics.Bitmap
 import android.os.Bundle
 import android.os.StrictMode
 import android.os.StrictMode.VmPolicy
+import android.text.Editable
+import android.text.TextWatcher
 import android.util.Log
 import android.view.View
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 
+data class Vector(val x: Float, val y: Float)
 
 @Suppress("unused")
 class Main : AppCompatActivity() {
@@ -21,7 +23,6 @@ class Main : AppCompatActivity() {
         when (val ss = view!!.tag) {
             "B_poll" -> {
                 sendy.send(PollMaster.EV_2_start_stop)
-//                omer.send(PollMaster.EV_2_start_stop)
             }
             "B_RES" -> {
 //                omer.send(PollMaster.EV_0, 0, 0, ss)  //handled by onclick listener
@@ -43,8 +44,6 @@ class Main : AppCompatActivity() {
         }
     }
 
-    data class Vector(val x: Float, val y: Float)
-
     fun useTargetXY(pad: ImageView, x: Float, y: Float): Vector {
         val padWidth = pad.width.toFloat()
         val padHeight = pad.height
@@ -55,14 +54,13 @@ class Main : AppCompatActivity() {
         sendy.yTarget = yRel
         sendy.send(PollMaster.EV_4_target_pos)
         mReport2!!.text =
-            "TARGET: ${String.format("%.${2}f", xRel)}  ${String.format("%.${2}f", yRel)})"
+            "(${String.format("%.${2}f", xRel)}  ${String.format("%.${2}f", yRel)})"
         return Vector(xRel, yRel)
     }
 
 
     override fun onDestroy() {
         super.onDestroy()
-        mReport = null
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
@@ -70,7 +68,7 @@ class Main : AppCompatActivity() {
         outState.putString(
             "message",
             "onSaveInstanceState: orientation changed"
-        )    //test of saveInstanceState
+        )
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -87,20 +85,39 @@ class Main : AppCompatActivity() {
         }
 
         when (resources.configuration.orientation) {
-            Configuration.ORIENTATION_PORTRAIT -> setContentView(R.layout.mainportraitsimple)
+            Configuration.ORIENTATION_PORTRAIT -> setContentView(R.layout.portrait)
 //            Configuration.ORIENTATION_LANDSCAPE -> setContentView(R.layout.mainland)
         }
 
         mContext = this.applicationContext
         mContextForDummies = this // found this, but why ???
-        mReport = findViewById<View>(R.id.report) as TextView
+
+        mIPDialog = findViewById<View>(R.id.IPDialog) as EditText
+        mIPDialog?.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
+                // This method is called before the text is changed
+            }
+
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                // This method is called when the text is changed
+                val newText = s.toString()
+                sendy.send(PollMaster.EV_9_new_IP)
+            }
+
+            override fun afterTextChanged(s: Editable?) {
+                // This method is called after the text is changed
+            }
+        })
+
+
+        mReport0 = findViewById<View>(R.id.report0) as TextView
         mReport1 = findViewById<View>(R.id.report1) as TextView
         mReport2 = findViewById<View>(R.id.report2) as TextView
         mReport3 = findViewById<View>(R.id.report3) as TextView
+        mReport4a = findViewById<View>(R.id.report4a) as TextView
         mReport4 = findViewById<View>(R.id.report4) as TextView
-        mReport4b = findViewById<View>(R.id.report4b) as TextView
+        mReport5a = findViewById<View>(R.id.report5a) as TextView
         mReport5 = findViewById<View>(R.id.report5) as TextView
-        mReport5b = findViewById<View>(R.id.report5b) as TextView
         mPad = findViewById<View>(R.id.pad) as ImageView
         mContext = this.applicationContext
         mCircleView = CircleView(this, null)
@@ -108,7 +125,6 @@ class Main : AppCompatActivity() {
         mCircleView!!.visibility = View.GONE
 
         mReset = findViewById<View>(R.id.reset) as Button
-
         mReset?.setOnClickListener {
             sendy.send(PollMaster.EV_0_reset)
             true
@@ -119,12 +135,15 @@ class Main : AppCompatActivity() {
         }
 
         seekBar = findViewById(R.id.seek)
+        seekReport = findViewById(R.id.seekreport)
 
         // Set an event listener for the SeekBar
         seekBar?.setOnSeekBarChangeListener(object :
             SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
+//                alfa is a multiplier for forces ForceX and ForceY as used in PollMaster.calculateForces
                 sendy.alfa = progress
+                seekReport!!.text = progress.toString()
             }
 
             override fun onStartTrackingTouch(seekBar: SeekBar?) {
@@ -136,8 +155,11 @@ class Main : AppCompatActivity() {
             }
         })
         if (savedInstanceState == null) {
-            recky.start()
+            // sendy is an FMM (Finite Message Machine) that handles all the incomming events:
+            // start and stop the polling, reset, receive target and current positions,
+            // request to change the IP address of the brunner interface, change polling intervals
             sendy.start()
+            recky.start()
         } else {
         }
         if (recky.isAlive) Log.e(logTag, "oscar lives") else Log.e(logTag, "oscar is dead")
@@ -154,7 +176,10 @@ class Main : AppCompatActivity() {
         var ANIMATION_LAG = 300
 
         @SuppressLint("StaticFieldLeak")
-        var mReport: TextView? = null
+        var mIPDialog: TextView? = null
+
+        @SuppressLint("StaticFieldLeak")
+        var mReport0: TextView? = null
 
         @SuppressLint("StaticFieldLeak")
         var mReset: Button? = null
@@ -169,16 +194,16 @@ class Main : AppCompatActivity() {
         var mReport3: TextView? = null
 
         @SuppressLint("StaticFieldLeak")
+        var mReport4a: TextView? = null
+
+        @SuppressLint("StaticFieldLeak")
         var mReport4: TextView? = null
 
         @SuppressLint("StaticFieldLeak")
-        var mReport4b: TextView? = null
+        var mReport5a: TextView? = null
 
         @SuppressLint("StaticFieldLeak")
         var mReport5: TextView? = null
-
-        @SuppressLint("StaticFieldLeak")
-        var mReport5b: TextView? = null
 
         @SuppressLint("StaticFieldLeak")
         var mReport6: TextView? = null
@@ -196,13 +221,16 @@ class Main : AppCompatActivity() {
         var seekBar: SeekBar? = null
 
         @SuppressLint("StaticFieldLeak")
+        var seekReport: TextView? = null
+
+        @SuppressLint("StaticFieldLeak")
         var mCircleView: CircleView? = null
 
     }
 }
 
 const val portR = 15095
-const val brunnerAddress = "192.168.0.203"
+var brunnerAddress = "192.168.0.203"
 
 var recky = RecMaster()
 var sendy = PollMaster()
