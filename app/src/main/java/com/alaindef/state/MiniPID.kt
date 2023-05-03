@@ -1,4 +1,7 @@
-package com.stormbots
+package com.alaindef.state
+
+import android.util.Log
+
 
 //adf 230502 from https://github.com/tekdemo/MiniPID-Java.git
 
@@ -13,26 +16,29 @@ package com.stormbots
  * @see http://brettbeauregard.com/blog/2011/04/improving-the-beginners-pid-direction/improving-the-beginners-pid-introduction
  */
 class MiniPID {
+
+
+    val logTag = ">---MiniPID"
     //**********************************
     // Class private variables
     //**********************************
-    private var P = 0.0
-    private var I = 0.0
-    private var D = 0.0
-    private var F = 0.0
-    private var maxIOutput = 0.0
-    private var maxError = 0.0
-    private var errorSum = 0.0
-    private var maxOutput = 0.0
-    private var minOutput = 0.0
-    private var setpoint = 0.0
-    private var lastActual = 0.0
+    private var P = 0.0f
+    private var I = 0.0f
+    private var D = 0.0f
+    private var F = 0.0f
+    private var maxIOutput = 0.0f
+    private var maxError = 0.0f
+    private var errorSum = 0.0f
+    private var maxOutput = 0.0f
+    private var minOutput = 0.0f
+    private var setpoint = 0.0f
+    private var lastActual = 0.0f
     private var firstRun = true
     private var reversed = false
-    private var outputRampRate = 0.0
-    private var lastOutput = 0.0
-    private var outputFilter = 0.0
-    private var setpointRange = 0.0
+    private var outputRampRate = 0.0f
+    private var lastOutput = 0.0f
+    private var outputFilter = 0.0f
+    private var setpointRange = 0.0f
     //**********************************
     // Constructor functions
     //**********************************
@@ -43,11 +49,13 @@ class MiniPID {
      * @param i Integral gain.  Becomes large if setpoint cannot reach target quickly.
      * @param d Derivative gain. Responds quickly to large changes in error. Small values prevents P and I terms from causing overshoot.
      */
-    constructor(p: Double, i: Double, d: Double) {
+    constructor(p: Float, i: Float, d: Float) {
         P = p
         I = i
         D = d
         checkSigns()
+
+        Log.i(logTag, "minipid started")
     }
 
     /**
@@ -58,7 +66,7 @@ class MiniPID {
      * @param d Derivative gain. Responds quickly to large changes in error. Small values prevents P and I terms from causing overshoot.
      * @param f Feed-forward gain. Open loop "best guess" for the output should be. Only useful if setpoint represents a rate.
      */
-    constructor(p: Double, i: Double, d: Double, f: Double) {
+    constructor(p: Float, i: Float, d: Float, f: Float) {
         P = p
         I = i
         D = d
@@ -78,7 +86,7 @@ class MiniPID {
      *
      * @param p Proportional gain. Affects output according to **output+=P*(setpoint-current_value)**
      */
-    fun setP(p: Double) {
+    fun setP(p: Float) {
         P = p
         checkSigns()
     }
@@ -92,19 +100,19 @@ class MiniPID {
      * @see {@link .setMaxIOutput
      * @param i New gain value for the Integral term
      */
-    fun setI(i: Double) {
-        if (I != 0.0) {
+    fun setI(i: Float) {
+        if (I != 0.0f) {
             errorSum = errorSum * I / i
         }
-        if (maxIOutput != 0.0) {
+        if (maxIOutput != 0.0f) {
             maxError = maxIOutput / i
         }
         I = i
         checkSigns()
-        // Implementation note: 
-        // This Scales the accumulated error to avoid output errors. 
-        // As an example doubling the I term cuts the accumulated error in half, which results in the 
-        // output change due to the I term constant during the transition. 
+        // Implementation note:
+        // This Scales the accumulated error to avoid output errors.
+        // As an example doubling the I term cuts the accumulated error in half, which results in the
+        // output change due to the I term constant during the transition.
     }
 
     /**
@@ -122,7 +130,7 @@ class MiniPID {
      *
      * @param d New gain value for the Derivative term
      */
-    fun setD(d: Double) {
+    fun setD(d: Float) {
         D = d
         checkSigns()
     }
@@ -136,7 +144,7 @@ class MiniPID {
      *
      * @param f Feed forward gain.
      */
-    fun setF(f: Double) {
+    fun setF(f: Float) {
         F = f
         checkSigns()
     }
@@ -148,10 +156,10 @@ class MiniPID {
      * @param i Integral gain.  Becomes large if setpoint cannot reach target quickly.
      * @param d Derivative gain. Responds quickly to large changes in error. Small values prevents P and I terms from causing overshoot.
      */
-    fun setPID(p: Double, i: Double, d: Double) {
+    fun setPID(p: Float, i: Float, d: Float) {
         P = p
         D = d
-        //Note: the I term has additional calculations, so we need to use it's 
+        //Note: the I term has additional calculations, so we need to use it's
         //specific method for setting it.
         setI(i)
         checkSigns()
@@ -165,11 +173,11 @@ class MiniPID {
      * @param d Derivative gain. Responds quickly to large changes in error. Small values prevents P and I terms from causing overshoot.
      * @param f Feed-forward gain. Open loop "best guess" for the output should be. Only useful if setpoint represents a rate.
      */
-    fun setPID(p: Double, i: Double, d: Double, f: Double) {
+    fun setPID(p: Float, i: Float, d: Float, f: Float) {
         P = p
         D = d
         F = f
-        //Note: the I term has additional calculations, so we need to use it's 
+        //Note: the I term has additional calculations, so we need to use it's
         //specific method for setting it.
         setI(i)
         checkSigns()
@@ -180,12 +188,12 @@ class MiniPID {
 //     * This can be used to prevent large windup issues and make tuning simpler
 //     * @param maximum. Units are the same as the expected output value
 //     */
-    fun setMaxIOutput(maximum: Double) {
-        // Internally maxError and Izone are similar, but scaled for different purposes. 
-        // The maxError is generated for simplifying math, since calculations against 
-        // the max error are far more common than changing the I term or Izone. 
+    fun setMaxIOutput(maximum: Float) {
+        // Internally maxError and Izone are similar, but scaled for different purposes.
+        // The maxError is generated for simplifying math, since calculations against
+        // the max error are far more common than changing the I term or Izone.
         maxIOutput = maximum
-        if (I != 0.0) {
+        if (I != 0f) {
             maxError = maxIOutput / I
         }
     }
@@ -196,7 +204,7 @@ class MiniPID {
      * **[-output, output]**
      * @param output
      */
-    fun setOutputLimits(output: Double) {
+    fun setOutputLimits(output: Float) {
         setOutputLimits(-output, output)
     }
 
@@ -207,13 +215,13 @@ class MiniPID {
      * @param minimum possible output value
      * @param maximum possible output value
      */
-    fun setOutputLimits(minimum: Double, maximum: Double) {
+    fun setOutputLimits(minimum: Float, maximum: Float) {
         if (maximum < minimum) return
         maxOutput = maximum
         minOutput = minimum
 
         // Ensure the bounds of the I term are within the bounds of the allowable output swing
-        if (maxIOutput == 0.0 || maxIOutput > maximum - minimum) {
+        if (maxIOutput == 0f || maxIOutput > maximum - minimum) {
             setMaxIOutput(maximum - minimum)
         }
     }
@@ -235,7 +243,7 @@ class MiniPID {
      * @see MiniPID.getOutput
      * @param setpoint
      */
-    fun setSetpoint(setpoint: Double) {
+    fun setSetpoint(setpoint: Float) {
         this.setpoint = setpoint
     }
 
@@ -245,32 +253,32 @@ class MiniPID {
      * @param setpoint The target value for the system
      * @return calculated output value for driving the system
      */
-    fun getOutput(actual: Double, setpoint: Double): Double {
+    fun getOutput(actual: Float, setpoint: Float): Float {
         var setpoint = setpoint
-        var output: Double
-        val Poutput: Double
-        var Ioutput: Double
-        val Doutput: Double
-        val Foutput: Double
+        var output: Float
+        val Poutput: Float
+        var Ioutput: Float
+        val Doutput: Float
+        val Foutput: Float
         this.setpoint = setpoint
 
         // Ramp the setpoint used for calculations if user has opted to do so
-        if (setpointRange != 0.0) {
+        if (setpointRange != 0f) {
             setpoint = constrain(setpoint, actual - setpointRange, actual + setpointRange)
         }
 
         // Do the simple parts of the calculations
         val error = setpoint - actual
 
-        // Calculate F output. Notice, this depends only on the setpoint, and not the error. 
+        // Calculate F output. Notice, this depends only on the setpoint, and not the error.
         Foutput = F * setpoint
 
         // Calculate P term
         Poutput = P * error
 
-        // If this is our first time running this, we don't actually _have_ a previous input or output. 
+        // If this is our first time running this, we don't actually _have_ a previous input or output.
         // For sensor, sanely assume it was exactly where it is now.
-        // For last output, we can assume it's the current time-independent outputs. 
+        // For last output, we can assume it's the current time-independent outputs.
         if (firstRun) {
             lastActual = actual
             lastOutput = Poutput + Foutput
@@ -279,16 +287,16 @@ class MiniPID {
 
         // Calculate D Term
         // Note, this is negative. This actually "slows" the system if it's doing
-        // the correct thing, and small values helps prevent output spikes and overshoot 
+        // the correct thing, and small values helps prevent output spikes and overshoot
         Doutput = -D * (actual - lastActual)
         lastActual = actual
 
         // The Iterm is more complex. There's several things to factor in to make it easier to deal with.
         // 1. maxIoutput restricts the amount of output contributed by the Iterm.
         // 2. prevent windup by not increasing errorSum if we're already running against our max Ioutput
-        // 3. prevent windup by not increasing errorSum if output is output=maxOutput    
+        // 3. prevent windup by not increasing errorSum if output is output=maxOutput
         Ioutput = I * errorSum
-        if (maxIOutput != 0.0) {
+        if (maxIOutput != 0f) {
             Ioutput = constrain(Ioutput, -maxIOutput, maxIOutput)
         }
 
@@ -299,37 +307,37 @@ class MiniPID {
         if (minOutput != maxOutput && !bounded(output, minOutput, maxOutput)) {
             errorSum = error
             // reset the error sum to a sane level
-            // Setting to current error ensures a smooth transition when the P term 
+            // Setting to current error ensures a smooth transition when the P term
             // decreases enough for the I term to start acting upon the controller
             // From that point the I term will build up as would be expected
-        } else if (outputRampRate != 0.0 && !bounded(
+        } else if (outputRampRate != 0f && !bounded(
                 output,
                 lastOutput - outputRampRate,
                 lastOutput + outputRampRate
             )
         ) {
             errorSum = error
-        } else if (maxIOutput != 0.0) {
+        } else if (maxIOutput != 0f) {
             errorSum = constrain(errorSum + error, -maxError, maxError)
-            // In addition to output limiting directly, we also want to prevent I term 
+            // In addition to output limiting directly, we also want to prevent I term
             // buildup, so restrict the error directly
         } else {
             errorSum += error
         }
 
         // Restrict output to our specified output and ramp limits
-        if (outputRampRate != 0.0) {
+        if (outputRampRate != 0f) {
             output = constrain(output, lastOutput - outputRampRate, lastOutput + outputRampRate)
         }
         if (minOutput != maxOutput) {
             output = constrain(output, minOutput, maxOutput)
         }
-        if (outputFilter != 0.0) {
+        if (outputFilter != 0f) {
             output = lastOutput * outputFilter + output * (1 - outputFilter)
         }
 
-        // Get a test printline with lots of details about the internal 
-        // calculations. This can be useful for debugging. 
+        // Get a test printline with lots of details about the internal
+        // calculations. This can be useful for debugging.
         // System.out.printf("Final output %5.2f [ %5.2f, %5.2f , %5.2f  ], eSum %.2f\n",output,Poutput, Ioutput, Doutput,errorSum );
         // System.out.printf("%5.2f\t%5.2f\t%5.2f\t%5.2f\n",output,Poutput, Ioutput, Doutput );
         lastOutput = output
@@ -343,7 +351,7 @@ class MiniPID {
      * Not typically useful, and use of parameter modes is suggested. <br></br>
      * @return calculated output value for driving the system
      */
-    val output: Double
+    val output: Float
         get() = getOutput(lastActual, setpoint)
 
     /**
@@ -354,7 +362,7 @@ class MiniPID {
      * @param setpoint The target value for the system
      * @return calculated output value for driving the system
      */
-    fun getOutput(actual: Double): Double {
+    fun getOutput(actual: Float): Float {
         return getOutput(actual, setpoint)
     }
 
@@ -367,7 +375,7 @@ class MiniPID {
      */
     fun reset() {
         firstRun = true
-        errorSum = 0.0
+        errorSum = 0f
     }
 
     /**
@@ -380,7 +388,7 @@ class MiniPID {
      *
      * @param rate, with units being the same as the output
      */
-    fun setOutputRampRate(rate: Double) {
+    fun setOutputRampRate(rate: Float) {
         outputRampRate = rate
     }
 
@@ -391,7 +399,7 @@ class MiniPID {
      * during large setpoint adjustments. Increases lag and I term if range is too small.
      * @param range, with units being the same as the expected sensor range.
      */
-    fun setSetpointRange(range: Double) {
+    fun setSetpointRange(range: Float) {
         setpointRange = range
     }
 
@@ -406,8 +414,8 @@ class MiniPID {
      * <pre>output*(1-strength)*sum(0..n){output*strength^n}</pre> algorithm.
      * @param output valid between [0..1), meaning [current output only.. historical output only)
      */
-    fun setOutputFilter(strength: Double) {
-        if (strength == 0.0 || bounded(strength, 0.0, 1.0)) {
+    fun setOutputFilter(strength: Float) {
+        if (strength == 0f || bounded(strength, 0f, 1f)) {
             outputFilter = strength
         }
     }
@@ -421,7 +429,7 @@ class MiniPID {
      * @param max minimum value in range
      * @return Value if it's within provided range, min or max otherwise
      */
-    private fun constrain(value: Double, min: Double, max: Double): Double {
+    private fun constrain(value: Float, min: Float, max: Float): Float {
         if (value > max) {
             return max
         }
@@ -437,7 +445,7 @@ class MiniPID {
      * @param max Maximum value of range
      * @return true if value is within range, false otherwise
      */
-    private fun bounded(value: Double, min: Double, max: Double): Boolean {
+    private fun bounded(value: Float, min: Float, max: Float): Boolean {
         // Note, this is an inclusive range. This is so tests like
         // `bounded(constrain(0,0,1),0,1)` will return false.
         // This is more helpful for determining edge-case behaviour
@@ -451,15 +459,15 @@ class MiniPID {
      */
     private fun checkSigns() {
         if (reversed) {  // all values should be below zero
-            if (P > 0) P *= -1.0
-            if (I > 0) I *= -1.0
-            if (D > 0) D *= -1.0
-            if (F > 0) F *= -1.0
+            if (P > 0) P *= -1f
+            if (I > 0) I *= -1f
+            if (D > 0) D *= -1f
+            if (F > 0) F *= -1f
         } else {  // all values should be above zero
-            if (P < 0) P *= -1.0
-            if (I < 0) I *= -1.0
-            if (D < 0) D *= -1.0
-            if (F < 0) F *= -1.0
+            if (P < 0) P *= -1f
+            if (I < 0) I *= -1f
+            if (D < 0) D *= -1f
+            if (F < 0) F *= -1f
         }
     }
 }

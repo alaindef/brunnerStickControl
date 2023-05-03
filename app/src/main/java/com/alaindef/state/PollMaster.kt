@@ -15,6 +15,7 @@ import java.util.regex.Pattern
 
 /** 230417 created by alaindef */
 class PollMaster : Thread() {
+    val logTag = ">---Sendy---"
 
     var event: Int = 0
     var cnt = 0
@@ -31,6 +32,8 @@ class PollMaster : Thread() {
     private var ipAddress: InetAddress = InetAddress.getByName("192.168.0.203")
 
     private var mHandler: ZeHandler? = null
+
+    private val miniPID = MiniPID(1f, 0f, 0f)
 
     override fun run() {
         mHandler = ZeHandler(Looper.getMainLooper())
@@ -53,9 +56,28 @@ class PollMaster : Thread() {
         if (yTarget > yCurrent) forceY = -forceY
     }
 
-    fun calculateForces() {
+    fun calculateForces0() {
         forceX = alfa * (50 * kotlin.math.abs(xTarget - xCurrent)).toInt()
         if (xTarget > xCurrent) forceX = -forceX
+        forceY = alfa * min(250, abs(120 * (yTarget - yCurrent)).toInt())
+        val sq = (1 + yCurrent) * (1 + yCurrent)
+        forceY = (forceY * (1 + kotlin.math.abs(sq) / 10)).toInt()
+        if (yTarget > yCurrent) forceY = -forceY
+    }
+    fun calculateForces() {
+
+        miniPID.setP(1000f)
+        miniPID.setDirection(true)
+        miniPID.setOutputLimits(1000f)
+        miniPID.setSetpoint(xTarget)
+
+        forceX = miniPID.getOutput(xCurrent, xTarget).toInt()
+
+
+//        forceX = alfa * (50 * kotlin.math.abs(xTarget - xCurrent)).toInt()
+//        if (xTarget > xCurrent) forceX = -forceX
+
+
         forceY = alfa * min(250, abs(120 * (yTarget - yCurrent)).toInt())
         val sq = (1 + yCurrent) * (1 + yCurrent)
         forceY = (forceY * (1 + kotlin.math.abs(sq) / 10)).toInt()
@@ -89,7 +111,6 @@ class PollMaster : Thread() {
 
         override fun handleMessage(incomingMessage: Message) {
             // process incoming messages here
-            val logTag = ">---Sendy---"
             val arg3 = incomingMessage.obj
             event = incomingMessage.what
             when (event) {
@@ -193,5 +214,6 @@ class PollMaster : Thread() {
         const val EV_13_force_min = 13
         const val EV_14_force_plus = 14
         private var running = false
+
     }
 }

@@ -1,4 +1,4 @@
-package com.stormbots
+package com.alaindef.state
 
 object MainPID {
     /**
@@ -6,16 +6,16 @@ object MainPID {
      */
     fun main(args: Array<String?>?) {
         val miniPID: MiniPID
-        miniPID = MiniPID(0.25, 0.01, 0.4)
-        miniPID.setOutputLimits(10.0)
+        miniPID = MiniPID(0.25f, 0.01f, 0.4f)
+        miniPID.setOutputLimits(10.0f)
         //miniPID.setMaxIOutput(2);
         //miniPID.setOutputRampRate(3);
         //miniPID.setOutputFilter(.3);
-        miniPID.setSetpointRange(40.0)
-        var target = 100.0
-        var actual = 0.0
-        var output = 0.0
-        miniPID.setSetpoint(0.0)
+        miniPID.setSetpointRange(40.0f)
+        var target = 100.0f
+        var actual = 0.0f
+        var output = 0.0f
+        miniPID.setSetpoint(0.0f)
         miniPID.setSetpoint(target)
 //        adf
 //        System.err.printf("Target\tActual\tOutput\tError\n")
@@ -26,7 +26,7 @@ object MainPID {
         for (i in 0..99) {
 
             //if(i==50)miniPID.setI(.05);
-            if (i == 60) target = 50.0
+            if (i == 60) target = 50.0f
 
             //if(i==75)target=(100);
             //if(i>50 && i%4==0)target=target+(Math.random()-.5)*50;
