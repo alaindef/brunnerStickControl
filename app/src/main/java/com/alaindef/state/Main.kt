@@ -154,6 +154,27 @@ class Main : AppCompatActivity() {
                 // Do something when the user stops touching the SeekBar
             }
         })
+
+        conIBar = findViewById(R.id.conI)
+        conIReport = findViewById(R.id.conIreport)
+
+        // Set an event listener for the conIBar
+        conIBar?.setOnSeekBarChangeListener(object :
+            SeekBar.OnSeekBarChangeListener {
+            override fun onProgressChanged(conIBar: SeekBar?, progress: Int, fromUser: Boolean) {
+                sendy.conI = progress.toFloat()
+                conIReport!!.text = progress.toString()
+            }
+
+            override fun onStartTrackingTouch(conIBar: SeekBar?) {
+                // Do something when the user starts touching the conIBar
+            }
+
+            override fun onStopTrackingTouch(conIBar: SeekBar?) {
+                // Do something when the user stops touching the conIBar
+            }
+        })
+
         if (savedInstanceState == null) {
             // sendy is an FMM (Finite Message Machine) that handles all the incomming events:
             // start and stop the polling, reset, receive target and current positions,
@@ -224,6 +245,12 @@ class Main : AppCompatActivity() {
         var seekReport: TextView? = null
 
         @SuppressLint("StaticFieldLeak")
+        var conIBar: SeekBar? = null
+
+        @SuppressLint("StaticFieldLeak")
+        var conIReport: TextView? = null
+
+        @SuppressLint("StaticFieldLeak")
         var mCircleView: CircleView? = null
 
     }
@@ -235,7 +262,6 @@ var brunnerAddress = "192.168.0.203"
 var recky = RecMaster()
 var sendy = PollMaster()
 val udpSender: UdpSender = UdpSender(brunnerAddress, 15090)
-
 
 
 

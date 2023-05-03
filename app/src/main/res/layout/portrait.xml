@@ -254,7 +254,7 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="9"
+            android:layout_weight="8"
             android:orientation="horizontal"
             android:weightSum="8">
 
@@ -300,7 +300,6 @@
             android:layout_height="0dp"
             android:layout_weight="1"
             android:background="@android:color/holo_blue_light"
-            android:gravity="bottom"
             android:weightSum="8">
 
             <androidx.appcompat.widget.AppCompatTextView
@@ -327,6 +326,54 @@
 
             <androidx.appcompat.widget.AppCompatTextView
                 android:id="@+id/seekreport"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_gravity="center"
+                android:layout_weight="1"
+                android:background="@drawable/britain22"
+                android:contentDescription="@string/photoView"
+                android:gravity="center"
+                android:onClick="sendEvent"
+                android:tag="B_seek"
+                android:text=""
+                android:textColor="@android:color/white"
+                android:textSize="50dp" />
+
+        </LinearLayout>
+
+
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:background="@android:color/holo_blue_light"
+            android:weightSum="8">
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/conIFill"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_gravity="center"
+                android:layout_weight="1"
+                android:background="@drawable/krokus"
+                android:contentDescription="@string/photoView"
+                android:gravity="center"
+                android:onClick="sendEvent"
+                android:tag="B_seek"
+                android:textColor="@android:color/white"
+                android:textSize="50dp" />
+
+            <android.widget.SeekBar
+                android:id="@+id/conI"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="6"
+                android:background="@drawable/carthesius"
+                android:gravity="bottom" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/conIreport"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_gravity="center"

@@ -19,7 +19,7 @@ class PollMaster : Thread() {
 
     var event: Int = 0
     var cnt = 0
-    var delta_t = 100
+    var delta_t = 5
     var xCurrent = 0f
     var yCurrent = 0f
     var currentPosReceived = false
@@ -29,6 +29,7 @@ class PollMaster : Thread() {
     var forceX = 0
     var forceY = 0
     var alfa = 50
+    var conI = 0f
     private var ipAddress: InetAddress = InetAddress.getByName("192.168.0.203")
 
     private var mHandler: ZeHandler? = null
@@ -66,9 +67,10 @@ class PollMaster : Thread() {
     }
     fun calculateForces() {
 
-        miniPID.setP(1000f)
+        miniPID.setP(50f*alfa)
+        miniPID.setI(conI/100f)
         miniPID.setDirection(true)
-        miniPID.setOutputLimits(1000f)
+//        miniPID.setOutputLimits(1000f)
         miniPID.setSetpoint(xTarget)
 
         forceX = miniPID.getOutput(xCurrent, xTarget).toInt()
