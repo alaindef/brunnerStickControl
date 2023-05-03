@@ -28,11 +28,11 @@ class UdpSender(private val ipAddress: String, private val portSender: Int) {
         return byteBuffer.array()
     }
 
-    fun sendUDP(forceX: Int, forceY: Int, IP: InetAddress, port: Int) {
+    fun sendUDP(forceX: Float, forceY: Float, IP: InetAddress, port: Int) {
         val policy = ThreadPolicy.Builder().permitAll().build()
         StrictMode.setThreadPolicy(policy)
 
-        val byteMessage = convertTheIndians(intArrayOf(0xAE, forceY, 0, forceX, 0, 0, 0, 0, 0))
+        val byteMessage = convertTheIndians(intArrayOf(0xAE, forceY.toInt(), 0, forceX.toInt(), 0, 0, 0, 0, 0))
         try {
             val socketS = DatagramSocket()
 

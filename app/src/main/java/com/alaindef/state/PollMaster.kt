@@ -7,10 +7,9 @@ import android.os.Looper
 import android.os.Message
 import android.util.Log
 import java.lang.Integer.max
-import java.lang.Integer.min
-import java.lang.Math.abs
 import java.net.InetAddress
 import java.util.regex.Pattern
+import kotlin.math.min
 
 
 /** 230417 created by alaindef */
@@ -19,22 +18,31 @@ class PollMaster : Thread() {
 
     var event: Int = 0
     var cnt = 0
-    var delta_t = 5
+    var delta_t = 10
     var xCurrent = 0f
     var yCurrent = 0f
     var currentPosReceived = false
     var xTarget = 0f
     var yTarget = 0f
     var targetPosReceived = false
-    var forceX = 0
-    var forceY = 0
-    var alfa = 50
+    var forceX = 0f
+    var forceY = 0f
+
+    var forces = Vector(0f, 0f)
+
+    var conP = 50f
     var conI = 0f
+    var conPv = 50f
+    var conIv = 0f
     private var ipAddress: InetAddress = InetAddress.getByName("192.168.0.203")
 
     private var mHandler: ZeHandler? = null
 
-    private val miniPID = MiniPID(1f, 0f, 0f)
+    //    private val horizontalPID = MiniPID(1f, 0f, 0f)
+    private val horizontalPID = BasicPID(1f, 0f, 0f)
+
+    //    private val verticalPID = MiniPID(1f, 0f, 0f)
+    private val verticalPID = BasicPID(1f, 0f, 0f)
 
     override fun run() {
         mHandler = ZeHandler(Looper.getMainLooper())
@@ -48,42 +56,57 @@ class PollMaster : Thread() {
         mHandler!!.sendMessage(mHandler!!.obtainMessage(what, 0, 0, null))
     }
 
-    fun calculateForcesSave() {
-        forceX = alfa * (30 * abs(xTarget - xCurrent)).toInt()
+    fun calculateForcesSave(): Vector {
+        forceX = (conP * 30f * kotlin.math.abs(xTarget - xCurrent))
         if (xTarget > xCurrent) forceX = -forceX
-        forceY = alfa * min(170, abs(70 * (yTarget - yCurrent)).toInt())
+        forceY = (conP * kotlin.math.min(170f, kotlin.math.abs(70f * (yTarget - yCurrent))))
         val sq = (1 + yCurrent) * (1 + yCurrent)
-        forceY = (forceY * (1 + kotlin.math.abs(sq) / 10)).toInt()
+        forceY = (forceY * (1 + kotlin.math.abs(sq) / 10))
         if (yTarget > yCurrent) forceY = -forceY
+        return Vector(forceX, forceY)
     }
 
-    fun calculateForces0() {
-        forceX = alfa * (50 * kotlin.math.abs(xTarget - xCurrent)).toInt()
+    fun calculateForces0(): Vector {
+        var forceX = (conP * 50f * kotlin.math.abs(xTarget - xCurrent))
         if (xTarget > xCurrent) forceX = -forceX
-        forceY = alfa * min(250, abs(120 * (yTarget - yCurrent)).toInt())
-        val sq = (1 + yCurrent) * (1 + yCurrent)
-        forceY = (forceY * (1 + kotlin.math.abs(sq) / 10)).toInt()
+        var forceY = (conP * kotlin.math.min(250f, kotlin.math.abs(120f * (yTarget - yCurrent))))
+        val sq = (1 + yCurrent) * (1f + yCurrent)
+        forceY = (forceY * (1f + kotlin.math.abs(sq) / 10f))
         if (yTarget > yCurrent) forceY = -forceY
+        return Vector(forceX, forceY)
     }
-    fun calculateForces() {
 
-        miniPID.setP(50f*alfa)
-        miniPID.setI(conI/100f)
-        miniPID.setDirection(true)
-//        miniPID.setOutputLimits(1000f)
-        miniPID.setSetpoint(xTarget)
+    fun calculateForces(): Vector {
 
-        forceX = miniPID.getOutput(xCurrent, xTarget).toInt()
+        horizontalPID.setP(50f * conP)
+        horizontalPID.setI(conI * 1f)
+        horizontalPID.setDirection(true)
+        horizontalPID.setOutputLimits(4000f)
+        horizontalPID.setSetpoint(xTarget)
 
+        forceX = horizontalPID.getOutput(xCurrent, xTarget)
+//        if (forceX > 0) forceX = min(forceX, 500f) else forceX = kotlin.math.max(forceX, -500f)
+
+        verticalPID.setP(80f * conPv)
+        verticalPID.setI(conIv * 10f)
+        verticalPID.setDirection(true)
+        verticalPID.setOutputLimits(4000f)
+        verticalPID.setSetpoint(yTarget)
+
+
+        forceY = verticalPID.getOutput(yCurrent, yTarget)
+//        if (forceY > 0) forceY = min(forceY, 1000f) else forceY = kotlin.math.max(forceY, -1000f)
 
 //        forceX = alfa * (50 * kotlin.math.abs(xTarget - xCurrent)).toInt()
 //        if (xTarget > xCurrent) forceX = -forceX
 
 
-        forceY = alfa * min(250, abs(120 * (yTarget - yCurrent)).toInt())
-        val sq = (1 + yCurrent) * (1 + yCurrent)
-        forceY = (forceY * (1 + kotlin.math.abs(sq) / 10)).toInt()
-        if (yTarget > yCurrent) forceY = -forceY
+//        forceY = (conP * kotlin.math.min(250f, kotlin.math.abs(120f * (yTarget - yCurrent)))).toInt()
+//        val sq = (1 + yCurrent) * (1 + yCurrent)
+//        forceY = (forceY * (1 + kotlin.math.abs(sq) / 10)).toInt()
+//        if (yTarget > yCurrent) forceY = -forceY
+
+        return Vector(forceX, forceY)
     }
 
     private val PATTERN: Pattern = Pattern.compile(
@@ -117,23 +140,25 @@ class PollMaster : Thread() {
             event = incomingMessage.what
             when (event) {
                 EV_0_reset -> {
-                    forceX = 0
-                    forceY = 0
+                    forceX = 0f
+                    forceY = 0f
                     udpSender.sendUDP(forceX, forceY, ipAddress, 15090)
-                    Main.mReport3!!.text = "($forceX $forceY)"
+                    Main.mReport3!!.text = "(${forceX.toInt()} ${forceY.toInt()})"
+                    Main.mReport4!!.text = "$delta_t"
                     return
                 }
                 EV_1_full_reset -> {
                     running = false
                     whileNotPolling()
-                    forceX = 0
-                    forceY = 0
+                    forceX = 0f
+                    forceY = 0f
                     cnt = 0
                     delta_t = 100
                     //not used: after sending forces, receiver waits for input immediately, with timeout
                     udpSender.sendUDP(forceX, forceY, ipAddress, 15090)
-                    Main.mReport3!!.text = "($forceX $forceY)"
+                    Main.mReport3!!.text = "(${forceX.toInt()} ${forceY.toInt()})"
                     Main.mReport0!!.text = "$logTag   $cnt "
+                    Main.mReport4!!.text = "$delta_t"
 
                     return
                 }
@@ -144,6 +169,7 @@ class PollMaster : Thread() {
                     } else {
                         running = true
                         send(EV_3_next_round)
+                        Main.mReport4!!.text = "$delta_t"
                     }
                 }
                 EV_3_next_round -> {
@@ -153,7 +179,7 @@ class PollMaster : Thread() {
                         Main.mReport0!!.setBackgroundColor(Color.RED)
                         calculateForces()
                         udpSender.sendUDP(forceX, forceY, ipAddress, 15090)
-                        Main.mReport3!!.text = "($forceX $forceY)"
+                        Main.mReport3!!.text = "(${forceX.toInt()} ${forceY.toInt()})"
                         recky.send(RecMaster.EV_0)
                         Main.mPad!!.invalidate()
                     }
@@ -185,12 +211,12 @@ class PollMaster : Thread() {
                     Main.mReport4!!.text = "$delta_t"
                 }
                 EV_13_force_min -> {
-                    forceX -= 100
-                    Main.mReport3!!.text = "$logTag\nforceX = $forceX"
+                    forceX -= 100f
+                    Main.mReport3!!.text = "$logTag\nforceX = ${forceX.toInt()}"
                 }
                 EV_14_force_plus -> {
-                    forceX += 100
-                    Main.mReport3!!.text = "$logTag\nforceX = $forceX"
+                    forceX += 100f
+                    Main.mReport3!!.text = "$logTag\nforceX = ${forceX.toInt()}"
                 }
                 else -> {
                     Log.e(logTag, "EVENT $event unknown")

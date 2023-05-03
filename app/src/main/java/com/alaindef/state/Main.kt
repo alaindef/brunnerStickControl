@@ -13,6 +13,8 @@ import android.util.Log
 import android.view.View
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
+import com.google.android.material.slider.Slider
+import com.google.android.material.slider.Slider.OnChangeListener
 
 data class Vector(val x: Float, val y: Float)
 
@@ -134,44 +136,41 @@ class Main : AppCompatActivity() {
             true
         }
 
-        seekBar = findViewById(R.id.seek)
-        seekReport = findViewById(R.id.seekreport)
-
-        // Set an event listener for the SeekBar
-        seekBar?.setOnSeekBarChangeListener(object :
-            SeekBar.OnSeekBarChangeListener {
-            override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
-//                alfa is a multiplier for forces ForceX and ForceY as used in PollMaster.calculateForces
-                sendy.alfa = progress
-                seekReport!!.text = progress.toString()
-            }
-
-            override fun onStartTrackingTouch(seekBar: SeekBar?) {
-                // Do something when the user starts touching the SeekBar
-            }
-
-            override fun onStopTrackingTouch(seekBar: SeekBar?) {
-                // Do something when the user stops touching the SeekBar
+        conPBar = findViewById(R.id.conP)
+        conPReport = findViewById(R.id.conPreport)
+        conPBar?.addOnChangeListener(object : OnChangeListener{
+            override fun onValueChange(slider: Slider, value: Float, fromUser: Boolean) {
+                sendy.conP = value
+                conPReport!!.text = value.toInt().toString()
             }
         })
 
+
         conIBar = findViewById(R.id.conI)
         conIReport = findViewById(R.id.conIreport)
-
-        // Set an event listener for the conIBar
-        conIBar?.setOnSeekBarChangeListener(object :
-            SeekBar.OnSeekBarChangeListener {
-            override fun onProgressChanged(conIBar: SeekBar?, progress: Int, fromUser: Boolean) {
-                sendy.conI = progress.toFloat()
-                conIReport!!.text = progress.toString()
+        conIBar?.addOnChangeListener(object : OnChangeListener{
+            override fun onValueChange(slider: Slider, value: Float, fromUser: Boolean) {
+                sendy.conI = value
+                conIReport!!.text = value.toInt().toString()
             }
+        })
 
-            override fun onStartTrackingTouch(conIBar: SeekBar?) {
-                // Do something when the user starts touching the conIBar
+        conPvBar = findViewById(R.id.conPv)
+        conPvReport = findViewById(R.id.conPvreport)
+        conPvBar?.addOnChangeListener(object : OnChangeListener{
+            override fun onValueChange(slider: Slider, value: Float, fromUser: Boolean) {
+                sendy.conPv = value
+                conPvReport!!.text = value.toInt().toString()
             }
+        })
 
-            override fun onStopTrackingTouch(conIBar: SeekBar?) {
-                // Do something when the user stops touching the conIBar
+
+        conIvBar = findViewById(R.id.conIv)
+        conIvReport = findViewById(R.id.conIvreport)
+        conIvBar?.addOnChangeListener(object : OnChangeListener{
+            override fun onValueChange(slider: Slider, value: Float, fromUser: Boolean) {
+                sendy.conIv = value
+                conIvReport!!.text = value.toInt().toString()
             }
         })
 
@@ -239,16 +238,29 @@ class Main : AppCompatActivity() {
         var mContextForDummies: Context? = null
 
         @SuppressLint("StaticFieldLeak")
-        var seekBar: SeekBar? = null
+        var conPBar: Slider? = null
 
         @SuppressLint("StaticFieldLeak")
-        var seekReport: TextView? = null
+        var conPReport: TextView? = null
 
         @SuppressLint("StaticFieldLeak")
-        var conIBar: SeekBar? = null
+        var conIBar: Slider? = null
 
         @SuppressLint("StaticFieldLeak")
         var conIReport: TextView? = null
+
+
+        @SuppressLint("StaticFieldLeak")
+        var conPvBar: Slider? = null
+
+        @SuppressLint("StaticFieldLeak")
+        var conPvReport: TextView? = null
+
+        @SuppressLint("StaticFieldLeak")
+        var conIvBar: Slider? = null
+
+        @SuppressLint("StaticFieldLeak")
+        var conIvReport: TextView? = null
 
         @SuppressLint("StaticFieldLeak")
         var mCircleView: CircleView? = null

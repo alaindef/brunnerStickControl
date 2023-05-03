@@ -5,4 +5,10 @@
         <!-- Customize your theme here. -->
     </style>
 
+    <style name="MyMaterialTheme" parent="Theme.MaterialComponents.Light.NoActionBar">
+        <!-- Add attributes here -->
+        <!-- item name="colorPrimary">@color/itimalia_pink_califoria</item  -->
+    </style>
+
+
 </resources>
