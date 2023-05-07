@@ -1,27 +1,33 @@
 package com.alaindef.state
 
-import kotlin.math.max
-import kotlin.math.min
+import java.util.LinkedList
+import java.util.Queue
 
 class BasicPID(private var kP: Float, private var kI: Float, private var kD: Float) {
     private var lastError = 0f
     private var integral = 0f
     private var reversed = false
+    private val queue: Queue<Float> = LinkedList(listOf())
+    private val maxQsize = 3
 
     fun calculate(error: Float, deltaTime: Float): Float {
-//        adf
-//        kP = sendy.conPv
         val proportional = kP * error
-        integral += error * deltaTime
-//        if (integral > 0) integral = min(integral, 30f) else integral = max(integral, 30f)
+
+        val quadratic    = kP * error * error /10f
+
+        val sum = queue.fold(0f) { acc, i -> acc + i }
+        queue.add(error)
+        if (queue.size > maxQsize) queue.remove()
+
+//        integral = sum * deltaTime
         integral += error * deltaTime
         val derivative = kD * (error - lastError) / deltaTime
         lastError = error
-        return proportional + kI * integral + derivative
+        return proportional + kI * integral + derivative  +quadratic
     }
 
     fun getOutput(current: Float, target: Float): Float {
-        return calculate(target - current, sendy.delta_t.toFloat()/10f)
+        return calculate(target - current, sendy.delta_t.toFloat() / 10f)
     }
 
     fun setP(p: Float) {
@@ -51,8 +57,7 @@ class BasicPID(private var kP: Float, private var kI: Float, private var kD: Flo
     }
 
 
-
-    fun checkSigns(){
+    fun checkSigns() {
         if (reversed) {  // all values should be below zero
             if (kP > 0) kP *= -1f
             if (kI > 0) kI *= -1f
@@ -63,6 +68,7 @@ class BasicPID(private var kP: Float, private var kI: Float, private var kD: Flo
             if (kI < 0) kI *= -1f
             if (kD < 0) kD *= -1f
 //            if (kF < 0) kF *= -1f
-        }}
+        }
+    }
 
 }

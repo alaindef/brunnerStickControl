@@ -8,8 +8,10 @@ import android.os.Message
 import android.util.Log
 import java.lang.Integer.max
 import java.net.InetAddress
+import java.util.*
 import java.util.regex.Pattern
 import kotlin.math.min
+import kotlin.math.pow
 
 
 /** 230417 created by alaindef */
@@ -34,6 +36,22 @@ class PollMaster : Thread() {
     var conI = 0f
     var conPv = 50f
     var conIv = 0f
+
+//    val yTable = buildTableY(
+//        intArrayOf( 0, 12, 25, 37, 50, 62, 75,  87, 100),
+//        intArrayOf(-40, 0, 20, 37, 50, 62, 80, 100, 130)
+//    )
+
+   val xTable = buildTableY(
+        intArrayOf(  0, 10, 20, 30, 40, 50, 60, 70, 80,  90, 100),
+        intArrayOf(-10,  5, 20, 30, 40, 50, 60, 70, 85, 100, 130)
+    )
+
+    val yTable = buildTableY(
+        intArrayOf( 0, 10, 20, 30, 40, 50, 60, 70, 80,  90, 100),
+        intArrayOf(-40,-5, 16, 28, 40, 50, 60, 70, 80,  95, 130)
+    )
+
     private var ipAddress: InetAddress = InetAddress.getByName("192.168.0.203")
 
     private var mHandler: ZeHandler? = null
@@ -56,55 +74,69 @@ class PollMaster : Thread() {
         mHandler!!.sendMessage(mHandler!!.obtainMessage(what, 0, 0, null))
     }
 
-    fun calculateForcesSave(): Vector {
-        forceX = (conP * 30f * kotlin.math.abs(xTarget - xCurrent))
-        if (xTarget > xCurrent) forceX = -forceX
-        forceY = (conP * kotlin.math.min(170f, kotlin.math.abs(70f * (yTarget - yCurrent))))
-        val sq = (1 + yCurrent) * (1 + yCurrent)
-        forceY = (forceY * (1 + kotlin.math.abs(sq) / 10))
-        if (yTarget > yCurrent) forceY = -forceY
-        return Vector(forceX, forceY)
+    fun buildTableX(xc: IntArray, xGauge: IntArray): IntArray {
+        val sRef = xc.size
+        val sX = 100
+        val res = IntArray(sX)
+        println("size $sRef")
+        for (i in 1 until sRef) {
+            for (newI in xc[i - 1] until xc[i]) {
+                res?.set(
+                    newI,
+                    xGauge[i - 1] + (newI - xc[i - 1]) * (xGauge[i] - xGauge[i - 1]) / (xc[i] - xc[i - 1])
+                )
+            }
+        }
+        return res
+//        println("result: ${res.joinToString() }")
+    }
+    fun buildTableY(yc: IntArray, yGauge: IntArray): IntArray {
+        val sRef = yc.size
+        val sY = 100
+        val res = IntArray(sY)
+        println("size $sRef")
+        for (i in 1 until sRef) {
+            for (newI in yc[i - 1] until yc[i]) {
+                res?.set(
+                    newI,
+                    yGauge[i - 1] + (newI - yc[i - 1]) * (yGauge[i] - yGauge[i - 1]) / (yc[i] - yc[i - 1])
+                )
+            }
+        }
+        return res
+//        println("result: ${res.joinToString() }")
     }
 
-    fun calculateForces0(): Vector {
-        var forceX = (conP * 50f * kotlin.math.abs(xTarget - xCurrent))
-        if (xTarget > xCurrent) forceX = -forceX
-        var forceY = (conP * kotlin.math.min(250f, kotlin.math.abs(120f * (yTarget - yCurrent))))
-        val sq = (1 + yCurrent) * (1f + yCurrent)
-        forceY = (forceY * (1f + kotlin.math.abs(sq) / 10f))
-        if (yTarget > yCurrent) forceY = -forceY
-        return Vector(forceX, forceY)
+    fun correctY(y: Float): Float {
+        return yTable[(y * 100f).toInt()].toFloat() / 100f
+    }
+    fun correctx(x: Float): Float {
+        return xTable[(x * 100f).toInt()].toFloat() / 100f
     }
 
     fun calculateForces(): Vector {
 
-        horizontalPID.setP(50f * conP)
+        horizontalPID.setP(100f * conP)
         horizontalPID.setI(conI * 1f)
+        horizontalPID.setI(0f)
         horizontalPID.setDirection(true)
         horizontalPID.setOutputLimits(4000f)
-        horizontalPID.setSetpoint(xTarget)
+//        horizontalPID.setSetpoint(xTarget)
 
-        forceX = horizontalPID.getOutput(xCurrent, xTarget)
+        forceX = horizontalPID.getOutput(xCurrent, correctx(xTarget))
+//        forceX *= ((1 + ((xCurrent * conI) / 10f)))
 //        if (forceX > 0) forceX = min(forceX, 500f) else forceX = kotlin.math.max(forceX, -500f)
 
-        verticalPID.setP(80f * conPv)
-        verticalPID.setI(conIv * 10f)
+        verticalPID.setP(160f * conPv)
+//        verticalPID.setI(conIv * 10f)
+        verticalPID.setI(0f)
         verticalPID.setDirection(true)
         verticalPID.setOutputLimits(4000f)
         verticalPID.setSetpoint(yTarget)
 
-
-        forceY = verticalPID.getOutput(yCurrent, yTarget)
+        forceY = verticalPID.getOutput(yCurrent, correctY(yTarget))
+//        forceY *= ((1 + ((yCurrent * conIv) / 10f)))
 //        if (forceY > 0) forceY = min(forceY, 1000f) else forceY = kotlin.math.max(forceY, -1000f)
-
-//        forceX = alfa * (50 * kotlin.math.abs(xTarget - xCurrent)).toInt()
-//        if (xTarget > xCurrent) forceX = -forceX
-
-
-//        forceY = (conP * kotlin.math.min(250f, kotlin.math.abs(120f * (yTarget - yCurrent)))).toInt()
-//        val sq = (1 + yCurrent) * (1 + yCurrent)
-//        forceY = (forceY * (1 + kotlin.math.abs(sq) / 10)).toInt()
-//        if (yTarget > yCurrent) forceY = -forceY
 
         return Vector(forceX, forceY)
     }
@@ -133,6 +165,8 @@ class PollMaster : Thread() {
 
     inner class ZeHandler  /*  https://developer.android.com/reference/android/os/Handler */
         (looper: Looper?) : Handler(looper!!) {
+
+        private val queue: Queue<Float> = LinkedList(listOf(0f, 0f, 0f))
 
         override fun handleMessage(incomingMessage: Message) {
             // process incoming messages here
@@ -209,6 +243,10 @@ class PollMaster : Thread() {
                 EV_12_dt_plus -> {
                     if (delta_t < 10) delta_t += 1 else if (delta_t < 100) delta_t += 10 else delta_t += 100
                     Main.mReport4!!.text = "$delta_t"
+                    queue.add(delta_t.toFloat())
+                    val first = queue.remove()
+                    val sum = queue.reduceOrNull { acc, i -> acc + i } ?: 0
+                    Main.mReport5!!.text = "len=${queue.size} $first  sum=$sum  delta_t=$delta_t"
                 }
                 EV_13_force_min -> {
                     forceX -= 100f
