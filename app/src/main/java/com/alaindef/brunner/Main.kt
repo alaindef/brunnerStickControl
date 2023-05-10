@@ -16,7 +16,24 @@ import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.slider.Slider
 import com.google.android.material.slider.Slider.OnChangeListener
 
-data class Vector(val x: Float, val y: Float)
+data class Vector(val x: Float, val y: Float) {
+    fun add(arg: Vector): Vector{
+        return Vector(x+arg.x, y+arg.y)
+    }
+
+    fun times(arg: Float): Vector{
+        return Vector(x*arg, y*arg)
+    }
+    fun divide(arg:Float): Vector{
+        return Vector(x/arg, y/arg)
+    }
+
+    fun toIntVector(): IntVector {
+        return IntVector(x.toInt(), y.toInt())
+    }
+}
+
+data class IntVector(val x: Int, val y: Int)
 
 @Suppress("unused")
 class Main : AppCompatActivity() {

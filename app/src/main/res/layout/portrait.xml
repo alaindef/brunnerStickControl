@@ -249,7 +249,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
-        android:weightSum="30">
+        android:weightSum="32">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -258,41 +258,6 @@
             android:orientation="horizontal"
             android:weightSum="16">
 
-
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:orientation="vertical"
-                android:weightSum="10">
-
-                <Button
-                    android:id="@+id/polling"
-                    android:layout_width="match_parent"
-                    android:layout_height="0dp"
-                    android:layout_weight="5"
-                    android:background="@drawable/tuin"
-                    android:onClick="sendEvent"
-                    android:tag="B_poll"
-                    android:text="@string/polling"
-                    android:textAlignment="center"
-                    android:textSize="35dp" />
-
-
-                <Button
-                    android:id="@+id/reset"
-                    android:layout_width="match_parent"
-                    android:layout_height="0dp"
-                    android:layout_weight="5"
-                    android:background="@drawable/lotti50"
-                    android:contentDescription="@string/photoView"
-                    android:longClickable="true"
-                    android:onClick="sendEvent"
-                    android:tag="B_RES"
-                    android:text="@string/reset"
-                    android:textAlignment="center"
-                    android:textSize="35dp" />
-            </LinearLayout>
 
             <com.alaindef.brunner.PadView
                 android:id="@+id/pad"
@@ -309,7 +274,7 @@
                 android:weightSum="8">
 
 
-                <Button
+                <View
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
                     android:layout_weight="1" />
@@ -317,11 +282,59 @@
                 <com.alaindef.brunner.PolylineView
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
-                    android:layout_weight="7"/>
+                    android:layout_weight="5"/>
+
+                <Button
+                    android:id="@+id/v1"
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:layout_weight="2"
+                    android:background="@drawable/tuin"
+                    android:onClick="sendEvent"
+                    android:tag="B_poll"
+                    android:text="@string/polling"
+                    android:textAlignment="center"
+                    android:textSize="35dp" />
 
             </LinearLayout>
 
         </LinearLayout>
+
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="2"
+            android:weightSum="10">
+
+            <Button
+                android:id="@+id/polling"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="5"
+                android:background="@drawable/tuin"
+                android:onClick="sendEvent"
+                android:tag="B_poll"
+                android:text="@string/polling"
+                android:textAlignment="center"
+                android:textSize="35dp" />
+
+
+            <Button
+                android:id="@+id/reset"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="5"
+                android:background="@drawable/lotti50"
+                android:contentDescription="@string/photoView"
+                android:longClickable="true"
+                android:onClick="sendEvent"
+                android:tag="B_RES"
+                android:text="@string/reset"
+                android:textAlignment="center"
+                android:textSize="35dp" />
+        </LinearLayout>
+
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -345,13 +358,12 @@
                 android:textColor="@android:color/white"
                 android:textSize="30dp" />
 
-            <com.google.android.material.slider.Slider
+            <com.alaindef.brunner.ViewSlider
                 android:id="@+id/conP"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_gravity="center"
                 android:layout_weight="6"
-                android:background="@android:color/holo_blue_light"
                 android:theme="@style/MyMaterialTheme"
                 android:value="0"
                 android:valueFrom="0"
@@ -398,7 +410,7 @@
                 android:textSize="30dp" />
 
 
-            <com.google.android.material.slider.Slider
+            <com.alaindef.brunner.ViewSlider
                 android:id="@+id/conI"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
@@ -448,7 +460,7 @@
                 android:textColor="@android:color/white"
                 android:textSize="30dp" />
 
-            <com.google.android.material.slider.Slider
+            <com.alaindef.brunner.ViewSlider
                 android:id="@+id/conPv"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
@@ -459,6 +471,7 @@
                 android:value="0"
                 android:valueFrom="0"
                 android:valueTo="100" />
+
 
             <androidx.appcompat.widget.AppCompatTextView
                 android:id="@+id/conPvreport"
@@ -501,7 +514,7 @@
                 android:textSize="30dp" />
 
 
-            <com.google.android.material.slider.Slider
+            <com.alaindef.brunner.ViewSlider
                 android:id="@+id/conIv"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"

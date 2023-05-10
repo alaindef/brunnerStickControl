@@ -38,6 +38,7 @@ object UdpRecObject {
 
 
     fun getCoordinates(): Vector {
+//        returns values from brunner range 0.00 .. 1.00
         val policy = StrictMode.ThreadPolicy.Builder().permitAll().build()
         StrictMode.setThreadPolicy(policy)
 
@@ -55,11 +56,11 @@ object UdpRecObject {
             Main.mReport1!!.text =
                 "(${String.format("%.${2}f", x)}  ${String.format("%.${2}f", y)})"
         } catch (ex: SocketTimeoutException) {
-            Main.mReport5!!.text = ex.message
-            Main.mReport5a!!.text = "Timeout error"
+//            Main.mReport5!!.text = ex.message
+//            Main.mReport5a!!.text = "Timeout error"
         } catch (ex: IOException) {
-            Main.mReport5!!.text = ex.message
-            Main.mReport5a!!.text = "Client error"
+//            Main.mReport5!!.text = ex.message
+//            Main.mReport5a!!.text = "Client error"
         } catch (ex: InterruptedException) {
             ex.printStackTrace()
         }

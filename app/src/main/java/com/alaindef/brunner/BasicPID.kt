@@ -10,6 +10,7 @@ class BasicPID(private var kP: Float, private var kI: Float, private var kD: Flo
     private val queue: Queue<Float> = LinkedList(listOf())
     private val maxQsize = 3
 
+
     fun calculate(error: Float, deltaTime: Float): Float {
         val proportional = kP * error
 

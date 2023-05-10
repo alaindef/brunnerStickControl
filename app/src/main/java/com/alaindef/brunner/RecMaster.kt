@@ -38,7 +38,7 @@ class RecMaster : Thread() {
             when (event) {
                 EV_0 -> {
                     val res = UdpRecObject.getCoordinates()
-                    // return the result to sendy
+                    // return the result to sendy range of coordinates: 0f .. 1f
                     sendy.send(PollMaster.EV_6_current_pos, 0, 0, res)
                 }
                 else -> {

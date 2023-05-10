@@ -102,7 +102,7 @@ class PolylineView @JvmOverloads constructor(
                 // Deselect the selected vertex
                 selectedVertexIndex = -1
                 invalidate()
-                sendy.yTable[selectedVertexIndex] = (selectedVertexIndex*10) + ((vertices[selectedVertexIndex].x*50/width)).toInt()
+//                sendy.yTable[selectedVertexIndex] = (selectedVertexIndex*10) + ((vertices[selectedVertexIndex].x*50/width)).toInt()
             }
         }
 
