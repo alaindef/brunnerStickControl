@@ -1,10 +1,9 @@
-package com.alaindef.state
+package com.alaindef.brunner
 
 /** 230417 created by alaindef */
 
 import android.os.StrictMode
 import android.os.StrictMode.ThreadPolicy
-import android.util.Log
 import java.net.DatagramPacket
 import java.net.DatagramSocket
 import java.net.InetAddress

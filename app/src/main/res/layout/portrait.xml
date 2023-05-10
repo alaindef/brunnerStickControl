@@ -294,7 +294,7 @@
                     android:textSize="35dp" />
             </LinearLayout>
 
-            <com.alaindef.state.PadView
+            <com.alaindef.brunner.PadView
                 android:id="@+id/pad"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
@@ -314,7 +314,7 @@
                     android:layout_height="match_parent"
                     android:layout_weight="1" />
 
-                <com.alaindef.state.PolylineView
+                <com.alaindef.brunner.PolylineView
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
                     android:layout_weight="7"/>

@@ -1,4 +1,4 @@
-package com.alaindef.state
+package com.alaindef.brunner
 
 /** 230417 created by alaindef */
 import android.graphics.Color
@@ -10,8 +10,6 @@ import java.lang.Integer.max
 import java.net.InetAddress
 import java.util.*
 import java.util.regex.Pattern
-import kotlin.math.min
-import kotlin.math.pow
 
 
 /** 230417 created by alaindef */

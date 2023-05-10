@@ -1,4 +1,4 @@
-package com.alaindef.state
+package com.alaindef.brunner
 
 /** 230417 created by alaindef */
 import android.annotation.SuppressLint
@@ -182,13 +182,13 @@ class Main : AppCompatActivity() {
             recky.start()
         } else {
         }
-        if (recky.isAlive) Log.e(logTag, "oscar lives") else Log.e(logTag, "oscar is dead")
+        if (recky.isAlive) Log.e(logTag, "oscar lives") else Log.e(logTag, "recky is dead")
 
-        if (sendy.isAlive) Log.e(logTag, "omer lives") else Log.e(logTag, "omer is dead")
+        if (sendy.isAlive) Log.e(logTag, "omer lives") else Log.e(logTag, "sendy is dead")
     }
 
     companion object {
-        const val version = 43
+        const val version = 0.1
         const val DIM: Float = 0.5f // for Alpha, between 0 and 1 for textview
 
         // between 0 and 255 for imageview
