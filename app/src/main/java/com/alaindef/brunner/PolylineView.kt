@@ -14,25 +14,24 @@ import kotlin.math.sqrt
 class PolylineView @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
-    defStyleAttr: Int = 0
+    defStyleAttr: Int = 0,
 ) : View(context, attrs, defStyleAttr) {
 
     var tunWidth = 0
+    val teut =33
 
     // a list of 11 (0..10) correction input factors, values between 0 and 100
-    private val vertices = mutableListOf(PointF(0f,0f))
+    private val vertices = mutableListOf(PointF(0f, 0f))
 
 
     init {
         // Add a ViewTreeObserver to the view
-        viewTreeObserver.addOnGlobalLayoutListener(object : ViewTreeObserver.OnGlobalLayoutListener {
+        viewTreeObserver.addOnGlobalLayoutListener(object :
+            ViewTreeObserver.OnGlobalLayoutListener {
             override fun onGlobalLayout() {
                 // Get the width of the view and store it in a variable
-                tunWidth = width
-                for (i in 0 .. 10){
-                    vertices.add(PointF(0f, ( i.toFloat()/10) * height))
-                }
-                vertices.removeAt(0)
+                vertices.clear()
+                for (i in 0..10) vertices.add(PointF(width / 2f, (i.toFloat() / 10) * height))
 
                 invalidate()
 
@@ -54,9 +53,6 @@ class PolylineView @JvmOverloads constructor(
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
-
-        tunWidth = width
-        println("tun dan $tunWidth")
 
         // Draw the polyline
         val path = Path()
@@ -93,20 +89,38 @@ class PolylineView @JvmOverloads constructor(
             MotionEvent.ACTION_MOVE -> {
                 // Move the selected vertex
                 if (selectedVertexIndex in vertices.indices) {
-                    vertices[selectedVertexIndex].x = min(width.toFloat(), max(0f,x))
+                    vertices[selectedVertexIndex].x = min(width.toFloat(), max(0f, x))
 
                     invalidate()
                 }
             }
             MotionEvent.ACTION_UP -> {
                 // Deselect the selected vertex
-                selectedVertexIndex = -1
+
+                if (selectedVertexIndex in vertices.indices) {
+//                    get delta in range [-0.5..+0.5]
+                    val deltaY = (vertices[selectedVertexIndex].x - width / 2) / width
+                    invalidate()
+                    Forces.yTable[selectedVertexIndex] =
+                        ((selectedVertexIndex * 10) - (deltaY * 50)).toInt()
+                }
                 invalidate()
-//                sendy.yTable[selectedVertexIndex] = (selectedVertexIndex*10) + ((vertices[selectedVertexIndex].x*50/width)).toInt()
+//                Forces.yTable[selectedVertexIndex] = (selectedVertexIndex*10)
+                selectedVertexIndex = -1
+
             }
         }
 
         return true
+    }
+
+    fun resetCorY() {
+        println("REST corY =========================================== ")
+        vertices.clear()
+        for (i in 0..10) {
+            vertices.add(PointF(width / 2f, (i.toFloat() / 10) * height))
+        }
+        invalidate()
     }
 
     companion object

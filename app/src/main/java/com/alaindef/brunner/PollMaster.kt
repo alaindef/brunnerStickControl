@@ -6,10 +6,8 @@ import android.os.Handler
 import android.os.Looper
 import android.os.Message
 import android.util.Log
-import com.google.android.material.theme.MaterialComponentsViewInflater
 import java.lang.Integer.max
 import java.net.InetAddress
-import java.util.*
 import java.util.regex.Pattern
 
 
@@ -19,19 +17,8 @@ class PollMaster : Thread() {
     var event: Int = 0
     var cnt = 0
     var delta_t = 10
-    var xCurrent = 5f
-    var yCurrent = 15f
     var currentPosReceived = false
-    var xTarget = 0f
-    var yTarget = 0f
     var targetPosReceived = false
-    var forceX = 0f
-    var forceY = 0f
-
-    var conP = 50f
-    var conI = 0f
-    var conPv = 50f
-    var conIv = 0f
 
     private var ipAddress: InetAddress = InetAddress.getByName("192.168.0.203")
 
@@ -75,7 +62,6 @@ class PollMaster : Thread() {
     inner class ZeHandler  /*  https://developer.android.com/reference/android/os/Handler */
         (looper: Looper?) : Handler(looper!!) {
 
-        private val queue: Queue<Float> = LinkedList(listOf(0f, 0f, 0f))
 
         override fun handleMessage(incomingMessage: Message) {
             // process incoming messages here
@@ -85,23 +71,20 @@ class PollMaster : Thread() {
             event = incomingMessage.what
             when (event) {
                 EV_0_reset -> {
-                    forceX = 0f
-                    forceY = 0f
-                    udpSender.sendUDP(forceX, forceY, ipAddress, 15090)
-                    Main.mReport3!!.text = "(${forceX.toInt()} ${forceY.toInt()})"
+                    Forces.resetForces()
+                    udpSender.sendUDP(Forces.forces.x, Forces.forces.y, ipAddress, 15090)
+                    Main.mReport3!!.text = "(${Forces.forces.x.toInt()} ${Forces.forces.y.toInt()})"
                     Main.mReport4!!.text = "$delta_t"
                     return
                 }
                 EV_1_full_reset -> {
                     running = false
                     whileNotPolling()
-                    forceX = 0f
-                    forceY = 0f
+                    Forces.resetForces()
                     cnt = 0
-                    delta_t = 100
-                    //not used: after sending forces, receiver waits for input immediately, with timeout
-                    udpSender.sendUDP(forceX, forceY, ipAddress, 15090)
-                    Main.mReport3!!.text = "(${forceX.toInt()} ${forceY.toInt()})"
+                    delta_t = 5
+                    udpSender.sendUDP(Forces.forces.x, Forces.forces.y, ipAddress, 15090)
+                    Main.mReport3!!.text = "(${Forces.forces.x.toInt()} ${Forces.forces.y.toInt()})"
                     Main.mReport0!!.text = "$logTag   $cnt "
                     Main.mReport4!!.text = "$delta_t"
 
@@ -122,26 +105,32 @@ class PollMaster : Thread() {
                         cnt++
                         Main.mReport0!!.text = "$cnt: running ..."
                         Main.mReport0!!.setBackgroundColor(Color.RED)
-                        val forces = Forces.calculateForces(
-                            Vector(xCurrent, yCurrent),
-                            Vector(xTarget, yTarget)
+                        Forces.calculateForces(
                         )
-                        udpSender.sendUDP(forces.x, forces.y, ipAddress, 15090)
-                        Main.mReport3!!.text = "(${forceX.toInt()} ${forceY.toInt()})"
+                        udpSender.sendUDP(Forces.forces.x, Forces.forces.y, ipAddress, 15090)
+                        Main.mReport3!!.text = "(${Forces.forces.x.toInt()} ${Forces.forces.y.toInt()})"
                         if (cnt.mod(100) == 0)
                             Main.mReport5a!!.text = "break $cnt"
-                        recky.send(RecMaster.EV_0)
+
+//adf230511                        recky.send(RecMaster.EV_0)
+//
+                        val res = UdpRecObject.getCoordinates()
+                        // return the result to sendy range of coordinates: 0f .. 1f
+                        send(PollMaster.EV_6_current_pos, 0, 0, res)
+
                         Main.mPad!!.invalidate()
+                        Main.delete1!!.invalidate()
                     }
                 }
                 EV_4_target_pos -> {
                     targetPosReceived = true
+                    Main.mPad!!.invalidate()
+                    Main.delete1!!.invalidate()
                 }
                 EV_6_current_pos -> {
                     currentPosReceived = true
                     val res = arg3 as Vector
-                    xCurrent = res.x                //range 0f .. 1f
-                    yCurrent = res.y
+                    Forces.currentRel = res            //range 0f .. 1f
 //                    send(EV_3_next_round)
                     Handler().postDelayed({ send(EV_3_next_round) }, delta_t.toLong())
 
@@ -159,22 +148,26 @@ class PollMaster : Thread() {
                 EV_12_dt_plus -> {
                     if (delta_t < 10) delta_t += 1 else if (delta_t < 100) delta_t += 10 else delta_t += 100
                     Main.mReport4!!.text = "$delta_t"
-                    queue.add(delta_t.toFloat())
-                    val first = queue.remove()
-                    val sum = queue.reduceOrNull { acc, i -> acc + i } ?: 0
-                    Main.mReport5!!.text = "len=${queue.size} $first  sum=$sum  delta_t=$delta_t"
                 }
                 EV_13_force_min -> {
-                    forceX -= 100f
-                    Main.mReport3!!.text = "$logTag\nforceX = ${forceX.toInt()}"
+                    Forces.forces.x -= 100f
+                    Main.mReport3!!.text = "$logTag\nforceX = ${Forces.forces.x.toInt()}"
                 }
                 EV_14_force_plus -> {
-                    forceX += 100f
-                    Main.mReport3!!.text = "$logTag\nforceX = ${forceX.toInt()}"
+                    Forces.forces.x += 100f
+                    Main.mReport3!!.text = "$logTag\nforceX = ${Forces.forces.x.toInt()}"
                 }
                 EV_21_from_slider -> {
                     Forces.newPIDParam(arg1.toFloat(), arg3.toString())
 //                    println("sendy receives pos $arg1 from $arg3")
+                }
+                EV_22_resetCorY -> {
+                    Main.correctionView!!.resetCorY()
+                    println("EV_22 =================================")
+                }
+                EV_23_calibrate -> {
+                    Forces!!.calibrate()
+                    println("EV_23  ================================")
                 }
                 else -> {
                     Log.e(logTag, "EVENT $event unknown")
@@ -200,6 +193,8 @@ class PollMaster : Thread() {
         const val EV_13_force_min = 13
         const val EV_14_force_plus = 14
         const val EV_21_from_slider = 21
+        const val EV_22_resetCorY = 22
+        const val EV_23_calibrate = 23
         private var running = false
 
     }

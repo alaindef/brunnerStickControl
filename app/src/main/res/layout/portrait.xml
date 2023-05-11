@@ -197,9 +197,9 @@
             android:contentDescription="@string/photoView"
             android:gravity="center"
             android:onClick="sendEvent"
-            android:tag="B_4"
+            android:tag="dt-"
             android:text="dt-"
-            android:textSize="50dp" />
+            android:textSize="30dp" />
 
         <androidx.appcompat.widget.AppCompatTextView
             android:id="@+id/tile2"
@@ -211,9 +211,9 @@
             android:contentDescription="@string/photoView"
             android:gravity="center"
             android:onClick="sendEvent"
-            android:tag="B_5"
+            android:tag="dt+"
             android:text="dt+"
-            android:textSize="50dp" />
+            android:textSize="30dp" />
 
         <androidx.appcompat.widget.AppCompatTextView
             android:id="@+id/tile3"
@@ -225,9 +225,9 @@
             android:contentDescription="@string/photoView"
             android:gravity="center"
             android:onClick="sendEvent"
-            android:tag="B_6"
-            android:text="f-"
-            android:textSize="50dp" />
+            android:tag="calibrate"
+            android:text="calibrate"
+            android:textSize="30dp" />
 
         <androidx.appcompat.widget.AppCompatTextView
             android:id="@+id/tile4"
@@ -239,9 +239,9 @@
             android:contentDescription="@string/photoView"
             android:gravity="center"
             android:onClick="sendEvent"
-            android:tag="B_7"
-            android:text="f+"
-            android:textSize="50dp" />
+            android:tag="resetCorY"
+            android:text="rst corY"
+            android:textSize="30dp" />
 
     </LinearLayout>
 
@@ -259,18 +259,27 @@
             android:weightSum="16">
 
 
-            <com.alaindef.brunner.PadView
-                android:id="@+id/pad"
+            <com.alaindef.brunner.delete
+                android:id="@+id/del"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
-                android:layout_weight="12"
+                android:layout_weight="6"
+                android:background="@drawable/carthesius"
+                android:gravity="center" />
+
+            <com.alaindef.brunner.PadView
+                android:id="@+id/pad"
+                android:contentDescription="pad content description"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="6"
                 android:background="@drawable/carthesius"
                 android:gravity="center" />
 
             <LinearLayout
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
-                android:layout_weight="3"
+                android:layout_weight="4"
                 android:weightSum="8">
 
 
@@ -280,21 +289,15 @@
                     android:layout_weight="1" />
 
                 <com.alaindef.brunner.PolylineView
+                    android:id="@+id/yTable"
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
-                    android:layout_weight="5"/>
+                    android:layout_weight="6"/>
 
-                <Button
-                    android:id="@+id/v1"
+                <View
                     android:layout_width="0dp"
-                    android:layout_height="0dp"
-                    android:layout_weight="2"
-                    android:background="@drawable/tuin"
-                    android:onClick="sendEvent"
-                    android:tag="B_poll"
-                    android:text="@string/polling"
-                    android:textAlignment="center"
-                    android:textSize="35dp" />
+                    android:layout_height="match_parent"
+                    android:layout_weight="1" />
 
             </LinearLayout>
 

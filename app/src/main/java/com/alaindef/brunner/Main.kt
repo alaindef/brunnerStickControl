@@ -12,20 +12,22 @@ import android.text.TextWatcher
 import android.util.Log
 import android.view.View
 import android.widget.*
+import androidx.appcompat.widget.AppCompatImageView
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.slider.Slider
 import com.google.android.material.slider.Slider.OnChangeListener
 
-data class Vector(val x: Float, val y: Float) {
-    fun add(arg: Vector): Vector{
-        return Vector(x+arg.x, y+arg.y)
+data class Vector(var x: Float, var y: Float) {
+    fun add(arg: Vector): Vector {
+        return Vector(x + arg.x, y + arg.y)
     }
 
-    fun times(arg: Float): Vector{
-        return Vector(x*arg, y*arg)
+    fun times(arg: Float): Vector {
+        return Vector(x * arg, y * arg)
     }
-    fun divide(arg:Float): Vector{
-        return Vector(x/arg, y/arg)
+
+    fun divide(arg: Float): Vector {
+        return Vector(x / arg, y / arg)
     }
 
     fun toIntVector(): IntVector {
@@ -33,7 +35,11 @@ data class Vector(val x: Float, val y: Float) {
     }
 }
 
-data class IntVector(val x: Int, val y: Int)
+data class IntVector(val x: Int, val y: Int) {
+    fun max(arg: IntVector): IntVector {
+        return IntVector(kotlin.math.max(x, arg.x), kotlin.math.max(y, arg.y))
+    }
+}
 
 @Suppress("unused")
 class Main : AppCompatActivity() {
@@ -47,34 +53,21 @@ class Main : AppCompatActivity() {
 //                omer.send(PollMaster.EV_0, 0, 0, ss)  //handled by onclick listener
 //                because long press is also used
             }
-            "B_4" -> {
+            "dt-" -> {
                 sendy.send(PollMaster.EV_11_dt_min, 0, 0, ss)
             }
-            "B_5" -> {
+            "dt+" -> {
                 sendy.send(PollMaster.EV_12_dt_plus, 0, 0, ss)
             }
-            "B_6" -> {
-                sendy.send(PollMaster.EV_13_force_min, 0, 0, ss)
+            "calibrate" -> {
+                sendy.send(PollMaster.EV_23_calibrate, 0, 0, ss)
             }
-            "B_7" -> {
-                sendy.send(PollMaster.EV_14_force_plus, 0, 0, ss)
+            "resetCorY" -> {
+                correctionView!!.resetCorY()
+//                sendy.send(PollMaster.EV_22_resetCorY, 0, 0, ss)
             }
             else -> Log.wtf(logTag, "tag unknown $ss")
         }
-    }
-
-    fun useTargetXY(pad: ImageView, x: Float, y: Float): Vector {
-        val padWidth = pad.width.toFloat()
-        val padHeight = pad.height
-        val xRel = (minOf(maxOf(((x * 100F) / padWidth), 0F), 100F)) / 100f
-        val yRel = (minOf(maxOf(((y * 100F) / padHeight), 0F), 100F)) / 100f
-
-        sendy.xTarget = xRel
-        sendy.yTarget = yRel
-        sendy.send(PollMaster.EV_4_target_pos)
-        mReport2!!.text =
-            "(${String.format("%.${2}f", xRel)}  ${String.format("%.${2}f", yRel)})"
-        return Vector(xRel, yRel)
     }
 
 
@@ -137,11 +130,10 @@ class Main : AppCompatActivity() {
         mReport4 = findViewById<View>(R.id.report4) as TextView
         mReport5a = findViewById<View>(R.id.report5a) as TextView
         mReport5 = findViewById<View>(R.id.report5) as TextView
-        mPad = findViewById<View>(R.id.pad) as ImageView
         mContext = this.applicationContext
-        mCircleView = CircleView(this, null)
-        mPad!!.setImageDrawable(mCircleView!!.background)
-        mCircleView!!.visibility = View.GONE
+//        mCircleView = CircleView(this, null)
+//        mPad!!.setImageDrawable(mCircleView!!.background)
+//        mCircleView!!.visibility = View.GONE
 
         mReset = findViewById<View>(R.id.reset) as Button
         mReset?.setOnClickListener {
@@ -155,9 +147,9 @@ class Main : AppCompatActivity() {
 
         conPBar = findViewById(R.id.conP)
         conPReport = findViewById(R.id.conPreport)
-        conPBar?.addOnChangeListener(object : OnChangeListener{
+        conPBar?.addOnChangeListener(object : OnChangeListener {
             override fun onValueChange(slider: Slider, value: Float, fromUser: Boolean) {
-                sendy.conP = value
+                Forces.conP = value
                 conPReport!!.text = value.toInt().toString()
             }
         })
@@ -165,18 +157,18 @@ class Main : AppCompatActivity() {
 
         conIBar = findViewById(R.id.conI)
         conIReport = findViewById(R.id.conIreport)
-        conIBar?.addOnChangeListener(object : OnChangeListener{
+        conIBar?.addOnChangeListener(object : OnChangeListener {
             override fun onValueChange(slider: Slider, value: Float, fromUser: Boolean) {
-                sendy.conI = value
+                Forces.conI = value
                 conIReport!!.text = value.toInt().toString()
             }
         })
 
         conPvBar = findViewById(R.id.conPv)
         conPvReport = findViewById(R.id.conPvreport)
-        conPvBar?.addOnChangeListener(object : OnChangeListener{
+        conPvBar?.addOnChangeListener(object : OnChangeListener {
             override fun onValueChange(slider: Slider, value: Float, fromUser: Boolean) {
-                sendy.conPv = value
+                Forces.conPv = value
                 conPvReport!!.text = value.toInt().toString()
             }
         })
@@ -184,22 +176,28 @@ class Main : AppCompatActivity() {
 
         conIvBar = findViewById(R.id.conIv)
         conIvReport = findViewById(R.id.conIvreport)
-        conIvBar?.addOnChangeListener(object : OnChangeListener{
+        conIvBar?.addOnChangeListener(object : OnChangeListener {
             override fun onValueChange(slider: Slider, value: Float, fromUser: Boolean) {
-                sendy.conIv = value
+                Forces.conIv = value
                 conIvReport!!.text = value.toInt().toString()
             }
         })
+
+        correctionView = findViewById(R.id.yTable)
+        mPad = findViewById<View>(R.id.pad) as AppCompatImageView?
+        delete1 = findViewById(R.id.del)
+
+        delete1!!.teut
 
         if (savedInstanceState == null) {
             // sendy is an FMM (Finite Message Machine) that handles all the incomming events:
             // start and stop the polling, reset, receive target and current positions,
             // request to change the IP address of the brunner interface, change polling intervals
             sendy.start()
-            recky.start()
+//adf230511            recky.start()
         } else {
         }
-        if (recky.isAlive) Log.e(logTag, "oscar lives") else Log.e(logTag, "recky is dead")
+//adf230511        if (recky.isAlive) Log.e(logTag, "oscar lives") else Log.e(logTag, "recky is dead")
 
         if (sendy.isAlive) Log.e(logTag, "omer lives") else Log.e(logTag, "sendy is dead")
     }
@@ -246,9 +244,6 @@ class Main : AppCompatActivity() {
         var mReport6: TextView? = null
 
         @SuppressLint("StaticFieldLeak")
-        var mPad: ImageView? = null
-
-        @SuppressLint("StaticFieldLeak")
         var mContext: Context? = null
 
         @SuppressLint("StaticFieldLeak")
@@ -278,17 +273,29 @@ class Main : AppCompatActivity() {
 
         @SuppressLint("StaticFieldLeak")
         var conIvReport: TextView? = null
+//
+//        @SuppressLint("StaticFieldLeak")
+//        var mCircleView: CircleView? = null
 
         @SuppressLint("StaticFieldLeak")
-        var mCircleView: CircleView? = null
+        var mPad: AppCompatImageView? = null
+
+        @SuppressLint("StaticFieldLeak")
+        var correctionView: PolylineView? = null
+
+
+        @SuppressLint("StaticFieldLeak")
+        var delete1: delete? = null
 
     }
 }
 
+private val PadView.teut: Unit
+    get() {}
 const val portR = 15095
 var brunnerAddress = "192.168.0.203"
 
-var recky = RecMaster()
+//adf230511 recky not needed (2 threads seems too much for android) var recky = RecMaster()
 var sendy = PollMaster()
 val udpSender: UdpSender = UdpSender(brunnerAddress, 15090)
 
