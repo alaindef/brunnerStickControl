@@ -18,6 +18,8 @@
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_gravity="center"
+            android:importantForAutofill="no"
+            android:inputType="text"
             android:layout_weight="4"
             android:gravity="center"
             android:text="192.168.0.203" />
@@ -31,7 +33,7 @@
             android:gravity="center"
             android:text=""
             android:textColor="@android:color/white"
-            android:textSize="12dp" />
+            android:textSize="12sp" />
 
     </LinearLayout>
 
@@ -61,7 +63,7 @@
             android:gravity="center"
             android:text=""
             android:textColor="@android:color/white"
-            android:textSize="20dp" />
+            android:textSize="20sp" />
 
     </LinearLayout>
 
@@ -91,7 +93,7 @@
             android:gravity="center"
             android:text=""
             android:textColor="@android:color/white"
-            android:textSize="20dp" />
+            android:textSize="20sp" />
 
     </LinearLayout>
 
@@ -120,7 +122,7 @@
             android:gravity="center"
             android:text=""
             android:textColor="@android:color/white"
-            android:textSize="20dp" />
+            android:textSize="20sp" />
 
     </LinearLayout>
 
@@ -199,7 +201,7 @@
             android:onClick="sendEvent"
             android:tag="dt-"
             android:text="dt-"
-            android:textSize="30dp" />
+            android:textSize="30sp" />
 
         <androidx.appcompat.widget.AppCompatTextView
             android:id="@+id/tile2"
@@ -213,7 +215,7 @@
             android:onClick="sendEvent"
             android:tag="dt+"
             android:text="dt+"
-            android:textSize="30dp" />
+            android:textSize="30sp" />
 
         <androidx.appcompat.widget.AppCompatTextView
             android:id="@+id/tile3"
@@ -227,7 +229,7 @@
             android:onClick="sendEvent"
             android:tag="calibrate"
             android:text="calibrate"
-            android:textSize="30dp" />
+            android:textSize="30sp" />
 
         <androidx.appcompat.widget.AppCompatTextView
             android:id="@+id/tile4"
@@ -241,7 +243,7 @@
             android:onClick="sendEvent"
             android:tag="resetCorY"
             android:text="rst corY"
-            android:textSize="30dp" />
+            android:textSize="30sp" />
 
     </LinearLayout>
 
@@ -259,20 +261,11 @@
             android:weightSum="16">
 
 
-            <com.alaindef.brunner.delete
+            <com.alaindef.brunner.PadView
                 android:id="@+id/del"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
-                android:layout_weight="6"
-                android:background="@drawable/carthesius"
-                android:gravity="center" />
-
-            <com.alaindef.brunner.PadView
-                android:id="@+id/pad"
-                android:contentDescription="pad content description"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="6"
+                android:layout_weight="12"
                 android:background="@drawable/carthesius"
                 android:gravity="center" />
 
@@ -320,7 +313,7 @@
                 android:tag="B_poll"
                 android:text="@string/polling"
                 android:textAlignment="center"
-                android:textSize="35dp" />
+                android:textSize="35sp" />
 
 
             <Button
@@ -335,7 +328,7 @@
                 android:tag="B_RES"
                 android:text="@string/reset"
                 android:textAlignment="center"
-                android:textSize="35dp" />
+                android:textSize="35sp" />
         </LinearLayout>
 
 
@@ -359,7 +352,7 @@
                 android:tag="B_seek"
                 android:text="P"
                 android:textColor="@android:color/white"
-                android:textSize="30dp" />
+                android:textSize="30sp" />
 
             <com.alaindef.brunner.ViewSlider
                 android:id="@+id/conP"
@@ -385,7 +378,7 @@
                 android:tag="B_seek"
                 android:text=""
                 android:textColor="@android:color/white"
-                android:textSize="30dp" />
+                android:textSize="30sp" />
 
         </LinearLayout>
 
@@ -410,7 +403,7 @@
                 android:tag="B_seek"
                 android:text="I"
                 android:textColor="@android:color/white"
-                android:textSize="30dp" />
+                android:textSize="30sp" />
 
 
             <com.alaindef.brunner.ViewSlider
@@ -438,7 +431,7 @@
                 android:tag="B_seek"
                 android:text=""
                 android:textColor="@android:color/white"
-                android:textSize="30dp" />
+                android:textSize="30sp" />
 
         </LinearLayout>
         <LinearLayout
@@ -461,7 +454,7 @@
                 android:tag="B_seek"
                 android:text="Pv"
                 android:textColor="@android:color/white"
-                android:textSize="30dp" />
+                android:textSize="30sp" />
 
             <com.alaindef.brunner.ViewSlider
                 android:id="@+id/conPv"
@@ -489,7 +482,7 @@
                 android:tag="B_seek"
                 android:text=""
                 android:textColor="@android:color/white"
-                android:textSize="30dp" />
+                android:textSize="30sp" />
 
         </LinearLayout>
 
@@ -514,7 +507,7 @@
                 android:tag="B_seek"
                 android:text="Iv"
                 android:textColor="@android:color/white"
-                android:textSize="30dp" />
+                android:textSize="30sp" />
 
 
             <com.alaindef.brunner.ViewSlider
@@ -542,7 +535,7 @@
                 android:tag="B_seek"
                 android:text=""
                 android:textColor="@android:color/white"
-                android:textSize="30dp" />
+                android:textSize="30sp" />
 
         </LinearLayout>
 

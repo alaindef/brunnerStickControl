@@ -1,5 +1,8 @@
 package com.alaindef.brunner
 
+import java.lang.Float.min
+import kotlin.math.max
+
 object Forces {
     private val horizontalPID = BasicPID(1f, 0f, 0f)
 
@@ -16,11 +19,8 @@ object Forces {
 
     var forces = Vector(0f, 0f)
 
-
-    //    private val xTable = intArrayOf( -10, 5, 20, 30, 40, 50, 60, 70, 85, 100, 130)
-//    private val yTable = intArrayOf( -40, -5, 16, 28, 40, 50, 60, 70, 80, 95, 130)
-    private val xTable = intArrayOf(0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100)
-    val yTable = intArrayOf(0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100)
+    val corTable = Array<Vector>(11) { Vector(0f, 0f) }
+    val corTableProvisional = Array<Vector>(11) { Vector(0f, 0f) }
 
     init {
 
@@ -35,41 +35,60 @@ object Forces {
         }
     }
 
-    fun calibrate() {
+    fun calibrateAll() {
+        targetRel = Vector(0.7f, 0f)        //first calibration point. now wait for current to settle
+        sendy.send(PollMaster.EV_4_startcalibration, 0, 0, null)
 
-        Main.delete1!!.drawTarget(170f, 70f)
-        targetRel = Vector(0.7f, 0.1f)
-//        Main.delete1!!.drawTarget(0.7f, 0.7f)
-        Main.mReport2!!.text = "(${targetRel.x} ${targetRel.y})"
-
-        currentRel = Vector(0.1f, 0.7f)
-//        Main.delete1!!.drawTarget(target.x, target.y)
-        sendy.send(PollMaster.EV_4_target_pos)
-
-        Main.mReport5!!.text =
-            "target ${(targetRel.y * 100).toInt()} current ${(currentRel.y * 100).toInt()} "
+        print("cortable")
+        for (i in 0..10) print(" <$i ${corTable[i].y}")
+        println()
+        Main.correctionView!!.invalidate()
     }
 
-    private fun correct(posRel: Vector): Vector {
+    fun calibrateOne(index: Int) {
+        val delta_y = targetRel.y - currentRel.y   //when we are here, the stick has moved to previous target
+        corTableProvisional[index-1].y -= delta_y
+        println("Forces.calibrateOne: index=${index-1} T=$targetRel  C=$currentRel.y D=$delta_y")
+
+        targetRel = Vector(0.7f, index / 10f)
+        sendy.send(PollMaster.EV_4_startcalibration, index, 0, null)
+    }
+
+    fun calibrateEnd(index: Int){
+        val delta_y = targetRel.y - currentRel.y
+        corTableProvisional[index].y -= delta_y
+        println()
+        print("cortable AFTER:   ")
+        for (i in 0..10){
+            corTable[i].y = corTableProvisional[i].y * 1.3f
+            print(" <$i ${corTable[i].y}>")
+            Main.correctionView!!.setVertex(i, Vector(0f, corTable[i].y + 0.5f))
+            Main.correctionView!!.invalidate()
+        }
+        println()
+    }
+
+
+    private fun correctRel(posRel: Vector): Vector {
 //        range of pos: 0f .. 1f. scale up to 0 .. 100
-        if (posRel.y > 0.99F) return Vector(posRel.x, 0.99f)    //avoid outofbounds further down
-        if (posRel.x > 0.99F) return Vector(0.99f, posRel.y)
-        val pos100 = posRel.times(100f)
-//        xTable and yTable go from 0 to 100 in steps of 10, so an index for the array is:
-        var index = pos100.divide(10f).toIntVector()
-        val newX = if (index.x < 10)
-            xTable[index.x] + (xTable[index.x + 1] - xTable[index.x]) * (pos100.x - index.x * 10f) / 10f
-        else posRel.x
-        val newY = if (index.y < 10)
-            yTable[index.y] + (yTable[index.y + 1] - yTable[index.y]) * (pos100.y - index.y * 10f) / 10f
-        else posRel.y
-//        return values in range 0f .. 1f
-        return Vector(newX, newY).divide(100f)
+        posRel.x = max(0f, kotlin.math.min(0.99f, posRel.x))    //avoid outofbounds further down
+        posRel.y = max(0f, min(posRel.y, .99f))
+
+        var index = posRel.divide(0.1f).toIntVector()
+
+        val corX = if (index.x < 10)
+            corTable[index.x].x + (corTable[index.x + 1].x - corTable[index.x].x) * (posRel.x - index.x / 10f) / 0.1f
+        else 0f
+        val corY = if (index.y < 10)
+            corTable[index.y].y + (corTable[index.y + 1].y - corTable[index.y].y) * (posRel.y - index.y / 10f) / 0.1f
+        else 0f
+
+        return posRel.min(Vector(corX, corY))
     }
 
 
     fun calculateForces(): Vector {
-        var corrected = correct(targetRel)
+        var corrected = correctRel(targetRel)
         horizontalPID.setP(100f * conP)
         horizontalPID.setI(conI * 2f)
 //        horizontalPID.setI(0f)
@@ -87,6 +106,7 @@ object Forces {
 //        verticalPID.setSetpoint(yTarget)
 
         forces.y = verticalPID.getOutput(currentRel.y, corrected.y)
+//        forces.y = verticalPID.getOutput(currentRel.y, corrected.y)
 
         return forces
     }

@@ -18,7 +18,7 @@ class PolylineView @JvmOverloads constructor(
 ) : View(context, attrs, defStyleAttr) {
 
     var tunWidth = 0
-    val teut =33
+    val teut = 33
 
     // a list of 11 (0..10) correction input factors, values between 0 and 100
     private val vertices = mutableListOf(PointF(0f, 0f))
@@ -40,6 +40,8 @@ class PolylineView @JvmOverloads constructor(
             }
         })
     }
+
+
 
 
     private val paint = Paint().apply {
@@ -101,11 +103,9 @@ class PolylineView @JvmOverloads constructor(
 //                    get delta in range [-0.5..+0.5]
                     val deltaY = (vertices[selectedVertexIndex].x - width / 2) / width
                     invalidate()
-                    Forces.yTable[selectedVertexIndex] =
-                        ((selectedVertexIndex * 10) - (deltaY * 50)).toInt()
+                    Forces.corTable[selectedVertexIndex].y = deltaY
                 }
                 invalidate()
-//                Forces.yTable[selectedVertexIndex] = (selectedVertexIndex*10)
                 selectedVertexIndex = -1
 
             }
@@ -119,8 +119,13 @@ class PolylineView @JvmOverloads constructor(
         vertices.clear()
         for (i in 0..10) {
             vertices.add(PointF(width / 2f, (i.toFloat() / 10) * height))
+            Forces.corTable[i].y = 0f
         }
         invalidate()
+    }
+
+    fun setVertex(index: Int, v: Vector){
+        vertices[index].x = v.y * width
     }
 
     companion object

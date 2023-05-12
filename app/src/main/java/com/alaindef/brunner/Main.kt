@@ -12,7 +12,6 @@ import android.text.TextWatcher
 import android.util.Log
 import android.view.View
 import android.widget.*
-import androidx.appcompat.widget.AppCompatImageView
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.slider.Slider
 import com.google.android.material.slider.Slider.OnChangeListener
@@ -20,6 +19,10 @@ import com.google.android.material.slider.Slider.OnChangeListener
 data class Vector(var x: Float, var y: Float) {
     fun add(arg: Vector): Vector {
         return Vector(x + arg.x, y + arg.y)
+    }
+
+    fun min(arg: Vector): Vector {
+        return Vector(x - arg.x, y - arg.y)
     }
 
     fun times(arg: Float): Vector {
@@ -131,9 +134,6 @@ class Main : AppCompatActivity() {
         mReport5a = findViewById<View>(R.id.report5a) as TextView
         mReport5 = findViewById<View>(R.id.report5) as TextView
         mContext = this.applicationContext
-//        mCircleView = CircleView(this, null)
-//        mPad!!.setImageDrawable(mCircleView!!.background)
-//        mCircleView!!.visibility = View.GONE
 
         mReset = findViewById<View>(R.id.reset) as Button
         mReset?.setOnClickListener {
@@ -184,22 +184,18 @@ class Main : AppCompatActivity() {
         })
 
         correctionView = findViewById(R.id.yTable)
-        mPad = findViewById<View>(R.id.pad) as AppCompatImageView?
-        delete1 = findViewById(R.id.del)
+        stickPad = findViewById(R.id.del)
 
-        delete1!!.teut
+        stickPad!!.teut
 
         if (savedInstanceState == null) {
             // sendy is an FMM (Finite Message Machine) that handles all the incomming events:
             // start and stop the polling, reset, receive target and current positions,
             // request to change the IP address of the brunner interface, change polling intervals
             sendy.start()
-//adf230511            recky.start()
         } else {
         }
-//adf230511        if (recky.isAlive) Log.e(logTag, "oscar lives") else Log.e(logTag, "recky is dead")
-
-        if (sendy.isAlive) Log.e(logTag, "omer lives") else Log.e(logTag, "sendy is dead")
+        if (sendy.isAlive) Log.e(logTag, "sendy lives") else Log.e(logTag, "sendy is dead")
     }
 
     companion object {
@@ -278,20 +274,15 @@ class Main : AppCompatActivity() {
 //        var mCircleView: CircleView? = null
 
         @SuppressLint("StaticFieldLeak")
-        var mPad: AppCompatImageView? = null
-
-        @SuppressLint("StaticFieldLeak")
         var correctionView: PolylineView? = null
 
 
         @SuppressLint("StaticFieldLeak")
-        var delete1: delete? = null
+        var stickPad: PadView? = null
 
     }
 }
 
-private val PadView.teut: Unit
-    get() {}
 const val portR = 15095
 var brunnerAddress = "192.168.0.203"
 

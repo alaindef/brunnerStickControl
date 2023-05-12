@@ -17,8 +17,6 @@ class PollMaster : Thread() {
     var event: Int = 0
     var cnt = 0
     var delta_t = 10
-    var currentPosReceived = false
-    var targetPosReceived = false
 
     private var ipAddress: InetAddress = InetAddress.getByName("192.168.0.203")
 
@@ -57,6 +55,20 @@ class PollMaster : Thread() {
             } else
                 Main.mReport0!!.text = "INVALID ip address: $address"
         }
+    }
+
+    fun moveToTarget() {
+        Forces.calculateForces()
+        udpSender.sendUDP(Forces.forces.x, Forces.forces.y, ipAddress, 15090)
+        Main.mReport3!!.text =
+            "(${Forces.forces.x.toInt()} ${Forces.forces.y.toInt()})"
+        if (cnt.mod(100) == 0)
+            Main.mReport5a!!.text = "break $cnt"
+        val res = UdpRecObject.getCoordinates()
+        // return the result to sendy range of coordinates: 0f .. 1f
+        Forces.currentRel = res            //range 0f .. 1f
+        Main.stickPad!!.invalidate()
+
     }
 
     inner class ZeHandler  /*  https://developer.android.com/reference/android/os/Handler */
@@ -105,35 +117,28 @@ class PollMaster : Thread() {
                         cnt++
                         Main.mReport0!!.text = "$cnt: running ..."
                         Main.mReport0!!.setBackgroundColor(Color.RED)
-                        Forces.calculateForces(
-                        )
-                        udpSender.sendUDP(Forces.forces.x, Forces.forces.y, ipAddress, 15090)
-                        Main.mReport3!!.text = "(${Forces.forces.x.toInt()} ${Forces.forces.y.toInt()})"
-                        if (cnt.mod(100) == 0)
-                            Main.mReport5a!!.text = "break $cnt"
-
-//adf230511                        recky.send(RecMaster.EV_0)
-//
-                        val res = UdpRecObject.getCoordinates()
-                        // return the result to sendy range of coordinates: 0f .. 1f
-                        send(PollMaster.EV_6_current_pos, 0, 0, res)
-
-                        Main.mPad!!.invalidate()
-                        Main.delete1!!.invalidate()
+                        moveToTarget()
+                        Handler().postDelayed({ send(EV_3_next_round) }, delta_t.toLong())
                     }
                 }
-                EV_4_target_pos -> {
-                    targetPosReceived = true
-                    Main.mPad!!.invalidate()
-                    Main.delete1!!.invalidate()
-                }
-                EV_6_current_pos -> {
-                    currentPosReceived = true
-                    val res = arg3 as Vector
-                    Forces.currentRel = res            //range 0f .. 1f
-//                    send(EV_3_next_round)
-                    Handler().postDelayed({ send(EV_3_next_round) }, delta_t.toLong())
+                EV_4_startcalibration -> {
+                    Main.stickPad!!.drawTarget(0.75f, arg1 / 10f)
+//                    println("sendy: arg1 = $arg1  ======================================")
+                    calibrating = true
+                    if (arg1 < 10) {
+                        Handler().postDelayed(
+                            { send(EV_5_calibrateOne, arg1, 0, null) }, 1000.toLong()
+                        )
 
+                    } else {
+                        Handler().postDelayed({ Forces.calibrateEnd(arg1)}, 1000.toLong())
+                        calibrating = false
+                    }
+
+                }
+                EV_5_calibrateOne ->{
+                    println("EV_5 arg1= $arg1 -------------------------------------------------------------")
+                    Forces.calibrateOne(arg1+1)
                 }
                 EV_9_new_IP -> {
                     if (!running) {
@@ -166,7 +171,7 @@ class PollMaster : Thread() {
                     println("EV_22 =================================")
                 }
                 EV_23_calibrate -> {
-                    Forces!!.calibrate()
+                    Forces!!.calibrateAll()
                     println("EV_23  ================================")
                 }
                 else -> {
@@ -184,8 +189,8 @@ class PollMaster : Thread() {
         const val EV_1_full_reset = 1
         const val EV_2_start_stop = 2
         const val EV_3_next_round = 3
-        const val EV_4_target_pos = 4
-        const val EV_5_current_pos = 5
+        const val EV_4_startcalibration = 4
+        const val EV_5_calibrateOne = 5
         const val EV_6_current_pos = 6
         const val EV_9_new_IP = 9
         const val EV_11_dt_min = 11
@@ -196,6 +201,7 @@ class PollMaster : Thread() {
         const val EV_22_resetCorY = 22
         const val EV_23_calibrate = 23
         private var running = false
+        private var calibrating = false
 
     }
 }
