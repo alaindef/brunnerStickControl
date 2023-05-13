@@ -6,6 +6,8 @@ import android.os.Handler
 import android.os.Looper
 import android.os.Message
 import android.util.Log
+import android.view.View
+import androidx.core.content.ContextCompat
 import java.lang.Integer.max
 import java.net.InetAddress
 import java.util.regex.Pattern
@@ -13,6 +15,7 @@ import java.util.regex.Pattern
 
 class PollMaster : Thread() {
     val logTag = ">---Sendy---"
+    var calibrateButton: View? = null
 
     var event: Int = 0
     var cnt = 0
@@ -121,24 +124,17 @@ class PollMaster : Thread() {
                         Handler().postDelayed({ send(EV_3_next_round) }, delta_t.toLong())
                     }
                 }
-                EV_4_startcalibration -> {
+                EV_4_calibrateOne -> {
                     Main.stickPad!!.drawTarget(0.75f, arg1 / 10f)
-//                    println("sendy: arg1 = $arg1  ======================================")
-                    calibrating = true
-                    if (arg1 < 10) {
+                    if ((arg1 < 10)){
                         Handler().postDelayed(
-                            { send(EV_5_calibrateOne, arg1, 0, null) }, 1000.toLong()
+                            { Forces.calibrateOne(arg1+arg2, arg2) }, 1000.toLong()
                         )
-
                     } else {
                         Handler().postDelayed({ Forces.calibrateEnd(arg1)}, 1000.toLong())
-                        calibrating = false
+                        calibrateButton!!.setBackgroundColor(ContextCompat.getColor(Main.mContext!!, R.color.buttonfirstcolor))
                     }
 
-                }
-                EV_5_calibrateOne ->{
-                    println("EV_5 arg1= $arg1 -------------------------------------------------------------")
-                    Forces.calibrateOne(arg1+1)
                 }
                 EV_9_new_IP -> {
                     if (!running) {
@@ -168,11 +164,11 @@ class PollMaster : Thread() {
                 }
                 EV_22_resetCorY -> {
                     Main.correctionView!!.resetCorY()
-                    println("EV_22 =================================")
                 }
                 EV_23_calibrate -> {
+                    calibrateButton = arg3 as androidx.appcompat.widget.AppCompatTextView
+                    calibrateButton!!.setBackgroundColor(ContextCompat.getColor(Main.mContext!!, R.color.buttonsecondcolor))
                     Forces!!.calibrateAll()
-                    println("EV_23  ================================")
                 }
                 else -> {
                     Log.e(logTag, "EVENT $event unknown")
@@ -189,9 +185,7 @@ class PollMaster : Thread() {
         const val EV_1_full_reset = 1
         const val EV_2_start_stop = 2
         const val EV_3_next_round = 3
-        const val EV_4_startcalibration = 4
-        const val EV_5_calibrateOne = 5
-        const val EV_6_current_pos = 6
+        const val EV_4_calibrateOne = 4
         const val EV_9_new_IP = 9
         const val EV_11_dt_min = 11
         const val EV_12_dt_plus = 12
@@ -201,7 +195,6 @@ class PollMaster : Thread() {
         const val EV_22_resetCorY = 22
         const val EV_23_calibrate = 23
         private var running = false
-        private var calibrating = false
 
     }
 }

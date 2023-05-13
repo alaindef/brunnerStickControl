@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="slidebackgroundcolor">#8863aef3</color>
+    <color name="buttonfirstcolor">#A9EF91</color>
+    <color name="buttonsecondcolor">#C565E5</color>
 </resources>

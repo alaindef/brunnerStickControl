@@ -14,7 +14,6 @@ class PadView @JvmOverloads constructor(
 ) :
     androidx.appcompat.widget.AppCompatImageView(context, attrs, defStyleAttr) {
 
-    var teut = 23
     private val path = Path()
     private val canvas = Canvas()
     private val paint = Paint().apply {

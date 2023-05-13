@@ -13,6 +13,7 @@ import android.util.Log
 import android.view.View
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import com.google.android.material.slider.Slider
 import com.google.android.material.slider.Slider.OnChangeListener
 
@@ -63,7 +64,7 @@ class Main : AppCompatActivity() {
                 sendy.send(PollMaster.EV_12_dt_plus, 0, 0, ss)
             }
             "calibrate" -> {
-                sendy.send(PollMaster.EV_23_calibrate, 0, 0, ss)
+                sendy.send(PollMaster.EV_23_calibrate, 0, 0, view)
             }
             "resetCorY" -> {
                 correctionView!!.resetCorY()
@@ -145,48 +146,13 @@ class Main : AppCompatActivity() {
             true
         }
 
-        conPBar = findViewById(R.id.conP)
         conPReport = findViewById(R.id.conPreport)
-        conPBar?.addOnChangeListener(object : OnChangeListener {
-            override fun onValueChange(slider: Slider, value: Float, fromUser: Boolean) {
-                Forces.conP = value
-                conPReport!!.text = value.toInt().toString()
-            }
-        })
-
-
-        conIBar = findViewById(R.id.conI)
         conIReport = findViewById(R.id.conIreport)
-        conIBar?.addOnChangeListener(object : OnChangeListener {
-            override fun onValueChange(slider: Slider, value: Float, fromUser: Boolean) {
-                Forces.conI = value
-                conIReport!!.text = value.toInt().toString()
-            }
-        })
-
-        conPvBar = findViewById(R.id.conPv)
         conPvReport = findViewById(R.id.conPvreport)
-        conPvBar?.addOnChangeListener(object : OnChangeListener {
-            override fun onValueChange(slider: Slider, value: Float, fromUser: Boolean) {
-                Forces.conPv = value
-                conPvReport!!.text = value.toInt().toString()
-            }
-        })
-
-
-        conIvBar = findViewById(R.id.conIv)
         conIvReport = findViewById(R.id.conIvreport)
-        conIvBar?.addOnChangeListener(object : OnChangeListener {
-            override fun onValueChange(slider: Slider, value: Float, fromUser: Boolean) {
-                Forces.conIv = value
-                conIvReport!!.text = value.toInt().toString()
-            }
-        })
 
         correctionView = findViewById(R.id.yTable)
         stickPad = findViewById(R.id.del)
-
-        stickPad!!.teut
 
         if (savedInstanceState == null) {
             // sendy is an FMM (Finite Message Machine) that handles all the incomming events:
@@ -246,40 +212,22 @@ class Main : AppCompatActivity() {
         var mContextForDummies: Context? = null
 
         @SuppressLint("StaticFieldLeak")
-        var conPBar: Slider? = null
-
-        @SuppressLint("StaticFieldLeak")
         var conPReport: TextView? = null
 
         @SuppressLint("StaticFieldLeak")
-        var conIBar: Slider? = null
-
-        @SuppressLint("StaticFieldLeak")
         var conIReport: TextView? = null
-
-
-        @SuppressLint("StaticFieldLeak")
-        var conPvBar: Slider? = null
 
         @SuppressLint("StaticFieldLeak")
         var conPvReport: TextView? = null
 
         @SuppressLint("StaticFieldLeak")
-        var conIvBar: Slider? = null
-
-        @SuppressLint("StaticFieldLeak")
         var conIvReport: TextView? = null
-//
-//        @SuppressLint("StaticFieldLeak")
-//        var mCircleView: CircleView? = null
 
         @SuppressLint("StaticFieldLeak")
         var correctionView: PolylineView? = null
 
-
         @SuppressLint("StaticFieldLeak")
         var stickPad: PadView? = null
-
     }
 }
 
