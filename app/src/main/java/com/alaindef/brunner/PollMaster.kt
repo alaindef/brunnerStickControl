@@ -21,6 +21,8 @@ class PollMaster : Thread() {
     var cnt = 0
     var delta_t = 10
 
+
+
     private var ipAddress: InetAddress = InetAddress.getByName("192.168.0.203")
 
     private var mHandler: ZeHandler? = null
@@ -126,15 +128,64 @@ class PollMaster : Thread() {
                 }
                 EV_4_calibrateOne -> {
                     Main.stickPad!!.drawTarget(0.75f, arg1 / 10f)
-                    if ((arg1 < 10)){
+                    if ((arg1 < 10)) {
                         Handler().postDelayed(
-                            { Forces.calibrateOne(arg1+arg2, arg2) }, 1000.toLong()
+                            { Forces.calibrateOne(arg1 + arg2, arg2) }, 1000.toLong()
                         )
                     } else {
-                        Handler().postDelayed({ Forces.calibrateEnd(arg1)}, 1000.toLong())
-                        calibrateButton!!.setBackgroundColor(ContextCompat.getColor(Main.mContext!!, R.color.buttonfirstcolor))
+                        Handler().postDelayed({ Forces.calibrateEnd(arg1) }, 1000.toLong())
+                        calibrateButton!!.setBackgroundColor(
+                            ContextCompat.getColor(
+                                Main.mContext!!,
+                                R.color.buttonfirstcolor
+                            )
+                        )
                     }
 
+                }
+                EV_5_calibratePos -> {
+                    val xpos = arg1
+                    val ypos = arg2
+                    val bounds = arg3 as Square
+
+//                    Main.stickPad!!.invalidate()
+                    println("i=$xpos  j=$ypos   square= $bounds")
+                    Forces.targetPos.setPositionRel(xpos/10f, ypos/10f)
+//                    Forces.stickPos.setPositionRel((xpos+.3f)/10f, ypos/10f)
+//                    Main.stickPad!!.invalidate()
+//                    Main.stickPad!!.drawTarget(xpos / 10f, ypos / 10f)
+
+                    Handler().postDelayed(
+                        { send(EV_6_deviation, xpos, ypos, bounds) }, 1000.toLong()
+                    )
+//                    if (xpos < bounds.r)
+//                        Handler().postDelayed(
+//                            { send(EV_5_calibratePos, xpos + 1, ypos, bounds) }, 500.toLong()
+//                        )
+//                    else {
+//                        if (ypos < bounds.d)
+//                            Handler().postDelayed(
+//                                { send(EV_5_calibratePos, bounds.l, ypos + 1, bounds) }, 500.toLong()
+//                            )
+//                    }
+                }
+                EV_6_deviation -> {
+                    val xpos = arg1
+                    val ypos = arg2
+                    val bounds = arg3 as Square
+
+                    val stickx = Forces.stickPos.x
+                    val sticky = Forces.stickPos.y
+                    Forces.stickPos.setPositionRel(stickx, sticky + 0.12f)
+                    println("deviation= ${Forces.targetPos}   ${Forces.stickPos}")
+                    if (xpos < bounds.r)
+                        send(EV_5_calibratePos, xpos + 1, ypos, bounds)
+                    else {
+                        if (ypos < bounds.d)
+                          send(EV_5_calibratePos, bounds.l, ypos + 1, bounds)
+                    }
+
+//                    Main.stickPad!!.invalidate()
                 }
                 EV_9_new_IP -> {
                     if (!running) {
@@ -167,7 +218,12 @@ class PollMaster : Thread() {
                 }
                 EV_23_calibrate -> {
                     calibrateButton = arg3 as androidx.appcompat.widget.AppCompatTextView
-                    calibrateButton!!.setBackgroundColor(ContextCompat.getColor(Main.mContext!!, R.color.buttonsecondcolor))
+                    calibrateButton!!.setBackgroundColor(
+                        ContextCompat.getColor(
+                            Main.mContext!!,
+                            R.color.buttonsecondcolor
+                        )
+                    )
                     Forces!!.calibrateAll()
                 }
                 else -> {
@@ -186,6 +242,8 @@ class PollMaster : Thread() {
         const val EV_2_start_stop = 2
         const val EV_3_next_round = 3
         const val EV_4_calibrateOne = 4
+        const val EV_5_calibratePos = 5
+        const val EV_6_deviation = 6
         const val EV_9_new_IP = 9
         const val EV_11_dt_min = 11
         const val EV_12_dt_plus = 12

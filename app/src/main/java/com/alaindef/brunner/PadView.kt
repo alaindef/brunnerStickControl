@@ -34,6 +34,15 @@ class PadView @JvmOverloads constructor(
         strokeWidth = 6f
         color = Color.MAGENTA
     }
+    private val paintBlue = Paint().apply {
+        isAntiAlias = true
+        isDither = true
+        style = Paint.Style.STROKE
+        strokeJoin = Paint.Join.ROUND
+        strokeCap = Paint.Cap.ROUND
+        strokeWidth = 6f
+        color = Color.BLUE
+    }
 
     fun sendTarget(xPix: Float, yPix: Float, padWidth: Float, padHeight: Float): Vector {
         val xRel = (minOf(maxOf((xPix / padWidth), 0F), 0.99F))
@@ -51,11 +60,29 @@ class PadView @JvmOverloads constructor(
         val padHeight = height.toFloat()
         super.onDraw(canvas)
         canvas.drawPath(path, paint)
+//        canvas.drawCircle(
+//            Forces.currentRel.x * padWidth,
+//            Forces.currentRel.y * padHeight,
+//            15f,
+//            paintRed
+//        )
+//        canvas.drawCircle(
+//            Forces.targetRel.x * padWidth,
+//            Forces.targetRel.y * padHeight,
+//            15f,
+//            paintBlue
+//        )
         canvas.drawCircle(
-            Forces.currentRel.x * padWidth,
-            Forces.currentRel.y * padHeight,
+            Forces.targetPos.x * padWidth,
+            Forces.targetPos.y * padHeight,
             15f,
             paintRed
+        )
+        canvas.drawCircle(
+            Forces.stickPos.x * padWidth,
+            Forces.stickPos.y * padHeight,
+            15f,
+            paintBlue
         )
     }
 
@@ -107,5 +134,22 @@ class PadView @JvmOverloads constructor(
 
     fun drawTarget(xRel: Float, yRel: Float) {
         drawTargetP(xRel * width, yRel * height)
+//        Forces.targetRel = Vector(xRel, yRel)
+    }
+
+    fun showPosP(xPixel: Float, yPixel: Float, color: Int) {
+        path.reset()
+        val xView = minOf(width.toFloat(), maxOf(0f, xPixel))
+        val yView = minOf(height.toFloat(), maxOf(0f, yPixel))
+//          draw a small circle to show the target position
+        paint.setColor(color)
+//        canvas.drawCircle(xView, yView, 15f, paint)
+        path.addCircle(xView, yView, 15f, Path.Direction.CCW)
+//        invalidate()
+    }
+
+    fun showPos(xRel: Float, yRel: Float, color: Int) {
+        showPosP(xRel * width, yRel * height, color)
+//        Forces.targetRel = Vector(xRel, yRel)
     }
 }

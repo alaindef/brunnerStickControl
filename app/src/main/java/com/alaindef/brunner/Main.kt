@@ -45,6 +45,10 @@ data class IntVector(val x: Int, val y: Int) {
     }
 }
 
+data class Square(val l: Int, val u: Int, val r: Int, val d: Int)
+
+data class Square1(val topLeft: IntVector, val bottomRight: IntVector)
+
 @Suppress("unused")
 class Main : AppCompatActivity() {
     private val logTag = ">----MAIN---"
@@ -69,6 +73,13 @@ class Main : AppCompatActivity() {
             "resetCorY" -> {
                 correctionView!!.resetCorY()
 //                sendy.send(PollMaster.EV_22_resetCorY, 0, 0, ss)
+            }
+            "ex1" -> {
+                Forces.calibrate()
+            }
+            "ex2" -> {
+                Forces.stickPos.setPositionRel(.8f, .0f)
+                Main.stickPad!!.invalidate()
             }
             else -> Log.wtf(logTag, "tag unknown $ss")
         }

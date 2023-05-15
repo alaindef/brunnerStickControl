@@ -186,7 +186,7 @@
         android:layout_width="match_parent"
         android:layout_height="60dp"
         android:background="@android:color/holo_blue_light"
-        android:weightSum="8">
+        android:weightSum="12">
 
 
         <androidx.appcompat.widget.AppCompatTextView
@@ -228,7 +228,21 @@
             android:gravity="center"
             android:onClick="sendEvent"
             android:tag="calibrate"
-            android:text="calibrate"
+            android:text="cal"
+            android:textSize="30sp" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/tile6"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_weight="2"
+            android:background="@color/buttonfirstcolor"
+            android:contentDescription="@string/photoView"
+            android:gravity="center"
+            android:onClick="sendEvent"
+            android:tag="resetCorY"
+            android:text="rst"
             android:textSize="30sp" />
 
         <androidx.appcompat.widget.AppCompatTextView
@@ -241,8 +255,22 @@
             android:contentDescription="@string/photoView"
             android:gravity="center"
             android:onClick="sendEvent"
-            android:tag="resetCorY"
-            android:text="rst corY"
+            android:tag="ex1"
+            android:text="ex1"
+            android:textSize="30sp" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/tile5"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_weight="2"
+            android:background="@color/buttonfirstcolor"
+            android:contentDescription="@string/photoView"
+            android:gravity="center"
+            android:onClick="sendEvent"
+            android:tag="ex2"
+            android:text="ex2"
             android:textSize="30sp" />
 
     </LinearLayout>

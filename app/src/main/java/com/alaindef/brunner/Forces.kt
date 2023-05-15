@@ -6,10 +6,15 @@ import java.lang.Float.min
 import kotlin.math.max
 
 object Forces {
+
     private val horizontalPID = BasicPID(1f, 0f, 0f)
 
     //    private val verticalPID = MiniPID(1f, 0f, 0f)
     private val verticalPID = BasicPID(1f, 0f, 0f)
+
+    val stickPos = PositionRel("STICK",.2f, .05f, PositionRel.currentColor)
+    val targetPos = PositionRel("TARGET",.6f, 0f, PositionRel.targetColor)
+    // initial position not shown
 
     var conP = 50f
     var conI = 0f
@@ -31,6 +36,20 @@ object Forces {
             "conPv" -> conPv = value
             "conIv" -> conIv = value
         }
+    }
+
+    fun calibrate(){
+        var square = Square(0,0, 0,5)
+
+        stickPos.setPositionRel(.8f, 0f)
+        sendy.send(PollMaster.EV_5_calibratePos, square.l, square.u, square)
+
+//        for (i in square.topLeft.x .. square.bottomRight.x) {
+//            for (j in square.topLeft.y .. square.bottomRight.y){
+//
+////                println("i=$i  j=$j")
+//            }
+//        }
     }
 
     fun calibrateAll() {
