@@ -37,7 +37,7 @@ object UdpRecObject {
     }
 
 
-    fun getCoordinates(): Vector {
+    fun getCoordinates(): VectorF {
 //        returns values from brunner range 0.00 .. 1.00
         val policy = StrictMode.ThreadPolicy.Builder().permitAll().build()
         StrictMode.setThreadPolicy(policy)
@@ -64,7 +64,7 @@ object UdpRecObject {
         } catch (ex: InterruptedException) {
             ex.printStackTrace()
         }
-        return Vector(x, y)
+        return VectorF(x, y)
     }
 
 }

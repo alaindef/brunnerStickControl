@@ -14,11 +14,10 @@ class PadView @JvmOverloads constructor(
 ) :
     com.google.android.material.imageview.ShapeableImageView(context, attrs, defStyleAttr) {
 
-    val stickPos = PositionRel("STICK", .2f, .05f, PositionRel.currentColor)
-    val targetPos = PositionRel("TARGET", .6f, 0f, PositionRel.targetColor)
+    val stick = PositionRel("STICK", VectorF(.2f, .05f), PositionRel.stickColor)
+    val target = PositionRel("TARGET", VectorF(.6f, 0f), PositionRel.targetColor)
 
     private val path = Path()
-    private val canvas = Canvas()
     private val paint = Paint().apply {
         isAntiAlias = true
         isDither = true
@@ -47,55 +46,57 @@ class PadView @JvmOverloads constructor(
         color = Color.BLUE
     }
 
-    fun sendTarget(xPix: Float, yPix: Float, padWidth: Float, padHeight: Float): Vector {
-        val xRel = (minOf(maxOf((xPix / padWidth), 0F), 0.99F))
-        val yRel = (minOf(maxOf((yPix / padHeight), 0F), 0.99F))
+    fun sendTarget0(xPix: Float, yPix: Float, padWidth: Float, padHeight: Float) {
+        target.setPos(
+            (minOf(maxOf((xPix / padWidth), 0F), 0.99F)),
+            (minOf(maxOf((yPix / padHeight), 0F), 0.99F))
+        )
         Main.mReport2!!.text =
-            "(${String.format("%.${2}f", xRel)}  ${String.format("%.${2}f", yRel)})"
-
-        Forces.targetRel = Vector(xRel, yRel)
-        invalidate()
-        return Vector(xRel, yRel)
+            "(${String.format("%.${2}f", target.pos.x)}  ${
+                String.format("%.${2}f", target.pos.y)
+            })"
+        Forces.targetRel = target.pos
+    }
+    fun sendTarget(pos: VectorF, size: VectorF) {
+        target.setPosV(
+            pos.divide(size).maxOf(VectorF(0f,0f).minOf(VectorF(0.99f,0.99f))))
+        Main.mReport2!!.text =
+            "(${String.format("%.${2}f", target.pos.x)}  ${
+                String.format("%.${2}f", target.pos.y)
+            })"
+        Forces.targetRel = target.pos
     }
 
     override fun onDraw(canvas: Canvas) {
-        val padWidth = width.toFloat()
-        val padHeight = height.toFloat()
         super.onDraw(canvas)
         canvas.drawPath(path, paint)
-        //old
-        //old
-        showPos(targetPos.x, targetPos.y, targetPos.color)
-        showPos(stickPos.x, stickPos.y, stickPos.color)
+        canvas.drawCircle(stick.pos.x * width, stick.pos.y * height, 15f, paintRed)
+        canvas.drawCircle(target.pos.x * width, target.pos.y * height, 15f, paintBlue)
+        // do not try to put drawCircle in separate functions, you need canvas anyway.
     }
 
     override fun onTouchEvent(event: MotionEvent): Boolean {
+        // move the target position
         val xPixel = event.x
         val yPixel = event.y
-        val padWidth = width.toFloat()
-        val padHeight = height.toFloat()
+        val pixelpos = VectorF(event.x, event.y)
+        val size = VectorF(width.toFloat(), height.toFloat())
 
         when (event.action) {
             MotionEvent.ACTION_DOWN -> {
                 Main.mReport5a!!.text = "action down ($xPixel $yPixel)"
-                sendTarget(xPixel, yPixel, padWidth, padHeight)
+                sendTarget(pixelpos, size)
                 path.moveTo(xPixel, yPixel)
-                return true
             }
             MotionEvent.ACTION_MOVE -> {
-                sendTarget(xPixel, yPixel, padWidth, padHeight)
+                Main.mReport5!!.text = "action move ($xPixel $yPixel)"
+                sendTarget(pixelpos, size)
                 paint.color = Color.BLUE
                 path.lineTo(xPixel, yPixel)
             }
             MotionEvent.ACTION_UP -> {
-                drawTargetP(xPixel, yPixel)
                 Main.mReport5a!!.text = "done"
-//                path.reset()
-//                val xView = minOf(padWidth, maxOf(0f, x))
-//                val yView = minOf(padHeight, maxOf(0f, y))
-//          //draw a small circle to show the target position
-//                paint.setColor(Color.RED)
-//                path.addCircle(xView, yView, 15f, Path.Direction.CCW)
+                path.reset()
             }
             else -> return false
         }
@@ -106,14 +107,13 @@ class PadView @JvmOverloads constructor(
     }
 
     fun drawTargetP(xPixel: Float, yPixel: Float) {
-        path.reset()
         val xView = minOf(width.toFloat(), maxOf(0f, xPixel))
         val yView = minOf(height.toFloat(), maxOf(0f, yPixel))
 //          draw a small circle to show the target position
         paint.setColor(Color.BLUE)
 //        canvas.drawCircle(xView, yView, 15f, paint)
         path.addCircle(xView, yView, 15f, Path.Direction.CCW)
-        invalidate()
+//        invalidate()
     }
 
     fun drawTarget(xRel: Float, yRel: Float) {
@@ -121,19 +121,5 @@ class PadView @JvmOverloads constructor(
 //        Forces.targetRel = Vector(xRel, yRel)
     }
 
-    fun showPosP(xPixel: Float, yPixel: Float, color: Int) {
-        path.reset()
-        val xView = minOf(width.toFloat(), maxOf(0f, xPixel))
-        val yView = minOf(height.toFloat(), maxOf(0f, yPixel))
-//          draw a small circle to show the target position
-        paint.setColor(color)
-//        canvas.drawCircle(xView, yView, 15f, paint)
-        path.addCircle(xView, yView, 15f, Path.Direction.CCW)
-//        invalidate()
-    }
 
-    fun showPos(xRel: Float, yRel: Float, color: Int) {
-        showPosP(xRel * width, yRel * height, color)
-//        Forces.targetRel = Vector(xRel, yRel)
-    }
 }

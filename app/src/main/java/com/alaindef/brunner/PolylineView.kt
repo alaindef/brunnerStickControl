@@ -124,7 +124,7 @@ class PolylineView @JvmOverloads constructor(
         invalidate()
     }
 
-    fun setVertex(index: Int, v: Vector){
+    fun setVertex(index: Int, v: VectorF){
         vertices[index].x = v.y * width
     }
 

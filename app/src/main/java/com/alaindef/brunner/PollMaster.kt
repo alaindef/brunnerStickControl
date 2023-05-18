@@ -72,7 +72,9 @@ class PollMaster : Thread() {
         val res = UdpRecObject.getCoordinates()
         // return the result to sendy range of coordinates: 0f .. 1f
         Forces.currentRel = res            //range 0f .. 1f
-        Main.stickPad!!.invalidate()
+//        Main.stickPad!!.invalidate()
+        Main.stickPad!!.stick.pos = res
+//        Main.stickPad!!.stickPos.show()
 
     }
 
@@ -150,7 +152,7 @@ class PollMaster : Thread() {
 
 //                    Main.stickPad!!.invalidate()
                     println("i=$xpos  j=$ypos   square= $bounds")
-                    Main.stickPad!!.targetPos.setPositionRel(xpos/10f, ypos/10f)
+                    Main.stickPad!!.target.setPos(xpos/10f, ypos/10f)
 //                    Forces.stickPos.setPositionRel((xpos+.3f)/10f, ypos/10f)
 //                    Main.stickPad!!.invalidate()
 //                    Main.stickPad!!.drawTarget(xpos / 10f, ypos / 10f)
@@ -174,10 +176,10 @@ class PollMaster : Thread() {
                     val ypos = arg2
                     val bounds = arg3 as Square
 
-                    val stickx = Main.stickPad!!.stickPos.x
-                    val sticky = Main.stickPad!!.stickPos.y
-                    Main.stickPad!!.stickPos.setPositionRel(stickx, sticky + 0.12f)
-                    println("deviation= ${Main.stickPad!!.targetPos}   ${Main.stickPad!!.stickPos}")
+                    val stickx = Main.stickPad!!.stick.pos.x
+                    val sticky = Main.stickPad!!.stick.pos.y
+                    Main.stickPad!!.stick.setPos(stickx, sticky + 0.12f)
+                    println("deviation= ${Main.stickPad!!.target}   ${Main.stickPad!!.stick}")
                     if (xpos < bounds.r)
                         send(EV_5_calibratePos, xpos + 1, ypos, bounds)
                     else {
@@ -186,6 +188,11 @@ class PollMaster : Thread() {
                     }
 
 //                    Main.stickPad!!.invalidate()
+                }
+                EV_7_force -> {
+                    Main.stickPad!!.target.setPos(.8f, Main.stickPad!!.target.pos.y + 0.1f)
+                    Forces.targetRel = Main.stickPad!!.target.pos
+                    Main.stickPad!!.invalidate()
                 }
                 EV_9_new_IP -> {
                     if (!running) {
@@ -244,6 +251,7 @@ class PollMaster : Thread() {
         const val EV_4_calibrateOne = 4
         const val EV_5_calibratePos = 5
         const val EV_6_deviation = 6
+        const val EV_7_force = 7
         const val EV_9_new_IP = 9
         const val EV_11_dt_min = 11
         const val EV_12_dt_plus = 12

@@ -2,42 +2,42 @@ package com.alaindef.brunner
 
 import android.graphics.Color
 
-const val targetColor = Color.BLUE
-const val currentColor = Color.MAGENTA
-
-class PositionRel constructor (val id: String, var x: Float, var y: Float, val color: Int) {
+class PositionRel constructor (val id: String, var pos: VectorF, val color: Int) {
 
     init{
-        println("init ======== > $id set ---------: ($x  $y)  $color targetcol= $targetColor stickcol=$currentColor")
+        println("init ======== > $id set ---------: ($pos.x  $pos.y)  $color targetcol= $targetColor stickcol=$stickColor")
     }
-    fun setPositionRel(xNew: Float, yNew: Float){
-        x = xNew
-        y = yNew
-        Main.stickPad!!.showPos(xNew, yNew, color)
-        println("$id set ---------: ($xNew  $yNew)  $color")
+
+    fun setPos(xNew: Float, yNew: Float){
+        pos.x = xNew
+        pos.y = yNew
+        Main.stickPad!!.invalidate()
+    }
+   fun setPosV(new:VectorF){
+        pos = new
         Main.stickPad!!.invalidate()
     }
 
-    fun min(arg: PositionRel): PositionRel {
-        val x1 = x - arg.x
-        val y1 = y - arg.y
-        return PositionRel(this.id, x1, y1, this.color)
+    fun minus(arg: PositionRel): PositionRel {
+        val x1 = pos.x - arg.pos.x
+        val y1 = pos.y - arg.pos.y
+        return PositionRel(this.id, VectorF(x1, y1), this.color)
     }
 
     fun times(arg: Float): PositionRel {
-        return PositionRel(this.id, x * arg, y * arg, this.color)
+        return PositionRel(this.id, VectorF(pos.x * arg, pos.y * arg), this.color)
     }
 
     fun divide(arg: Float): PositionRel {
-        return PositionRel(this.id, x / arg, y / arg, this.color)
+        return PositionRel(this.id, VectorF(pos.x / arg, pos.y / arg), this.color)
     }
 
-    fun toIntVector(): IntVector {
-        return IntVector(x.toInt(), y.toInt())
+    fun toIntVector(): VectorI {
+        return VectorI(pos.x.toInt(), pos.y.toInt())
     }
 
     companion object {
         const val targetColor = Color.BLUE
-        const val currentColor = Color.MAGENTA
+        const val stickColor = Color.MAGENTA
     }
 }

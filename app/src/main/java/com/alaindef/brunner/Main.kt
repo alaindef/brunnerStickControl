@@ -13,41 +13,51 @@ import android.util.Log
 import android.view.View
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.ContextCompat
-import com.google.android.material.slider.Slider
-import com.google.android.material.slider.Slider.OnChangeListener
 
-data class Vector(var x: Float, var y: Float) {
-    fun add(arg: Vector): Vector {
-        return Vector(x + arg.x, y + arg.y)
+data class VectorF(var x: Float, var y: Float) {
+    fun add(arg: VectorF): VectorF {
+        return VectorF(x + arg.x, y + arg.y)
     }
 
-    fun min(arg: Vector): Vector {
-        return Vector(x - arg.x, y - arg.y)
+    fun minus(arg: VectorF): VectorF {
+        return VectorF(x - arg.x, y - arg.y)
     }
 
-    fun times(arg: Float): Vector {
-        return Vector(x * arg, y * arg)
+    fun times(arg: Float): VectorF {
+        return VectorF(x * arg, y * arg)
+    }
+    fun times(arg: VectorF): VectorF {
+        return VectorF(x * arg.x, y * arg.y)
     }
 
-    fun divide(arg: Float): Vector {
-        return Vector(x / arg, y / arg)
+    fun divide(arg: Float): VectorF {
+        return VectorF(x / arg, y / arg)
+    }
+    fun divide(arg: VectorF): VectorF {
+        return VectorF(x / arg.x, y / arg.y)
     }
 
-    fun toIntVector(): IntVector {
-        return IntVector(x.toInt(), y.toInt())
+    fun toIntVector(): VectorI {
+        return VectorI(x.toInt(), y.toInt())
+    }
+
+    fun maxOf(arg: VectorF): VectorF {
+        return VectorF(maxOf(x, arg.x), maxOf(y, arg.y))
+    }
+    fun minOf(arg: VectorF): VectorF {
+        return VectorF(minOf(x, arg.x), minOf(y, arg.y))
     }
 }
 
-data class IntVector(val x: Int, val y: Int) {
-    fun max(arg: IntVector): IntVector {
-        return IntVector(kotlin.math.max(x, arg.x), kotlin.math.max(y, arg.y))
+data class VectorI(val x: Int, val y: Int) {
+    fun max(arg: VectorI): VectorI {
+        return VectorI(kotlin.math.max(x, arg.x), kotlin.math.max(y, arg.y))
     }
 }
 
 data class Square(val l: Int, val u: Int, val r: Int, val d: Int)
 
-data class Square1(val topLeft: IntVector, val bottomRight: IntVector)
+data class Square1(val topLeft: VectorI, val bottomRight: VectorI)
 
 @Suppress("unused")
 class Main : AppCompatActivity() {
@@ -76,11 +86,11 @@ class Main : AppCompatActivity() {
             }
             "ex1" -> {
 //                Forces.calibrate()
-                stickPad!!.targetPos.setPositionRel(.8f, stickPad!!.targetPos.y + 0.1f)
+              sendy.send(PollMaster.EV_7_force)
             }
             "ex2" -> {
-                stickPad!!.stickPos.setPositionRel(.3f, stickPad!!.stickPos.y + 0.1f)
-//                Main.stickPad!!.invalidate()
+//                stickPad!!.stickPos.setPositionRel(.3f, (stickPad!!.stickPos.pos.y + 0.1f)%1f)
+                stickPad!!.target.setPos(.3f, (stickPad!!.target.pos.y + 0.1f)%1f)
             }
             else -> Log.wtf(logTag, "tag unknown $ss")
         }
