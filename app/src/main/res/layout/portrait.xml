@@ -24,7 +24,7 @@
             android:gravity="center"
             android:text="192.168.0.203" />
 
-        <TextView
+        <com.google.android.material.textview.MaterialTextView
             android:id="@+id/report0"
             android:layout_width="0dp"
             android:layout_height="match_parent"
@@ -45,7 +45,7 @@
         android:weightSum="8">
 
 
-        <TextView
+        <com.google.android.material.textview.MaterialTextView
             android:id="@+id/report1a"
             android:layout_width="0dp"
             android:layout_height="match_parent"
@@ -54,7 +54,7 @@
             android:gravity="center"
             android:text="current position" />
 
-        <TextView
+        <com.google.android.material.textview.MaterialTextView
             android:id="@+id/report1"
             android:layout_width="0dp"
             android:layout_height="match_parent"
@@ -75,7 +75,7 @@
         android:weightSum="8">
 
 
-        <TextView
+        <com.google.android.material.textview.MaterialTextView
             android:id="@+id/report2a"
             android:layout_width="0dp"
             android:layout_height="match_parent"
@@ -84,7 +84,7 @@
             android:gravity="center"
             android:text="target position" />
 
-        <TextView
+        <com.google.android.material.textview.MaterialTextView
             android:id="@+id/report2"
             android:layout_width="0dp"
             android:layout_height="match_parent"
@@ -104,7 +104,7 @@
         android:weightSum="8">
 
 
-        <TextView
+        <com.google.android.material.textview.MaterialTextView
             android:id="@+id/report3a"
             android:layout_width="0dp"
             android:layout_height="match_parent"
@@ -113,7 +113,7 @@
             android:gravity="center"
             android:text="forces" />
 
-        <TextView
+        <com.google.android.material.textview.MaterialTextView
             android:id="@+id/report3"
             android:layout_width="0dp"
             android:layout_height="match_parent"
@@ -133,7 +133,7 @@
         android:background="@android:color/holo_blue_light"
         android:weightSum="8">
 
-        <TextView
+        <com.google.android.material.textview.MaterialTextView
             android:id="@+id/report4a"
             android:layout_width="0dp"
             android:layout_height="match_parent"
@@ -142,7 +142,7 @@
             android:gravity="center"
             android:text="polling interval" />
 
-        <TextView
+        <com.google.android.material.textview.MaterialTextView
             android:id="@+id/report4"
             android:layout_width="0dp"
             android:layout_height="36dp"
@@ -160,7 +160,7 @@
         android:background="@android:color/holo_blue_light"
         android:weightSum="8">
 
-        <TextView
+        <com.google.android.material.textview.MaterialTextView
             android:id="@+id/report5a"
             android:layout_width="0dp"
             android:layout_height="match_parent"
@@ -170,7 +170,7 @@
             android:gravity="center"
             android:text="divers messages" />
 
-        <TextView
+        <com.google.android.material.textview.MaterialTextView
             android:id="@+id/report5"
             android:layout_width="0dp"
             android:layout_height="match_parent"
@@ -189,7 +189,7 @@
         android:weightSum="12">
 
 
-        <androidx.appcompat.widget.AppCompatTextView
+        <com.google.android.material.textview.MaterialTextView
             android:id="@+id/tile1"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -203,7 +203,7 @@
             android:text="dt-"
             android:textSize="30sp" />
 
-        <androidx.appcompat.widget.AppCompatTextView
+        <com.google.android.material.textview.MaterialTextView
             android:id="@+id/tile2"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -217,7 +217,7 @@
             android:text="dt+"
             android:textSize="30sp" />
 
-        <androidx.appcompat.widget.AppCompatTextView
+        <com.google.android.material.textview.MaterialTextView
             android:id="@+id/tile3"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -231,7 +231,7 @@
             android:text="cal"
             android:textSize="30sp" />
 
-        <androidx.appcompat.widget.AppCompatTextView
+        <com.google.android.material.textview.MaterialTextView
             android:id="@+id/tile6"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -245,7 +245,7 @@
             android:text="rst"
             android:textSize="30sp" />
 
-        <androidx.appcompat.widget.AppCompatTextView
+        <com.google.android.material.textview.MaterialTextView
             android:id="@+id/tile4"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -259,7 +259,7 @@
             android:text="ex1"
             android:textSize="30sp" />
 
-        <androidx.appcompat.widget.AppCompatTextView
+        <com.google.android.material.textview.MaterialTextView
             android:id="@+id/tile5"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -341,7 +341,7 @@
                 android:tag="B_poll"
                 android:text="@string/polling"
                 android:textAlignment="center"
-                android:textSize="35sp" />
+                android:textSize="30sp" />
 
 
             <Button
@@ -356,7 +356,7 @@
                 android:tag="B_RES"
                 android:text="@string/reset"
                 android:textAlignment="center"
-                android:textSize="35sp" />
+                android:textSize="30sp" />
         </LinearLayout>
 
 
@@ -367,7 +367,7 @@
             android:background="@android:color/holo_blue_light"
             android:weightSum="8">
 
-            <androidx.appcompat.widget.AppCompatTextView
+            <com.google.android.material.textview.MaterialTextView
                 android:id="@+id/seekFill"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
@@ -380,7 +380,7 @@
                 android:tag="B_seek"
                 android:text="P"
                 android:textColor="@android:color/white"
-                android:textSize="30sp" />
+                android:textSize="25sp" />
 
             <com.alaindef.brunner.ViewSlider
                 android:id="@+id/conP"
@@ -393,7 +393,7 @@
                 android:valueFrom="0"
                 android:valueTo="100" />
 
-            <androidx.appcompat.widget.AppCompatTextView
+            <com.google.android.material.textview.MaterialTextView
                 android:id="@+id/conPreport"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
@@ -406,7 +406,7 @@
                 android:tag="B_seek"
                 android:text=""
                 android:textColor="@android:color/white"
-                android:textSize="30sp" />
+                android:textSize="25sp" />
 
         </LinearLayout>
 
@@ -418,7 +418,7 @@
             android:background="@android:color/holo_blue_light"
             android:weightSum="8">
 
-            <androidx.appcompat.widget.AppCompatTextView
+            <com.google.android.material.textview.MaterialTextView
                 android:id="@+id/conIFill"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
@@ -431,7 +431,7 @@
                 android:tag="B_seek"
                 android:text="I"
                 android:textColor="@android:color/white"
-                android:textSize="30sp" />
+                android:textSize="25sp" />
 
 
             <com.alaindef.brunner.ViewSlider
@@ -446,7 +446,7 @@
                 android:valueFrom="0"
                 android:valueTo="100" />
 
-            <androidx.appcompat.widget.AppCompatTextView
+            <com.google.android.material.textview.MaterialTextView
                 android:id="@+id/conIreport"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
@@ -459,7 +459,7 @@
                 android:tag="B_seek"
                 android:text=""
                 android:textColor="@android:color/white"
-                android:textSize="30sp" />
+                android:textSize="25sp" />
 
         </LinearLayout>
         <LinearLayout
@@ -469,7 +469,7 @@
             android:background="@android:color/holo_blue_light"
             android:weightSum="8">
 
-            <androidx.appcompat.widget.AppCompatTextView
+            <com.google.android.material.textview.MaterialTextView
                 android:id="@+id/conPvFill"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
@@ -482,7 +482,7 @@
                 android:tag="B_seek"
                 android:text="Pv"
                 android:textColor="@android:color/white"
-                android:textSize="30sp" />
+                android:textSize="25sp" />
 
             <com.alaindef.brunner.ViewSlider
                 android:id="@+id/conPv"
@@ -497,7 +497,7 @@
                 android:valueTo="100" />
 
 
-            <androidx.appcompat.widget.AppCompatTextView
+            <com.google.android.material.textview.MaterialTextView
                 android:id="@+id/conPvreport"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
@@ -510,7 +510,7 @@
                 android:tag="B_seek"
                 android:text=""
                 android:textColor="@android:color/white"
-                android:textSize="30sp" />
+                android:textSize="25sp" />
 
         </LinearLayout>
 
@@ -522,7 +522,7 @@
             android:background="@android:color/holo_blue_light"
             android:weightSum="8">
 
-            <androidx.appcompat.widget.AppCompatTextView
+            <com.google.android.material.textview.MaterialTextView
                 android:id="@+id/conIvFill"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
@@ -535,7 +535,7 @@
                 android:tag="B_seek"
                 android:text="Iv"
                 android:textColor="@android:color/white"
-                android:textSize="30sp" />
+                android:textSize="25sp" />
 
 
             <com.alaindef.brunner.ViewSlider
@@ -550,7 +550,7 @@
                 android:valueFrom="0"
                 android:valueTo="100" />
 
-            <androidx.appcompat.widget.AppCompatTextView
+            <com.google.android.material.textview.MaterialTextView
                 android:id="@+id/conIvreport"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
@@ -563,7 +563,7 @@
                 android:tag="B_seek"
                 android:text=""
                 android:textColor="@android:color/white"
-                android:textSize="30sp" />
+                android:textSize="25sp" />
 
         </LinearLayout>
 

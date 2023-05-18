@@ -75,11 +75,12 @@ class Main : AppCompatActivity() {
 //                sendy.send(PollMaster.EV_22_resetCorY, 0, 0, ss)
             }
             "ex1" -> {
-                Forces.calibrate()
+//                Forces.calibrate()
+                stickPad!!.targetPos.setPositionRel(.8f, stickPad!!.targetPos.y + 0.1f)
             }
             "ex2" -> {
-                Forces.stickPos.setPositionRel(.8f, .0f)
-                Main.stickPad!!.invalidate()
+                stickPad!!.stickPos.setPositionRel(.3f, stickPad!!.stickPos.y + 0.1f)
+//                Main.stickPad!!.invalidate()
             }
             else -> Log.wtf(logTag, "tag unknown $ss")
         }

@@ -150,7 +150,7 @@ class PollMaster : Thread() {
 
 //                    Main.stickPad!!.invalidate()
                     println("i=$xpos  j=$ypos   square= $bounds")
-                    Forces.targetPos.setPositionRel(xpos/10f, ypos/10f)
+                    Main.stickPad!!.targetPos.setPositionRel(xpos/10f, ypos/10f)
 //                    Forces.stickPos.setPositionRel((xpos+.3f)/10f, ypos/10f)
 //                    Main.stickPad!!.invalidate()
 //                    Main.stickPad!!.drawTarget(xpos / 10f, ypos / 10f)
@@ -174,10 +174,10 @@ class PollMaster : Thread() {
                     val ypos = arg2
                     val bounds = arg3 as Square
 
-                    val stickx = Forces.stickPos.x
-                    val sticky = Forces.stickPos.y
-                    Forces.stickPos.setPositionRel(stickx, sticky + 0.12f)
-                    println("deviation= ${Forces.targetPos}   ${Forces.stickPos}")
+                    val stickx = Main.stickPad!!.stickPos.x
+                    val sticky = Main.stickPad!!.stickPos.y
+                    Main.stickPad!!.stickPos.setPositionRel(stickx, sticky + 0.12f)
+                    println("deviation= ${Main.stickPad!!.targetPos}   ${Main.stickPad!!.stickPos}")
                     if (xpos < bounds.r)
                         send(EV_5_calibratePos, xpos + 1, ypos, bounds)
                     else {

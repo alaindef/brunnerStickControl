@@ -5,7 +5,7 @@ android {
     compileSdkVersion 33
 
     defaultConfig {
-        applicationId "com.alaindef.brunnerCor"
+        applicationId "com.alaindef.brunea3"
         minSdkVersion 23
         targetSdkVersion 33
         versionCode 1

@@ -12,7 +12,10 @@ class PadView @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null,
     defStyleAttr: Int = 0,
 ) :
-    androidx.appcompat.widget.AppCompatImageView(context, attrs, defStyleAttr) {
+    com.google.android.material.imageview.ShapeableImageView(context, attrs, defStyleAttr) {
+
+    val stickPos = PositionRel("STICK", .2f, .05f, PositionRel.currentColor)
+    val targetPos = PositionRel("TARGET", .6f, 0f, PositionRel.targetColor)
 
     private val path = Path()
     private val canvas = Canvas()
@@ -60,30 +63,10 @@ class PadView @JvmOverloads constructor(
         val padHeight = height.toFloat()
         super.onDraw(canvas)
         canvas.drawPath(path, paint)
-//        canvas.drawCircle(
-//            Forces.currentRel.x * padWidth,
-//            Forces.currentRel.y * padHeight,
-//            15f,
-//            paintRed
-//        )
-//        canvas.drawCircle(
-//            Forces.targetRel.x * padWidth,
-//            Forces.targetRel.y * padHeight,
-//            15f,
-//            paintBlue
-//        )
-        canvas.drawCircle(
-            Forces.targetPos.x * padWidth,
-            Forces.targetPos.y * padHeight,
-            15f,
-            paintRed
-        )
-        canvas.drawCircle(
-            Forces.stickPos.x * padWidth,
-            Forces.stickPos.y * padHeight,
-            15f,
-            paintBlue
-        )
+        //old
+        //old
+        showPos(targetPos.x, targetPos.y, targetPos.color)
+        showPos(stickPos.x, stickPos.y, stickPos.color)
     }
 
     override fun onTouchEvent(event: MotionEvent): Boolean {
@@ -106,6 +89,7 @@ class PadView @JvmOverloads constructor(
             }
             MotionEvent.ACTION_UP -> {
                 drawTargetP(xPixel, yPixel)
+                Main.mReport5a!!.text = "done"
 //                path.reset()
 //                val xView = minOf(padWidth, maxOf(0f, x))
 //                val yView = minOf(padHeight, maxOf(0f, y))

@@ -12,8 +12,6 @@ object Forces {
     //    private val verticalPID = MiniPID(1f, 0f, 0f)
     private val verticalPID = BasicPID(1f, 0f, 0f)
 
-    val stickPos = PositionRel("STICK",.2f, .05f, PositionRel.currentColor)
-    val targetPos = PositionRel("TARGET",.6f, 0f, PositionRel.targetColor)
     // initial position not shown
 
     var conP = 50f
@@ -31,17 +29,29 @@ object Forces {
 
     fun newPIDParam(value: Float, source: String) {
         when (source) {
-            "conP" -> conP = value
-            "conI" -> conI = value
-            "conPv" -> conPv = value
-            "conIv" -> conIv = value
+            "conP" -> {
+                conP = value
+                Main.conPReport!!.text = " ${value.toInt()}"
+            }
+            "conI" -> {
+                conI = value
+                Main.conIReport!!.text = " ${value.toInt()}"
+            }
+            "conPv" -> {
+                conPv = value
+                Main.conPvReport!!.text = " ${value.toInt()}"
+            }
+            "conIv" -> {
+                conIv = value
+                Main.conIvReport!!.text = " ${value.toInt()}"
+            }
         }
     }
 
     fun calibrate(){
         var square = Square(0,0, 0,5)
 
-        stickPos.setPositionRel(.8f, 0f)
+        Main.stickPad!!.stickPos.setPositionRel(.8f, 0f)
         sendy.send(PollMaster.EV_5_calibratePos, square.l, square.u, square)
 
 //        for (i in square.topLeft.x .. square.bottomRight.x) {
@@ -102,6 +112,24 @@ object Forces {
         else 0f
 
         return posRel.min(Vector(corX, corY))
+    }
+
+    private fun correctRel1(posRel: PositionRel): PositionRel {
+//        range of pos: 0f .. 1f. scale up to 0 .. 100
+        var posRelNew = posRel
+        posRelNew.x = max(0f, kotlin.math.min(0.99f, posRel.x))    //avoid outofbounds further down
+        posRelNew.y = max(0f, min(posRel.y, .99f))
+
+        var index = (posRel.divide(0.1f)).toIntVector()
+
+        posRelNew.x = if (index.x < 10)
+            corTable[index.x].x + (corTable[index.x + 1].x - corTable[index.x].x) * (posRelNew.x - index.x / 10f) / 0.1f
+        else 0f
+        posRelNew.y = if (index.y < 10)
+            corTable[index.y].y + (corTable[index.y + 1].y - corTable[index.y].y) * (posRelNew.y - index.y / 10f) / 0.1f
+        else 0f
+
+        return posRelNew
     }
 
 
