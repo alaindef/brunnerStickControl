@@ -13,6 +13,7 @@ import android.util.Log
 import android.view.View
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 
 data class VectorF(var x: Float, var y: Float) {
     fun add(arg: VectorF): VectorF {
@@ -78,7 +79,14 @@ class Main : AppCompatActivity() {
                 sendy.send(PollMaster.EV_12_dt_plus, 0, 0, ss)
             }
             "calibrate" -> {
-                sendy.send(PollMaster.EV_5_calibrate, 0, 0, view)
+//                sendy.send(PollMaster.EV_5_calibrate, 0, 0, view)
+                val startPos = VectorI(2,2)
+                val endPos   = VectorI(4, 4)
+                sendy.send(PollMaster.EV_7_calibratePos, 2, 2, Square1(startPos, endPos))
+
+                view.setBackgroundColor(
+                    ContextCompat.getColor(Main.mContext!!, R.color.buttonsecondcolor)
+                )
             }
             "resetCorY" -> {
                 correctionView!!.resetCorY()

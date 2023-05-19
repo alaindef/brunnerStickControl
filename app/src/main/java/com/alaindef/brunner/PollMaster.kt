@@ -16,11 +16,11 @@ import java.util.regex.Pattern
 class PollMaster : Thread() {
     val logTag = ">---Sendy---"
     var calibrateButton: View? = null
+    var calibrating = false
 
     var event: Int = 0
     var cnt = 0
     var delta_t = 10
-
 
 
     private var ipAddress: InetAddress = InetAddress.getByName("192.168.0.203")
@@ -129,7 +129,6 @@ class PollMaster : Thread() {
                     }
                 }
                 EV_6_calibrateOne -> {
-//                    Main.stickPad!!.drawTarget(0.75f, arg1 / 10f)
                     if ((arg1 < 10)) {
                         Handler().postDelayed(
                             { Main.stickPad!!.calibrateOne(arg1 + arg2, arg2) }, 1000.toLong()
@@ -137,50 +136,46 @@ class PollMaster : Thread() {
                     } else {
                         Handler().postDelayed({ Main.stickPad!!.calibrateEnd(arg1) }, 1000.toLong())
                         calibrateButton!!.setBackgroundColor(
-                            ContextCompat.getColor(
-                                Main.mContext!!,
-                                R.color.buttonfirstcolor
-                            )
+                            ContextCompat.getColor(Main.mContext!!, R.color.buttonfirstcolor)
                         )
                     }
-
                 }
                 EV_7_calibratePos -> {
-                    val xpos = arg1
-                    val ypos = arg2
-                    val bounds = arg3 as Square
+                    val bounds = arg3 as Square1
+                    var xpos = arg1
+                    var ypos = arg2
+
+                    if (!calibrating) {
+                        xpos = bounds.topLeft.x
+                        ypos = bounds.topLeft.y
+                        calibrating = true
+                    }
 
                     println("i=$xpos  j=$ypos   square= $bounds")
-                    Main.stickPad!!.target.setPos(xpos/10f, ypos/10f)
+                    Main.stickPad!!.target.setPos(xpos / 10f, ypos / 10f)
 
                     Handler().postDelayed(
-                        { send(EV_8_deviation, xpos, ypos, bounds) }, 1000.toLong()
+                        { send(EV_8_deviation, xpos, ypos, bounds) }, 800.toLong()
                     )
-//                    if (xpos < bounds.r)
-//                        Handler().postDelayed(
-//                            { send(EV_5_calibratePos, xpos + 1, ypos, bounds) }, 500.toLong()
-//                        )
-//                    else {
-//                        if (ypos < bounds.d)
-//                            Handler().postDelayed(
-//                                { send(EV_5_calibratePos, bounds.l, ypos + 1, bounds) }, 500.toLong()
-//                            )
-//                    }
                 }
                 EV_8_deviation -> {
                     val xpos = arg1
                     val ypos = arg2
-                    val bounds = arg3 as Square
+                    val bounds = arg3 as Square1
 
-                    val stickx = Main.stickPad!!.stick.pos.x
-                    val sticky = Main.stickPad!!.stick.pos.y
-                    Main.stickPad!!.stick.setPos(stickx, sticky + 0.12f)
-                    println("deviation= ${Main.stickPad!!.target}   ${Main.stickPad!!.stick}")
-                    if (xpos < bounds.r)
+                    println("deviation= ${Main.stickPad!!.target.pos}   ${Main.stickPad!!.stick.pos}")
+                    if (xpos < bounds.bottomRight.x)
                         send(EV_7_calibratePos, xpos + 1, ypos, bounds)
                     else {
-                        if (ypos < bounds.d)
-                          send(EV_7_calibratePos, bounds.l, ypos + 1, bounds)
+                        if (ypos < bounds.bottomRight.y)
+                            send(EV_7_calibratePos, bounds.topLeft.x, ypos + 1, bounds)
+                        else {
+                            calibrating = false
+//                            calibrateButton!!.setBackgroundColor(
+//                                ContextCompat.getColor(Main.mContext!!, R.color.buttonfirstcolor)
+//                            )
+                            println("================================> end CALIB  ")
+                        }
                     }
 
 //                    Main.stickPad!!.invalidate()

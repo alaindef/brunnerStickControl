@@ -51,19 +51,13 @@ class PadView @JvmOverloads constructor(
             (minOf(maxOf((xPix / padWidth), 0F), 0.99F)),
             (minOf(maxOf((yPix / padHeight), 0F), 0.99F))
         )
-        Main.mReport2!!.text =
-            "(${String.format("%.${2}f", target.pos.x)}  ${
-                String.format("%.${2}f", target.pos.y)
-            })"
+        Main.mReport2!!.text = "(%.2f %.2f)".format(target.pos.x, target.pos.y)
         Forces.targetRel = target.pos
     }
     fun sendTarget(pos: VectorF, size: VectorF) {
         target.setPosV(
             pos.divide(size).maxOf(VectorF(0f,0f).minOf(VectorF(0.99f,0.99f))))
-        Main.mReport2!!.text =
-            "(${String.format("%.${2}f", target.pos.x)}  ${
-                String.format("%.${2}f", target.pos.y)
-            })"
+        Main.mReport2!!.text = "(%.2f %.2f)".format(target.pos.x, target.pos.y)
         Forces.targetRel = target.pos
     }
 
