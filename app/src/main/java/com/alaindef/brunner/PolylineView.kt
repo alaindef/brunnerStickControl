@@ -120,6 +120,7 @@ class PolylineView @JvmOverloads constructor(
         for (i in 0..10) {
             vertices.add(PointF(width / 2f, (i.toFloat() / 10) * height))
             Forces.corTable[i].y = 0f
+            Forces.corTableProvisional[i].y = 0f
         }
         invalidate()
     }

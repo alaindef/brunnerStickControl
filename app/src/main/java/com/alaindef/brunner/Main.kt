@@ -78,7 +78,7 @@ class Main : AppCompatActivity() {
                 sendy.send(PollMaster.EV_12_dt_plus, 0, 0, ss)
             }
             "calibrate" -> {
-                sendy.send(PollMaster.EV_23_calibrate, 0, 0, view)
+                sendy.send(PollMaster.EV_5_calibrate, 0, 0, view)
             }
             "resetCorY" -> {
                 correctionView!!.resetCorY()
@@ -86,11 +86,11 @@ class Main : AppCompatActivity() {
             }
             "ex1" -> {
 //                Forces.calibrate()
-              sendy.send(PollMaster.EV_7_force)
+              sendy.send(PollMaster.EV_30_force)
             }
             "ex2" -> {
 //                stickPad!!.stickPos.setPositionRel(.3f, (stickPad!!.stickPos.pos.y + 0.1f)%1f)
-                stickPad!!.target.setPos(.3f, (stickPad!!.target.pos.y + 0.1f)%1f)
+                stickPad!!.target.setPos(.3f, ((stickPad!!.target.pos.y * 10f).toInt() + 1)%10.toFloat()/10f)
             }
             else -> Log.wtf(logTag, "tag unknown $ss")
         }
@@ -139,7 +139,7 @@ class Main : AppCompatActivity() {
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
                 // This method is called when the text is changed
                 val newText = s.toString()
-                sendy.send(PollMaster.EV_9_new_IP)
+                sendy.send(PollMaster.EV_15_new_IP)
             }
 
             override fun afterTextChanged(s: Editable?) {

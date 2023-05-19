@@ -102,24 +102,45 @@ class PadView @JvmOverloads constructor(
         }
         // Force a redraw of the view
         invalidate()
-
         return true
     }
 
-    fun drawTargetP(xPixel: Float, yPixel: Float) {
-        val xView = minOf(width.toFloat(), maxOf(0f, xPixel))
-        val yView = minOf(height.toFloat(), maxOf(0f, yPixel))
-//          draw a small circle to show the target position
-        paint.setColor(Color.BLUE)
-//        canvas.drawCircle(xView, yView, 15f, paint)
-        path.addCircle(xView, yView, 15f, Path.Direction.CCW)
-//        invalidate()
+
+    fun calibrateAll() {
+//        view.setBackgroundColor(ContextCompat.getColor(Main.mContext!!, R.color.buttonfirstcolor))
+        // There will be 11 calibration points (yes, that number is hardcoded, shut up!)
+        // we start at the top of the pad. sendy will schedule subsequent points
+        target.setPosV(VectorF(0.7f, 0f))
+        // we cannot do the calibration of this point right now.
+        // we have to wait for the stick to do its move. Sendy will do the timing
+        // sendy will also trigger further calibration points
+        // arg1 is the index of the first point to calibrate
+        // arg2 is the direction: 1 for index from 0 to 10, -1 for index from 10 to 0
+        sendy.send(PollMaster.EV_6_calibrateOne, 0, 1, null)
     }
 
-    fun drawTarget(xRel: Float, yRel: Float) {
-        drawTargetP(xRel * width, yRel * height)
-//        Forces.targetRel = Vector(xRel, yRel)
+    fun calibrateOne(index: Int, dir: Int) {
+        // Index is the seq number of one of 11 points, range 0 .. 10
+        // dir is +1 for going from 0 to 10, -1 for going from 10 to 0
+        // a new target will put the stick on the move, which takes time
+        //so, we fix the provisional correction for the previous position, which is stable now
+        val deltaY = target.pos.y - stick.pos.y
+        Forces.corTableProvisional[index - 1].y -= deltaY
+        // now we can set the new target
+        target.setPosV( VectorF(0.7f, index / 10f))
+        sendy.send(PollMaster.EV_6_calibrateOne, index, dir, null)
     }
+
+    fun calibrateEnd(index: Int) {
+        val deltaY = target.pos.y - stick.pos.y
+        Forces.corTableProvisional[index].y -= deltaY
+        for (i in 0..10) {
+            Forces.corTable[i].y = Forces.corTableProvisional[i].y * 1.3f
+            Main.correctionView!!.setVertex(i, VectorF(0f, Forces.corTable[i].y + 0.5f))
+            Main.correctionView!!.invalidate()
+        }
+    }
+
 
 
 }
