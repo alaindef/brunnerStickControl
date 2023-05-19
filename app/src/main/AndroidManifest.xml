@@ -15,7 +15,6 @@
             android:name="com.alaindef.brunner.Main"
             android:configChanges="orientation"
             android:exported="true"
-            android:largeHeap="true"
             tools:ignore="LockedOrientationActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

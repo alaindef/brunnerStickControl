@@ -122,6 +122,12 @@ class PolylineView @JvmOverloads constructor(
             Forces.corTable[i].y = 0f
             Forces.corTableProvisional[i].y = 0f
         }
+        for (i in 0 until 10){
+            for (j in 0 ..10){
+                Main.stickPad!!.correctionsProvisional[i][j] = VectorF(0f, 0f)
+                Main.stickPad!!.corrections[i][j] = VectorF(0f, 0f)
+            }
+        }
         invalidate()
     }
 

@@ -256,7 +256,7 @@
             android:gravity="center"
             android:onClick="sendEvent"
             android:tag="ex1"
-            android:text="ex1"
+            android:text="cal1col"
             android:textSize="30sp" />
 
         <com.google.android.material.textview.MaterialTextView
@@ -294,7 +294,7 @@
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="12"
-                android:background="@drawable/carthesiuswhite"
+                android:background="@drawable/carthesiuswhite100"
                 android:gravity="center" />
 
             <LinearLayout

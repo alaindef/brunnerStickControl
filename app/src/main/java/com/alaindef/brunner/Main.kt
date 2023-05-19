@@ -14,6 +14,7 @@ import android.view.View
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import java.nio.channels.Channel
 
 data class VectorF(var x: Float, var y: Float) {
     fun add(arg: VectorF): VectorF {
@@ -58,7 +59,7 @@ data class VectorI(val x: Int, val y: Int) {
 
 data class Square(val l: Int, val u: Int, val r: Int, val d: Int)
 
-data class Square1(val topLeft: VectorI, val bottomRight: VectorI)
+data class SquareI(val topLeft: VectorI, val bottomRight: VectorI)
 
 @Suppress("unused")
 class Main : AppCompatActivity() {
@@ -80,10 +81,7 @@ class Main : AppCompatActivity() {
             }
             "calibrate" -> {
 //                sendy.send(PollMaster.EV_5_calibrate, 0, 0, view)
-                val startPos = VectorI(2,2)
-                val endPos   = VectorI(4, 4)
-                sendy.send(PollMaster.EV_7_calibratePos, 2, 2, Square1(startPos, endPos))
-
+                sendy.send(PollMaster.EV_7_calibratePos, 0, 0, view)//
                 view.setBackgroundColor(
                     ContextCompat.getColor(Main.mContext!!, R.color.buttonsecondcolor)
                 )
@@ -93,8 +91,8 @@ class Main : AppCompatActivity() {
 //                sendy.send(PollMaster.EV_22_resetCorY, 0, 0, ss)
             }
             "ex1" -> {
-//                Forces.calibrate()
-              sendy.send(PollMaster.EV_30_force)
+//              sendy.send(PollMaster.EV_30_force)
+                sendy.send(PollMaster.EV_5_calibrate, 0, 0, view)
             }
             "ex2" -> {
 //                stickPad!!.stickPos.setPositionRel(.3f, (stickPad!!.stickPos.pos.y + 0.1f)%1f)

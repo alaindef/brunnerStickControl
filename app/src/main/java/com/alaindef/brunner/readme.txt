@@ -4,3 +4,5 @@
     - build.gradle: applicationId "com.alaindef.brunefd"
     - File - Sync Project with Gradle Files
 
+
+        android:largeHeap="true"

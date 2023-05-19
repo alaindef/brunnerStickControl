@@ -17,6 +17,9 @@ class PadView @JvmOverloads constructor(
     val stick = PositionRel("STICK", VectorF(.2f, .05f), PositionRel.stickColor)
     val target = PositionRel("TARGET", VectorF(.6f, 0f), PositionRel.targetColor)
 
+    val corrections: Array<Array<VectorF>> = Array(11) {Array(11) { VectorF(0f, 0f)} }
+    val correctionsProvisional: Array<Array<VectorF>> = Array(11) {Array(11) { VectorF(0f, 0f)} }
+
     private val path = Path()
     private val paint = Paint().apply {
         isAntiAlias = true

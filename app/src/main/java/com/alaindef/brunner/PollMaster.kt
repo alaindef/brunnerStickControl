@@ -17,10 +17,13 @@ class PollMaster : Thread() {
     val logTag = ">---Sendy---"
     var calibrateButton: View? = null
     var calibrating = false
+    val startPos = VectorI(8, 0)
+    val endPos = VectorI(10, 10)
+    val bounds = SquareI(startPos, endPos)
 
     var event: Int = 0
     var cnt = 0
-    var delta_t = 10
+    var deltaT = 10
 
 
     private var ipAddress: InetAddress = InetAddress.getByName("192.168.0.203")
@@ -93,7 +96,7 @@ class PollMaster : Thread() {
                     Forces.resetForces()
                     udpSender.sendUDP(Forces.forces.x, Forces.forces.y, ipAddress, 15090)
                     Main.mReport3!!.text = "(${Forces.forces.x.toInt()} ${Forces.forces.y.toInt()})"
-                    Main.mReport4!!.text = "$delta_t"
+                    Main.mReport4!!.text = "$deltaT"
                     return
                 }
                 EV_1_full_reset -> {
@@ -101,11 +104,11 @@ class PollMaster : Thread() {
                     whileNotPolling()
                     Forces.resetForces()
                     cnt = 0
-                    delta_t = 5
+                    deltaT = 5
                     udpSender.sendUDP(Forces.forces.x, Forces.forces.y, ipAddress, 15090)
                     Main.mReport3!!.text = "(${Forces.forces.x.toInt()} ${Forces.forces.y.toInt()})"
                     Main.mReport0!!.text = "$logTag   $cnt "
-                    Main.mReport4!!.text = "$delta_t"
+                    Main.mReport4!!.text = "$deltaT"
 
                     return
                 }
@@ -116,7 +119,7 @@ class PollMaster : Thread() {
                     } else {
                         running = true
                         send(EV_3_next_round)
-                        Main.mReport4!!.text = "$delta_t"
+                        Main.mReport4!!.text = "$deltaT"
                     }
                 }
                 EV_3_next_round -> {
@@ -125,8 +128,18 @@ class PollMaster : Thread() {
                         Main.mReport0!!.text = "$cnt: running ..."
                         Main.mReport0!!.setBackgroundColor(Color.RED)
                         moveToTarget()
-                        Handler().postDelayed({ send(EV_3_next_round) }, delta_t.toLong())
+                        Handler().postDelayed({ send(EV_3_next_round) }, deltaT.toLong())
                     }
+                }
+                EV_5_calibrate -> {
+                    calibrateButton = arg3 as androidx.appcompat.widget.AppCompatTextView
+                    calibrateButton!!.setBackgroundColor(
+                        ContextCompat.getColor(
+                            Main.mContext!!,
+                            R.color.buttonsecondcolor
+                        )
+                    )
+                    Main.stickPad!!.calibrateAll()
                 }
                 EV_6_calibrateOne -> {
                     if ((arg1 < 10)) {
@@ -141,40 +154,60 @@ class PollMaster : Thread() {
                     }
                 }
                 EV_7_calibratePos -> {
-                    val bounds = arg3 as Square1
-                    var xpos = arg1
-                    var ypos = arg2
+                    var xIndex = bounds.topLeft.x
+                    var yIndex = bounds.topLeft.y
 
-                    if (!calibrating) {
-                        xpos = bounds.topLeft.x
-                        ypos = bounds.topLeft.y
-                        calibrating = true
-                    }
-
-                    println("i=$xpos  j=$ypos   square= $bounds")
-                    Main.stickPad!!.target.setPos(xpos / 10f, ypos / 10f)
+                    calibrateButton = arg3 as androidx.appcompat.widget.AppCompatTextView
+                    calibrateButton!!.setBackgroundColor(
+                        ContextCompat.getColor(Main.mContext!!, R.color.buttonsecondcolor)
+                    )
+                    println("------   i=$xIndex  j=$yIndex   ------")
+                    Main.stickPad!!.target.setPos(xIndex / 10f, yIndex / 10f)
 
                     Handler().postDelayed(
-                        { send(EV_8_deviation, xpos, ypos, bounds) }, 800.toLong()
+                        { send(EV_8_deviation, xIndex, yIndex, null) }, 800.toLong()
                     )
                 }
                 EV_8_deviation -> {
-                    val xpos = arg1
-                    val ypos = arg2
-                    val bounds = arg3 as Square1
+                    val xIndex  = arg1
+                    val yIndex  = arg2
+                    val targetPos   = Main.stickPad!!.target.pos
+                    val stickPos    = Main.stickPad!!.stick.pos
+                    val delta       = targetPos.minus(stickPos)
 
-                    println("deviation= ${Main.stickPad!!.target.pos}   ${Main.stickPad!!.stick.pos}")
-                    if (xpos < bounds.bottomRight.x)
-                        send(EV_7_calibratePos, xpos + 1, ypos, bounds)
-                    else {
-                        if (ypos < bounds.bottomRight.y)
-                            send(EV_7_calibratePos, bounds.topLeft.x, ypos + 1, bounds)
-                        else {
+                    println("=======================> at ($xIndex $yIndex): tar=$targetPos    deviation= $delta")
+                    Main.stickPad!!.correctionsProvisional[xIndex][yIndex] = VectorF(0f,0f).minus(delta)
+                    if (yIndex == 10){
+                        for (i in 0..10) {
+//                            Forces.corTable[i].y = Forces.corTableProvisional[i].y * 1.3f
+                            Main.correctionView!!.setVertex(i, VectorF(0f, Main.stickPad!!.correctionsProvisional[xIndex][i].y + 0.5f))
+                            Main.correctionView!!.invalidate()
+                        }
+                    }
+
+                    if (yIndex < bounds.bottomRight.y) {
+                        Main.stickPad!!.target.setPos((xIndex) / 10f, (yIndex+1) / 10f)
+                        Handler().postDelayed(
+                            { send(EV_8_deviation, xIndex, yIndex + 1, bounds) }, 500.toLong()
+                        )
+                    } else {
+                        if (xIndex < bounds.bottomRight.x) {
+                            Main.stickPad!!.target.setPos((xIndex + 1) / 10f, (bounds.topLeft.y) / 10f)
+                            Handler().postDelayed(
+                                { send(EV_8_deviation, xIndex + 1, bounds.topLeft.y, bounds) },
+                                500.toLong()
+                            )
+                        } else {
                             calibrating = false
-//                            calibrateButton!!.setBackgroundColor(
-//                                ContextCompat.getColor(Main.mContext!!, R.color.buttonfirstcolor)
-//                            )
+                            calibrateButton!!.setBackgroundColor(
+                                ContextCompat.getColor(Main.mContext!!, R.color.buttonfirstcolor)
+                            )
                             println("================================> end CALIB  ")
+                            for (i in 0 until 10){
+                                for (j in 0 ..10){
+                                    Main.stickPad!!.corrections[i][j] = Main.stickPad!!.correctionsProvisional[i][j]
+                                }
+                            }
                         }
                     }
 
@@ -191,13 +224,13 @@ class PollMaster : Thread() {
                     }
                 }
                 EV_11_dt_min -> {
-                    if (delta_t <= 10) delta_t -= 1 else if (delta_t <= 100) delta_t -= 10 else delta_t -= 100
-                    delta_t = max(delta_t, 1)
-                    Main.mReport4!!.text = "$delta_t"
+                    if (deltaT <= 10) deltaT -= 1 else if (deltaT <= 100) deltaT -= 10 else deltaT -= 100
+                    deltaT = max(deltaT, 1)
+                    Main.mReport4!!.text = "$deltaT"
                 }
                 EV_12_dt_plus -> {
-                    if (delta_t < 10) delta_t += 1 else if (delta_t < 100) delta_t += 10 else delta_t += 100
-                    Main.mReport4!!.text = "$delta_t"
+                    if (deltaT < 10) deltaT += 1 else if (deltaT < 100) deltaT += 10 else deltaT += 100
+                    Main.mReport4!!.text = "$deltaT"
                 }
                 EV_13_force_min -> {
                     Forces.forces.x -= 100f
@@ -213,16 +246,6 @@ class PollMaster : Thread() {
                 }
                 EV_22_resetCorY -> {
                     Main.correctionView!!.resetCorY()
-                }
-                EV_5_calibrate -> {
-                    calibrateButton = arg3 as androidx.appcompat.widget.AppCompatTextView
-                    calibrateButton!!.setBackgroundColor(
-                        ContextCompat.getColor(
-                            Main.mContext!!,
-                            R.color.buttonsecondcolor
-                        )
-                    )
-                    Main.stickPad!!.calibrateAll()
                 }
                 else -> {
                     Log.e(logTag, "EVENT $event unknown")
