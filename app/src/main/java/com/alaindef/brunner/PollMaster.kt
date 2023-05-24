@@ -17,7 +17,10 @@ class PollMaster : Thread() {
     val logTag = ">---Sendy---"
     var calibrateButton: View? = null
     var calibrating = false
-    val startPos = VectorI(8, 0)
+    val delay = 700
+    var nextCal = 1                 // +1 for Down, -1 for Up
+
+    val startPos = VectorI(0, 0)
     val endPos = VectorI(10, 10)
     val bounds = SquareI(startPos, endPos)
 
@@ -70,8 +73,6 @@ class PollMaster : Thread() {
         udpSender.sendUDP(Forces.forces.x, Forces.forces.y, ipAddress, 15090)
         Main.mReport3!!.text =
             "(${Forces.forces.x.toInt()} ${Forces.forces.y.toInt()})"
-        if (cnt.mod(100) == 0)
-            Main.mReport5a!!.text = "break $cnt"
         val res = UdpRecObject.getCoordinates()
         // return the result to sendy range of coordinates: 0f .. 1f
         Forces.currentRel = res            //range 0f .. 1f
@@ -144,10 +145,10 @@ class PollMaster : Thread() {
                 EV_6_calibrateOne -> {
                     if ((arg1 < 10)) {
                         Handler().postDelayed(
-                            { Main.stickPad!!.calibrateOne(arg1 + arg2, arg2) }, 1000.toLong()
+                            { Main.stickPad!!.calibrateOne(arg1 + arg2, arg2) }, delay.toLong()
                         )
                     } else {
-                        Handler().postDelayed({ Main.stickPad!!.calibrateEnd(arg1) }, 1000.toLong())
+                        Handler().postDelayed({ Main.stickPad!!.calibrateEnd(arg1) }, delay.toLong())
                         calibrateButton!!.setBackgroundColor(
                             ContextCompat.getColor(Main.mContext!!, R.color.buttonfirstcolor)
                         )
@@ -165,18 +166,20 @@ class PollMaster : Thread() {
                     Main.stickPad!!.target.setPos(xIndex / 10f, yIndex / 10f)
 
                     Handler().postDelayed(
-                        { send(EV_8_deviation, xIndex, yIndex, null) }, 800.toLong()
+                        { send(EV_8_deviation, xIndex, yIndex, null) }, delay.toLong()
                     )
                 }
                 EV_8_deviation -> {
+                    //stick should have reached the target by now
                     val xIndex  = arg1
                     val yIndex  = arg2
                     val targetPos   = Main.stickPad!!.target.pos
                     val stickPos    = Main.stickPad!!.stick.pos
                     val delta       = targetPos.minus(stickPos)
 
-                    println("=======================> at ($xIndex $yIndex): tar=$targetPos    deviation= $delta")
-                    Main.stickPad!!.correctionsProvisional[xIndex][yIndex] = VectorF(0f,0f).minus(delta)
+//                    println("=======================> at ($xIndex $yIndex): tar=$targetPos    deviation= $delta")
+                    Main.stickPad!!.correctionsProvisional[xIndex][yIndex] = Main.stickPad!!.correctionsProvisional[xIndex][yIndex] minus delta
+//                    Main.stickPad!!.correctionsProvisional[xIndex][yIndex] = VectorF(0f,0f).minus(delta)
                     if (yIndex == 10){
                         for (i in 0..10) {
 //                            Forces.corTable[i].y = Forces.corTableProvisional[i].y * 1.3f
@@ -185,17 +188,18 @@ class PollMaster : Thread() {
                         }
                     }
 
-                    if (yIndex < bounds.bottomRight.y) {
-                        Main.stickPad!!.target.setPos((xIndex) / 10f, (yIndex+1) / 10f)
+                    if (((yIndex < bounds.bottomRight.y) or (nextCal<0)) and ((yIndex > 0) or (nextCal > 0)) ) {
+                        Main.stickPad!!.target.setPos((xIndex) / 10f, (yIndex+nextCal) / 10f)
                         Handler().postDelayed(
-                            { send(EV_8_deviation, xIndex, yIndex + 1, bounds) }, 500.toLong()
+                            { send(EV_8_deviation, xIndex, yIndex + nextCal, bounds) }, delay.toLong()
                         )
                     } else {
                         if (xIndex < bounds.bottomRight.x) {
-                            Main.stickPad!!.target.setPos((xIndex + 1) / 10f, (bounds.topLeft.y) / 10f)
+                            Main.stickPad!!.target.setPos((xIndex + 1) / 10f, (yIndex) / 10f)
+                            nextCal = -nextCal
                             Handler().postDelayed(
-                                { send(EV_8_deviation, xIndex + 1, bounds.topLeft.y, bounds) },
-                                500.toLong()
+                                { send(EV_8_deviation, xIndex + 1, yIndex, bounds) },
+                                delay.toLong()
                             )
                         } else {
                             calibrating = false

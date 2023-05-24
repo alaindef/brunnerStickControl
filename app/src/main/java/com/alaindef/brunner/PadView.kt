@@ -59,8 +59,10 @@ class PadView @JvmOverloads constructor(
     }
     fun sendTarget(pos: VectorF, size: VectorF) {
         target.setPosV(
-            pos.divide(size).maxOf(VectorF(0f,0f).minOf(VectorF(0.99f,0.99f))))
+            pos.divideBy(size).maxOf(VectorF(0f,0f).minOf(VectorF(0.99f,0.99f))))
         Main.mReport2!!.text = "(%.2f %.2f)".format(target.pos.x, target.pos.y)
+        Main.mReport5a!!.text = "corrected target position)"
+        Main.mReport5!!.text = "(%.2f %.2f)".format(Forces.corrected.x, Forces.corrected.y)
         Forces.targetRel = target.pos
     }
 
@@ -81,18 +83,17 @@ class PadView @JvmOverloads constructor(
 
         when (event.action) {
             MotionEvent.ACTION_DOWN -> {
-                Main.mReport5a!!.text = "action down ($xPixel $yPixel)"
+//                Main.mReport5a!!.text = "action down ($xPixel $yPixel)"
                 sendTarget(pixelpos, size)
                 path.moveTo(xPixel, yPixel)
             }
             MotionEvent.ACTION_MOVE -> {
-                Main.mReport5!!.text = "action move ($xPixel $yPixel)"
+//                Main.mReport5!!.text = "action move ($xPixel $yPixel)"
                 sendTarget(pixelpos, size)
                 paint.color = Color.BLUE
                 path.lineTo(xPixel, yPixel)
             }
             MotionEvent.ACTION_UP -> {
-                Main.mReport5a!!.text = "done"
                 path.reset()
             }
             else -> return false

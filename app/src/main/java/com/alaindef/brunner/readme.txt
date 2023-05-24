@@ -6,3 +6,6 @@
 
 
         android:largeHeap="true"
+
+230520: "Activity class {com.alaindef.brunefd/com.alaindef.brunner.Main} does not exist."
+    -> SYNC gradle!

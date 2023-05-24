@@ -14,28 +14,30 @@ import android.view.View
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
-import java.nio.channels.Channel
 
 data class VectorF(var x: Float, var y: Float) {
-    fun add(arg: VectorF): VectorF {
+    infix fun add(arg: VectorF): VectorF {
+        return VectorF(x + arg.x, y + arg.y)
+    }
+    infix fun plus(arg: VectorF): VectorF {
         return VectorF(x + arg.x, y + arg.y)
     }
 
-    fun minus(arg: VectorF): VectorF {
+    infix fun minus(arg: VectorF): VectorF {
         return VectorF(x - arg.x, y - arg.y)
     }
 
-    fun times(arg: Float): VectorF {
+    infix fun mul(arg: Float): VectorF {
         return VectorF(x * arg, y * arg)
     }
-    fun times(arg: VectorF): VectorF {
+    infix fun mul(arg: VectorF): VectorF {
         return VectorF(x * arg.x, y * arg.y)
     }
 
-    fun divide(arg: Float): VectorF {
+    infix fun divideBy(arg: Float): VectorF {
         return VectorF(x / arg, y / arg)
     }
-    fun divide(arg: VectorF): VectorF {
+    infix fun divideBy(arg: VectorF): VectorF {
         return VectorF(x / arg.x, y / arg.y)
     }
 
@@ -85,6 +87,7 @@ class Main : AppCompatActivity() {
                 view.setBackgroundColor(
                     ContextCompat.getColor(Main.mContext!!, R.color.buttonsecondcolor)
                 )
+                Forces.dim2 = true
             }
             "resetCorY" -> {
                 correctionView!!.resetCorY()
@@ -93,6 +96,7 @@ class Main : AppCompatActivity() {
             "ex1" -> {
 //              sendy.send(PollMaster.EV_30_force)
                 sendy.send(PollMaster.EV_5_calibrate, 0, 0, view)
+                Forces.dim2 = false
             }
             "ex2" -> {
 //                stickPad!!.stickPos.setPositionRel(.3f, (stickPad!!.stickPos.pos.y + 0.1f)%1f)
