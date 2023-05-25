@@ -15,10 +15,7 @@ class PadView @JvmOverloads constructor(
     com.google.android.material.imageview.ShapeableImageView(context, attrs, defStyleAttr) {
 
     val stick = PositionRel("STICK", VectorF(.2f, .05f), PositionRel.stickColor)
-    val target = PositionRel("TARGET", VectorF(.6f, 0f), PositionRel.targetColor)
-
-    val corrections: Array<Array<VectorF>> = Array(11) {Array(11) { VectorF(0f, 0f)} }
-    val correctionsProvisional: Array<Array<VectorF>> = Array(11) {Array(11) { VectorF(0f, 0f)} }
+    val target = PositionRel("TARGET", VectorF(.2f, 0f), PositionRel.targetColor)
 
     private val path = Path()
     private val paint = Paint().apply {
@@ -63,7 +60,12 @@ class PadView @JvmOverloads constructor(
         Main.mReport2!!.text = "(%.2f %.2f)".format(target.pos.x, target.pos.y)
         Main.mReport5a!!.text = "corrected target position)"
         Main.mReport5!!.text = "(%.2f %.2f)".format(Forces.corrected.x, Forces.corrected.y)
-        Forces.targetRel = target.pos
+        Forces.targetRel = target.pos       // moveToTarget is called continuously and uses this
+//        println("TEST")
+//        println("=================================== from PadView.sendtarget :")
+        for (iy in 0 .. sendy.rangeI){
+            print(" ${sendy.corrections[0][iy].y}")
+        }
     }
 
     override fun onDraw(canvas: Canvas) {
@@ -78,18 +80,18 @@ class PadView @JvmOverloads constructor(
         // move the target position
         val xPixel = event.x
         val yPixel = event.y
-        val pixelpos = VectorF(event.x, event.y)
+        val posPixel = VectorF(event.x, event.y)
         val size = VectorF(width.toFloat(), height.toFloat())
 
         when (event.action) {
             MotionEvent.ACTION_DOWN -> {
 //                Main.mReport5a!!.text = "action down ($xPixel $yPixel)"
-                sendTarget(pixelpos, size)
+                sendTarget(posPixel, size)
                 path.moveTo(xPixel, yPixel)
             }
             MotionEvent.ACTION_MOVE -> {
 //                Main.mReport5!!.text = "action move ($xPixel $yPixel)"
-                sendTarget(pixelpos, size)
+                sendTarget(posPixel, size)
                 paint.color = Color.BLUE
                 path.lineTo(xPixel, yPixel)
             }

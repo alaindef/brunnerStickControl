@@ -30,7 +30,11 @@ object Forces {
     var corrected = VectorF(0f, 0f)
     var correctedXY = VectorF(0f, 0f)
 
-    var dim2 = false
+    var calType = "none"
+
+
+    val rangeI = sendy!!.rangeI
+    val rangeF = sendy!!.rangeF
 
 
     fun newPIDParam(value: Float, source: String) {
@@ -71,9 +75,7 @@ object Forces {
         return posRel.minus(VectorF(corX, corY))
     }
 
-    private fun interpol(
-        pos: VectorF, ref: Array<VectorF>,
-    ): VectorF {
+    private fun interpol(pos: VectorF, ref: Array<VectorF>): VectorF {
         val dist: FloatArray = floatArrayOf(0f, 1f, 2f, 3f)
         var weightsum = 0f
         var weightedPos = 0f
@@ -84,8 +86,14 @@ object Forces {
             weightsum += 1f / dist[i]
             weightedPos += 1
         }
-
         return VectorF(0f, 0f)
+    }
+
+    fun correctFull(pos: VectorF): VectorF {
+        val cor = sendy!!.corrections[pos.x.toInt()][pos.y.toInt()] mul 1f
+        val res = pos add cor
+//        println("------------------------correctFull $cor")
+        return res
     }
 
     fun correct2Dim(pos: VectorF): VectorF {
@@ -93,23 +101,24 @@ object Forces {
         pos.x = max(0f, kotlin.math.min(0.99f, pos.x))    //avoid OutOfBounds further down
         pos.y = max(0f, min(pos.y, 0.99f))
 
-        var index = pos.divideBy(0.1f).toIntVector()
+//        var index = pos.divideBy(0.1f).toIntVector()
+        var index = (pos mul rangeF).toIntVector()
 
         // refpos has the vector positions of the 4 corners of the surrounding square
         //index has range of 0..10, positions have a range 0f to 1f
         val refPos: Array<VectorF> = arrayOf(
-            VectorF(index.x / 10f, index.y / 10f),
-            VectorF((index.x + 1) / 10f, index.y / 10f),
-            VectorF(index.x + 1 / 10f, (index.y + 1) / 10f),
-            VectorF((index.x) / 10f, (index.y + 1) / 10f)
+            VectorF(index.x / rangeF, index.y / rangeF),
+            VectorF((index.x + 1) / rangeF, index.y / rangeF),
+            VectorF(index.x + 1 / rangeF, (index.y + 1) / rangeF),
+            VectorF((index.x) / rangeF, (index.y + 1) / rangeF)
         )
 
         // ref has the corrections at the 4 corners of the surrounding square
         val refValue: Array<VectorF> = arrayOf(
-            Main.stickPad!!.corrections[index.x][index.y],
-            Main.stickPad!!.corrections[index.x + 1][index.y],
-            Main.stickPad!!.corrections[index.x + 1][index.y + 1],
-            Main.stickPad!!.corrections[index.x][index.y + 1]
+            sendy!!.corrections[index.x][index.y],
+            sendy!!.corrections[index.x + 1][index.y],
+            sendy!!.corrections[index.x + 1][index.y + 1],
+            sendy!!.corrections[index.x][index.y + 1]
         )
 
         // dist has the distances of the target position to the 4 corners of the surrounding square
@@ -121,16 +130,18 @@ object Forces {
         var teller = VectorF(0f, 0f)
         var noemer = VectorF(0f, 0f)
         for (i in 0..3) {
-            val deltaPos = pos.minus(refPos[i])
-            dist[i] = sqrt((deltaPos.x / 10f).pow(2) + (deltaPos.y).pow(2))
+            val deltaPos = pos minus refPos[i]
+            dist[i] = sqrt((deltaPos.x).pow(2) + (deltaPos.y).pow(2))
             // if we are close to a corner, take the value of that corner, and avoid divide by zero
-            if (dist[i] < 0.001) return pos.minus(refValue[i])
+            if (dist[i] < 0.001) return pos minus refValue[i]
 
             teller = teller.add(refValue[i].divideBy(dist[i]))
             noemer = noemer.add(VectorF(1f, 1f).divideBy(dist[i]))
         }
-        val cor = (teller.divideBy(noemer)).mul(2f)
-        val res = pos.minus(cor)
+        val cor = (teller.divideBy(noemer)).mul(2f)             //!!!! arbitrary 2f
+
+        println("------------------------correct2Dim $cor")
+        val res = pos minus cor
 //        println("pos= $pos   corPos= $res")
 
         return res
@@ -144,15 +155,15 @@ object Forces {
 
         var index = pos.divideBy(0.1f).toIntVector()
 
-        val x1 = index.x / 10f
-        val x2 = (index.x + 1) / 10f
-        val y1 = index.y / 10f
-        val y2 = (index.y + 1) / 10f
+        val x1 = index.x / rangeF
+        val x2 = (index.x + 1) / rangeF
+        val y1 = index.y / rangeF
+        val y2 = (index.y + 1) / rangeF
 
-        val z11 = Main.stickPad!!.corrections[index.x][index.y]
-        val z21 = Main.stickPad!!.corrections[index.x + 1][index.y]
-        val z12 = Main.stickPad!!.corrections[index.x][index.y + 1]
-        val z22 = Main.stickPad!!.corrections[index.x + 1][index.y + 1]
+        val z11 = sendy!!.corrections[index.x][index.y]
+        val z21 = sendy!!.corrections[index.x + 1][index.y]
+        val z12 = sendy!!.corrections[index.x][index.y + 1]
+        val z22 = sendy!!.corrections[index.x + 1][index.y + 1]
 
         val x01 = x0 - x1
         val x21 = x2 - x1
@@ -164,18 +175,19 @@ object Forces {
                 (z12 mul (x21 * y01 - x01 * y01)) plus
                 (z22 mul (x01 * y01))
 
-        val res = pos minus (d0x21y21 divideBy (x21*y21*100f))
+        val res = pos minus (d0x21y21 divideBy (x21 * y21 * rangeF * rangeF))
 
         return res
     }
 
     fun calculateForces(): VectorF {
         val pos = (Main.stickPad!!.target.pos)
-        val correctedSQ = correct2Dim(pos)
-//        val correctedXY = correct2DimXY(Main.stickPad!!.target.pos)
-//        println("------------------------------------- CORRECTIONS P=$pos SQ=$correctedSQ   XY=$correctedXY")
-        corrected = if (dim2) correctedSQ
-        else correctRel(Main.stickPad!!.target.pos)
+        when (calType) {
+            "full" -> corrected = correctFull(pos)
+            "interpol" -> corrected = correct2Dim(pos)
+            "col" -> corrected = correctRel(pos)
+            else -> corrected = pos
+        }
 
         horizontalPID.setP(100f * conP)
         horizontalPID.setI(conI * 2f)
@@ -194,7 +206,6 @@ object Forces {
 //        verticalPID.setSetpoint(yTarget)
 
         forces.y = verticalPID.getOutput(currentRel.y, corrected.y)
-//        forces.y = verticalPID.getOutput(currentRel.y, corrected.y)
 
         return forces
     }

@@ -17,12 +17,26 @@ class PollMaster : Thread() {
     val logTag = ">---Sendy---"
     var calibrateButton: View? = null
     var calibrating = false
-    val delay = 700
-    var nextCal = 1                 // +1 for Down, -1 for Up
+    var delay = 700                 // calibration will wait for this delay before calculating
 
+    // targetpos - stickpos
+    var step = 1                 // +1 for Down, -1 for Up
+
+    //a square of 11x11 for calibrating 121 points. interpolation required during run
     val startPos = VectorI(0, 0)
     val endPos = VectorI(10, 10)
     val bounds = SquareI(startPos, endPos)
+
+    //a square od 101x101 for calibrating all points. no interpolation required
+
+    var rangeI = 100
+    var rangeF = 100f
+    val field = SquareI(VectorI(0, 0), VectorI(100, 100))
+
+    val corrections: Array<Array<VectorF>> =
+        Array(rangeI + 1) { Array(rangeI + 1) { VectorF(0f, 0f) } }
+    val correctionsProvisional: Array<Array<VectorF>> =
+        Array(rangeI + 1) { Array(rangeI + 1) { VectorF(0f, 0f) } }
 
     var event: Int = 0
     var cnt = 0
@@ -148,22 +162,28 @@ class PollMaster : Thread() {
                             { Main.stickPad!!.calibrateOne(arg1 + arg2, arg2) }, delay.toLong()
                         )
                     } else {
-                        Handler().postDelayed({ Main.stickPad!!.calibrateEnd(arg1) }, delay.toLong())
+                        Handler().postDelayed(
+                            { Main.stickPad!!.calibrateEnd(arg1) },
+                            delay.toLong()
+                        )
                         calibrateButton!!.setBackgroundColor(
                             ContextCompat.getColor(Main.mContext!!, R.color.buttonfirstcolor)
                         )
                     }
                 }
                 EV_7_calibratePos -> {
-                    var xIndex = bounds.topLeft.x
-                    var yIndex = bounds.topLeft.y
+                    var xIndex = 0
+                    var yIndex = 0
+                    rangeI = arg1
+                    rangeF = arg1.toFloat()
+                    delay = arg2
 
                     calibrateButton = arg3 as androidx.appcompat.widget.AppCompatTextView
                     calibrateButton!!.setBackgroundColor(
                         ContextCompat.getColor(Main.mContext!!, R.color.buttonsecondcolor)
                     )
                     println("------   i=$xIndex  j=$yIndex   ------")
-                    Main.stickPad!!.target.setPos(xIndex / 10f, yIndex / 10f)
+                    Main.stickPad!!.target.setPos(xIndex / rangeF, yIndex / rangeF)
 
                     Handler().postDelayed(
                         { send(EV_8_deviation, xIndex, yIndex, null) }, delay.toLong()
@@ -171,35 +191,34 @@ class PollMaster : Thread() {
                 }
                 EV_8_deviation -> {
                     //stick should have reached the target by now
-                    val xIndex  = arg1
-                    val yIndex  = arg2
-                    val targetPos   = Main.stickPad!!.target.pos
-                    val stickPos    = Main.stickPad!!.stick.pos
-                    val delta       = targetPos.minus(stickPos)
+                    val xIndex = arg1
+                    val yIndex = arg2
+                    val targetPos = Main.stickPad!!.target.pos
+                    val stickPos = Main.stickPad!!.stick.pos
+                    val delta = targetPos minus stickPos
 
 //                    println("=======================> at ($xIndex $yIndex): tar=$targetPos    deviation= $delta")
-                    Main.stickPad!!.correctionsProvisional[xIndex][yIndex] = Main.stickPad!!.correctionsProvisional[xIndex][yIndex] minus delta
-//                    Main.stickPad!!.correctionsProvisional[xIndex][yIndex] = VectorF(0f,0f).minus(delta)
-                    if (yIndex == 10){
-                        for (i in 0..10) {
-//                            Forces.corTable[i].y = Forces.corTableProvisional[i].y * 1.3f
-                            Main.correctionView!!.setVertex(i, VectorF(0f, Main.stickPad!!.correctionsProvisional[xIndex][i].y + 0.5f))
-                            Main.correctionView!!.invalidate()
-                        }
-                    }
+                    correctionsProvisional[xIndex][yIndex] =
+                        correctionsProvisional[xIndex][yIndex] minus delta
+//                    if (yIndex == rangeI){
+//                        for (i in 0..10) {          //!!!!
+////                            Forces.corTable[i].y = Forces.corTableProvisional[i].y * 1.3f
+//                            Main.correctionView!!.setVertex(i, VectorF(0f, Main.stickPad!!.correctionsProvisional[xIndex][i].y + 0.5f))
+//                            Main.correctionView!!.invalidate()
+//                        }
+//                    }
 
-                    if (((yIndex < bounds.bottomRight.y) or (nextCal<0)) and ((yIndex > 0) or (nextCal > 0)) ) {
-                        Main.stickPad!!.target.setPos((xIndex) / 10f, (yIndex+nextCal) / 10f)
+                    if (((yIndex < rangeI) or (step < 0)) and ((yIndex > 0) or (step > 0))) {
+                        Main.stickPad!!.target.setPos((xIndex) / rangeF, (yIndex + step) / rangeF)
                         Handler().postDelayed(
-                            { send(EV_8_deviation, xIndex, yIndex + nextCal, bounds) }, delay.toLong()
+                            { send(EV_8_deviation, xIndex, yIndex + step, null) }, delay.toLong()
                         )
                     } else {
-                        if (xIndex < bounds.bottomRight.x) {
-                            Main.stickPad!!.target.setPos((xIndex + 1) / 10f, (yIndex) / 10f)
-                            nextCal = -nextCal
+                        if (xIndex < rangeI) {
+                            Main.stickPad!!.target.setPos((xIndex + 1) / rangeF, yIndex / rangeF)
+                            step = -step                    // reverse y direction
                             Handler().postDelayed(
-                                { send(EV_8_deviation, xIndex + 1, yIndex, bounds) },
-                                delay.toLong()
+                                { send(EV_8_deviation, xIndex + 1, yIndex, null) }, delay.toLong()
                             )
                         } else {
                             calibrating = false
@@ -207,26 +226,25 @@ class PollMaster : Thread() {
                                 ContextCompat.getColor(Main.mContext!!, R.color.buttonfirstcolor)
                             )
                             println("================================> end CALIB  ")
-                            for (i in 0 until 10){
-                                for (j in 0 ..10){
-                                    Main.stickPad!!.corrections[i][j] = Main.stickPad!!.correctionsProvisional[i][j]
+                            for (i in 0..rangeI) {
+                                for (j in 0..rangeI) {
+                                    corrections[i][j] = correctionsProvisional[i][j]
+                                    // adf test
+                                    for (k in 0 .. rangeI)
+                                        for (l in 0 .. rangeI)
+                                            corrections[k][l] = correctionsProvisional[k][l]
                                 }
                             }
                         }
                     }
-
-//                    Main.stickPad!!.invalidate()
                 }
                 EV_30_force -> {
                     Main.stickPad!!.target.setPos(.8f, Main.stickPad!!.target.pos.y + 0.1f)
                     Forces.targetRel = Main.stickPad!!.target.pos
                     Main.stickPad!!.invalidate()
                 }
-                EV_15_new_IP -> {
-                    if (!running) {
-                        whileNotPolling()
-                    }
-                }
+                EV_15_new_IP -> if (!running) whileNotPolling()
+
                 EV_11_dt_min -> {
                     if (deltaT <= 10) deltaT -= 1 else if (deltaT <= 100) deltaT -= 10 else deltaT -= 100
                     deltaT = max(deltaT, 1)

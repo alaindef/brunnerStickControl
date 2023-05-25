@@ -5,23 +5,21 @@
     android:background="@android:color/darker_gray"
     android:orientation="vertical">
 
-
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="36dp"
         android:background="@android:color/holo_blue_light"
         android:weightSum="8">
 
-
         <EditText
             android:id="@+id/IPDialog"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_gravity="center"
-            android:importantForAutofill="no"
-            android:inputType="text"
             android:layout_weight="4"
             android:gravity="center"
+            android:importantForAutofill="no"
+            android:inputType="text"
             android:text="192.168.0.203" />
 
         <com.google.android.material.textview.MaterialTextView
@@ -37,13 +35,11 @@
 
     </LinearLayout>
 
-
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="36dp"
         android:background="@android:color/holo_orange_light"
         android:weightSum="8">
-
 
         <com.google.android.material.textview.MaterialTextView
             android:id="@+id/report1a"
@@ -67,13 +63,11 @@
 
     </LinearLayout>
 
-
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="36dp"
         android:background="@android:color/holo_blue_light"
         android:weightSum="8">
-
 
         <com.google.android.material.textview.MaterialTextView
             android:id="@+id/report2a"
@@ -103,7 +97,6 @@
         android:background="@android:color/holo_orange_light"
         android:weightSum="8">
 
-
         <com.google.android.material.textview.MaterialTextView
             android:id="@+id/report3a"
             android:layout_width="0dp"
@@ -125,7 +118,6 @@
             android:textSize="20sp" />
 
     </LinearLayout>
-
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -152,7 +144,6 @@
             android:text="" />
 
     </LinearLayout>
-
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -187,7 +178,6 @@
         android:layout_height="60dp"
         android:background="@android:color/holo_blue_light"
         android:weightSum="12">
-
 
         <com.google.android.material.textview.MaterialTextView
             android:id="@+id/tile1"
@@ -227,36 +217,8 @@
             android:contentDescription="@string/photoView"
             android:gravity="center"
             android:onClick="sendEvent"
-            android:tag="calibrate"
-            android:text="cal"
-            android:textSize="30sp" />
-
-        <com.google.android.material.textview.MaterialTextView
-            android:id="@+id/tile6"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:layout_weight="2"
-            android:background="@color/buttonfirstcolor"
-            android:contentDescription="@string/photoView"
-            android:gravity="center"
-            android:onClick="sendEvent"
-            android:tag="resetCorY"
-            android:text="rst"
-            android:textSize="30sp" />
-
-        <com.google.android.material.textview.MaterialTextView
-            android:id="@+id/tile4"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:layout_weight="2"
-            android:background="@color/buttonfirstcolor"
-            android:contentDescription="@string/photoView"
-            android:gravity="center"
-            android:onClick="sendEvent"
-            android:tag="ex1"
-            android:text="cal1col"
+            android:tag="cal1full"
+            android:text="calfull"
             android:textSize="30sp" />
 
         <com.google.android.material.textview.MaterialTextView
@@ -269,8 +231,36 @@
             android:contentDescription="@string/photoView"
             android:gravity="center"
             android:onClick="sendEvent"
-            android:tag="ex2"
-            android:text="ex2"
+            android:tag="cal2dim"
+            android:text="cal2dim"
+            android:textSize="30sp" />
+
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/tile4"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_weight="2"
+            android:background="@color/buttonfirstcolor"
+            android:contentDescription="@string/photoView"
+            android:gravity="center"
+            android:onClick="sendEvent"
+            android:tag="cal1col"
+            android:text="cal1col"
+            android:textSize="30sp" />
+
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/tile6"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_weight="2"
+            android:background="@color/buttonfirstcolor"
+            android:contentDescription="@string/photoView"
+            android:gravity="center"
+            android:onClick="sendEvent"
+            android:tag="resetcol"
+            android:text="rst"
             android:textSize="30sp" />
 
     </LinearLayout>
@@ -288,7 +278,6 @@
             android:orientation="horizontal"
             android:weightSum="16">
 
-
             <com.alaindef.brunner.PadView
                 android:id="@+id/del"
                 android:layout_width="0dp"
@@ -303,7 +292,6 @@
                 android:layout_weight="4"
                 android:weightSum="8">
 
-
                 <View
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
@@ -313,7 +301,7 @@
                     android:id="@+id/yTable"
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
-                    android:layout_weight="6"/>
+                    android:layout_weight="6" />
 
                 <View
                     android:layout_width="0dp"
@@ -323,7 +311,6 @@
             </LinearLayout>
 
         </LinearLayout>
-
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -343,7 +330,6 @@
                 android:textAlignment="center"
                 android:textSize="30sp" />
 
-
             <Button
                 android:id="@+id/reset"
                 android:layout_width="0dp"
@@ -358,7 +344,6 @@
                 android:textAlignment="center"
                 android:textSize="30sp" />
         </LinearLayout>
-
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -410,7 +395,6 @@
 
         </LinearLayout>
 
-
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="0dp"
@@ -433,7 +417,6 @@
                 android:textColor="@android:color/white"
                 android:textSize="25sp" />
 
-
             <com.alaindef.brunner.ViewSlider
                 android:id="@+id/conI"
                 android:layout_width="0dp"
@@ -452,8 +435,8 @@
                 android:layout_height="match_parent"
                 android:layout_gravity="center"
                 android:layout_weight="1"
-                android:contentDescription="@string/photoView"
                 android:background="@drawable/circleblue"
+                android:contentDescription="@string/photoView"
                 android:gravity="center"
                 android:onClick="sendEvent"
                 android:tag="B_seek"
@@ -462,6 +445,7 @@
                 android:textSize="25sp" />
 
         </LinearLayout>
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="0dp"
@@ -511,9 +495,7 @@
                 android:text=""
                 android:textColor="@android:color/white"
                 android:textSize="25sp" />
-
         </LinearLayout>
-
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -537,7 +519,6 @@
                 android:textColor="@android:color/white"
                 android:textSize="25sp" />
 
-
             <com.alaindef.brunner.ViewSlider
                 android:id="@+id/conIv"
                 android:layout_width="0dp"
@@ -556,8 +537,8 @@
                 android:layout_height="match_parent"
                 android:layout_gravity="center"
                 android:layout_weight="1"
-                android:contentDescription="@string/photoView"
                 android:background="@drawable/circleblue"
+                android:contentDescription="@string/photoView"
                 android:gravity="center"
                 android:onClick="sendEvent"
                 android:tag="B_seek"

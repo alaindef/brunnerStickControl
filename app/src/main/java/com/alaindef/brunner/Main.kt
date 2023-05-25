@@ -81,26 +81,28 @@ class Main : AppCompatActivity() {
             "dt+" -> {
                 sendy.send(PollMaster.EV_12_dt_plus, 0, 0, ss)
             }
-            "calibrate" -> {
-//                sendy.send(PollMaster.EV_5_calibrate, 0, 0, view)
-                sendy.send(PollMaster.EV_7_calibratePos, 0, 0, view)//
+            "cal1full" -> {
+                sendy.send(PollMaster.EV_7_calibratePos, 4, 700, view)
+//                sendy.send(PollMaster.EV_7_calibratePos, 100, 100, view)
                 view.setBackgroundColor(
                     ContextCompat.getColor(Main.mContext!!, R.color.buttonsecondcolor)
                 )
-                Forces.dim2 = true
+                Forces.calType = "full"
             }
-            "resetCorY" -> {
+            "cal2dim" -> {
+                sendy.send(PollMaster.EV_7_calibratePos, 4, 700, view)
+                view.setBackgroundColor(
+                    ContextCompat.getColor(Main.mContext!!, R.color.buttonsecondcolor)
+                )
+                Forces.calType = "interpol"
+            }
+            "cal1col" -> {
+                sendy.send(PollMaster.EV_5_calibrate, 0, 0, view)
+                Forces.calType = "col"
+            }
+            "resetcol" -> {
                 correctionView!!.resetCorY()
 //                sendy.send(PollMaster.EV_22_resetCorY, 0, 0, ss)
-            }
-            "ex1" -> {
-//              sendy.send(PollMaster.EV_30_force)
-                sendy.send(PollMaster.EV_5_calibrate, 0, 0, view)
-                Forces.dim2 = false
-            }
-            "ex2" -> {
-//                stickPad!!.stickPos.setPositionRel(.3f, (stickPad!!.stickPos.pos.y + 0.1f)%1f)
-                stickPad!!.target.setPos(.3f, ((stickPad!!.target.pos.y * 10f).toInt() + 1)%10.toFloat()/10f)
             }
             else -> Log.wtf(logTag, "tag unknown $ss")
         }

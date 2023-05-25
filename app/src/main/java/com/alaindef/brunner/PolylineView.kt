@@ -124,8 +124,8 @@ class PolylineView @JvmOverloads constructor(
         }
         for (i in 0 until 10){
             for (j in 0 ..10){
-                Main.stickPad!!.correctionsProvisional[i][j] = VectorF(0f, 0f)
-                Main.stickPad!!.corrections[i][j] = VectorF(0f, 0f)
+                sendy!!.correctionsProvisional[i][j] = VectorF(0f, 0f)
+                sendy!!.corrections[i][j] = VectorF(0f, 0f)
             }
         }
         invalidate()
