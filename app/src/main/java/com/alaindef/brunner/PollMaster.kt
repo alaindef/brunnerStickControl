@@ -14,13 +14,34 @@ import java.util.regex.Pattern
 
 
 class PollMaster : Thread() {
+
+    companion object {
+        const val EV_0_reset = 0
+        const val EV_1_full_reset = 1
+        const val EV_2_start_stop = 2
+        const val EV_3_next_round = 3
+        const val EV_7_calibratePos = 7
+        const val EV_8_stick_should_arrive = 8
+        const val EV_11_dt_min = 11
+        const val EV_12_dt_plus = 12
+        const val EV_13_force_min = 13
+        const val EV_14_force_plus = 14
+        const val EV_15_new_IP = 15
+        const val EV_21_from_slider = 21
+        const val EV_22_resetCorY = 22
+        const val EV_30_force = 30
+        private var running = false
+    }
     val logTag = ">---Sendy---"
+
     var calibrateButton: View? = null
     var calibrating = false
-    var delay = 700                 // calibration will wait for this delay before calculating
+    var calibDelay =
+        Forces.calibDelay            // calibration will wait for this delay before calculating
 
     // targetpos - stickpos
-    var step = 1                 // +1 for Down, -1 for Up
+    var stepX = 1                 // +1 for right, -1 for left
+    var stepY = 1                 // +1 for Down, -1 for Up
 
     //a square of 11x11 for calibrating 121 points. interpolation required during run
     val startPos = VectorI(0, 0)
@@ -33,10 +54,6 @@ class PollMaster : Thread() {
     var rangeF = 100f
     val field = SquareI(VectorI(0, 0), VectorI(100, 100))
 
-    val corrections: Array<Array<VectorF>> =
-        Array(rangeI + 1) { Array(rangeI + 1) { VectorF(0f, 0f) } }
-    val correctionsProvisional: Array<Array<VectorF>> =
-        Array(rangeI + 1) { Array(rangeI + 1) { VectorF(0f, 0f) } }
 
     var event: Int = 0
     var cnt = 0
@@ -76,23 +93,31 @@ class PollMaster : Thread() {
             val address = Main.mIPDialog!!.getText().toString()
             if (validate(address)) {
                 ipAddress = InetAddress.getByName(address)
-                Main.mReport0!!.text = "Brunner ip $address"
+                "Brunner ip $address".also { Main.mReport0!!.text = it }
             } else
-                Main.mReport0!!.text = "INVALID ip address: $address"
+                "INVALID ip address: $address".also { Main.mReport0!!.text = it }
         }
     }
 
     fun moveToTarget() {
         Forces.calculateForces()
         udpSender.sendUDP(Forces.forces.x, Forces.forces.y, ipAddress, 15090)
-        Main.mReport3!!.text =
-            "(${Forces.forces.x.toInt()} ${Forces.forces.y.toInt()})"
-        val res = UdpRecObject.getCoordinates()
+        "(${Forces.forces.x.toInt()} ${Forces.forces.y.toInt()})".also { Main.mReport3!!.text = it }
+        val res = UdpRecObject.getCoordinates(cnt)
         // return the result to sendy range of coordinates: 0f .. 1f
         Forces.currentRel = res            //range 0f .. 1f
         Main.stickPad!!.stick.setPosV(res)
 //        Main.stickPad!!.stick.pos = res
 //        Main.stickPad!!.invalidate()
+
+    }
+
+    fun reportData(){
+        Main.mReport0!!.text = "$logTag   $cnt "
+        Main.mReport3!!.text = "(${Forces.forces.x.toInt()} ${Forces.forces.y.toInt()})"
+        Main.mReport4!!.text = "$deltaT"
+        Main.mReport3!!.text = "(${Forces.forces.x.toInt()} ${Forces.forces.y.toInt()})"
+        Main.mReport4!!.text = "$deltaT"
 
     }
 
@@ -105,13 +130,12 @@ class PollMaster : Thread() {
             val arg1 = incomingMessage.arg1
             val arg2 = incomingMessage.arg2
             val arg3 = incomingMessage.obj
+            reportData()
             event = incomingMessage.what
             when (event) {
                 EV_0_reset -> {
                     Forces.resetForces()
                     udpSender.sendUDP(Forces.forces.x, Forces.forces.y, ipAddress, 15090)
-                    Main.mReport3!!.text = "(${Forces.forces.x.toInt()} ${Forces.forces.y.toInt()})"
-                    Main.mReport4!!.text = "$deltaT"
                     return
                 }
                 EV_1_full_reset -> {
@@ -121,10 +145,6 @@ class PollMaster : Thread() {
                     cnt = 0
                     deltaT = 5
                     udpSender.sendUDP(Forces.forces.x, Forces.forces.y, ipAddress, 15090)
-                    Main.mReport3!!.text = "(${Forces.forces.x.toInt()} ${Forces.forces.y.toInt()})"
-                    Main.mReport0!!.text = "$logTag   $cnt "
-                    Main.mReport4!!.text = "$deltaT"
-
                     return
                 }
                 EV_2_start_stop -> {
@@ -134,7 +154,6 @@ class PollMaster : Thread() {
                     } else {
                         running = true
                         send(EV_3_next_round)
-                        Main.mReport4!!.text = "$deltaT"
                     }
                 }
                 EV_3_next_round -> {
@@ -146,101 +165,98 @@ class PollMaster : Thread() {
                         Handler().postDelayed({ send(EV_3_next_round) }, deltaT.toLong())
                     }
                 }
-                EV_5_calibrate -> {
-                    calibrateButton = arg3 as androidx.appcompat.widget.AppCompatTextView
-                    calibrateButton!!.setBackgroundColor(
-                        ContextCompat.getColor(
-                            Main.mContext!!,
-                            R.color.buttonsecondcolor
-                        )
-                    )
-                    Main.stickPad!!.calibrateAll()
-                }
-                EV_6_calibrateOne -> {
-                    if ((arg1 < 10)) {
-                        Handler().postDelayed(
-                            { Main.stickPad!!.calibrateOne(arg1 + arg2, arg2) }, delay.toLong()
-                        )
-                    } else {
-                        Handler().postDelayed(
-                            { Main.stickPad!!.calibrateEnd(arg1) },
-                            delay.toLong()
-                        )
-                        calibrateButton!!.setBackgroundColor(
-                            ContextCompat.getColor(Main.mContext!!, R.color.buttonfirstcolor)
-                        )
-                    }
-                }
                 EV_7_calibratePos -> {
-                    var xIndex = 0
-                    var yIndex = 0
-                    rangeI = arg1
-                    rangeF = arg1.toFloat()
-                    delay = arg2
+                    val calibX = 0
+                    val calibY = 0
 
                     calibrateButton = arg3 as androidx.appcompat.widget.AppCompatTextView
                     calibrateButton!!.setBackgroundColor(
                         ContextCompat.getColor(Main.mContext!!, R.color.buttonsecondcolor)
                     )
-                    println("------   i=$xIndex  j=$yIndex   ------")
-                    Main.stickPad!!.target.setPos(xIndex / rangeF, yIndex / rangeF)
-
+                    Main.stickPad!!.target.setPos(
+                        calibX * Forces.calibMax.toFloat() / 100f,
+                        calibY * Forces.calibMax.toFloat() / 100f
+                    )
                     Handler().postDelayed(
-                        { send(EV_8_deviation, xIndex, yIndex, null) }, delay.toLong()
+                        { send(EV_8_stick_should_arrive, calibX, calibY, null) },
+                        calibDelay.toLong()
                     )
                 }
-                EV_8_deviation -> {
+                EV_8_stick_should_arrive -> {
                     //stick should have reached the target by now
-                    val xIndex = arg1
-                    val yIndex = arg2
+                    val calibX = arg1
+                    val calibY = arg2
+
+                    val calibMax = Forces.calibMax
+                    val calibMaxF = Forces.calibMaxF
+
                     val targetPos = Main.stickPad!!.target.pos
                     val stickPos = Main.stickPad!!.stick.pos
-                    val delta = targetPos minus stickPos
 
-//                    println("=======================> at ($xIndex $yIndex): tar=$targetPos    deviation= $delta")
-                    correctionsProvisional[xIndex][yIndex] =
-                        correctionsProvisional[xIndex][yIndex] minus delta
-//                    if (yIndex == rangeI){
-//                        for (i in 0..10) {          //!!!!
-////                            Forces.corTable[i].y = Forces.corTableProvisional[i].y * 1.3f
-//                            Main.correctionView!!.setVertex(i, VectorF(0f, Main.stickPad!!.correctionsProvisional[xIndex][i].y + 0.5f))
-//                            Main.correctionView!!.invalidate()
-//                        }
-//                    }
+                    Forces.updateCorrections(calibX, calibY, targetPos minus stickPos)
 
-                    if (((yIndex < rangeI) or (step < 0)) and ((yIndex > 0) or (step > 0))) {
-                        Main.stickPad!!.target.setPos((xIndex) / rangeF, (yIndex + step) / rangeF)
+                    if (((calibY < calibMax) or (stepY < 0)) and ((calibY > 0) or (stepY > 0))) {
+                        //we are between y=0 and y=max
+                        Main.stickPad!!.target.setPos(
+                            calibX / calibMaxF,
+                            (calibY + stepY) / calibMaxF
+                        )
                         Handler().postDelayed(
-                            { send(EV_8_deviation, xIndex, yIndex + step, null) }, delay.toLong()
+                            { send(EV_8_stick_should_arrive, calibX, calibY + stepY, null) },
+                            calibDelay.toLong()
                         )
                     } else {
-                        if (xIndex < rangeI) {
-                            Main.stickPad!!.target.setPos((xIndex + 1) / rangeF, yIndex / rangeF)
-                            step = -step                    // reverse y direction
+                        if ((calibX < calibMax) or (stepX < 0) and ((calibX > 0) or (stepX > 0))) {
+                            //we are at y=0 or at y=max, move to next column and reverse y direction
+                            Main.stickPad!!.target.setPos(
+                                (calibX + stepX) / calibMaxF,
+                                calibY / calibMaxF
+                            )
+                            stepY = -stepY                    // reverse y direction
                             Handler().postDelayed(
-                                { send(EV_8_deviation, xIndex + 1, yIndex, null) }, delay.toLong()
+                                { send(EV_8_stick_should_arrive, calibX + stepX, calibY, null) },
+                                calibDelay.toLong()
                             )
                         } else {
-                            calibrating = false
-                            calibrateButton!!.setBackgroundColor(
-                                ContextCompat.getColor(Main.mContext!!, R.color.buttonfirstcolor)
-                            )
-                            println("================================> end CALIB  ")
-                            for (i in 0..rangeI) {
-                                for (j in 0..rangeI) {
-                                    corrections[i][j] = correctionsProvisional[i][j]
-                                    // adf test
-                                    for (k in 0 .. rangeI)
-                                        for (l in 0 .. rangeI)
-                                            corrections[k][l] = correctionsProvisional[k][l]
-                                }
+                            //we are at x=0 or x=max
+                            if (stepX > 0) {
+                                //we are at x=max, so reverse stepX and move to column at left
+                                stepX = -stepX
+                                stepY = -stepY
+                                Main.stickPad!!.target.setPos(
+                                    (calibX) / calibMaxF,
+                                    (calibY + stepY) / calibMaxF
+                                )
+                                Handler().postDelayed(
+                                    { send(EV_8_stick_should_arrive, calibX, (calibY + stepY), null) },
+                                    calibDelay.toLong()
+                                )
+                                Log.i(logTag, "===> REVERSE CALIB  ")
+                                Forces.fixCorrections(1f)
+                            } else {
+                                // we are back at x=0, we can stop now
+                                calibrating = false
+                                calibrateButton!!.setBackgroundColor(
+                                    ContextCompat.getColor(
+                                        Main.mContext!!,
+                                        R.color.button_first_color
+                                    )
+                                )
+                                stepX = 1; stepY = 1
+                                Log.i(logTag, "===> end CALIB  ")
+
+                                Forces.fixCorrections(2f)
+
+                                Log.i(logTag, "corr (0 0)  (${Forces.corrections[0][0]})")
+                                Log.i(logTag, "corr (99 0)  (${Forces.corrections[99][0]})")
+                                Log.i(logTag, "corr (0 99)  (${Forces.corrections[0][99]})")
+                                Log.i(logTag, "corr (99 99)  (${Forces.corrections[99][99]})")
                             }
                         }
                     }
                 }
                 EV_30_force -> {
                     Main.stickPad!!.target.setPos(.8f, Main.stickPad!!.target.pos.y + 0.1f)
-                    Forces.targetRel = Main.stickPad!!.target.pos
                     Main.stickPad!!.invalidate()
                 }
                 EV_15_new_IP -> if (!running) whileNotPolling()
@@ -266,9 +282,6 @@ class PollMaster : Thread() {
                     Forces.newPIDParam(arg1.toFloat(), arg3.toString())
 //                    println("sendy receives pos $arg1 from $arg3")
                 }
-                EV_22_resetCorY -> {
-                    Main.correctionView!!.resetCorY()
-                }
                 else -> {
                     Log.e(logTag, "EVENT $event unknown")
                     Main.mReport5a!!.text = "sendy: incoming EVENT unknown"
@@ -279,24 +292,4 @@ class PollMaster : Thread() {
     }
 
 
-    companion object {
-        const val EV_0_reset = 0
-        const val EV_1_full_reset = 1
-        const val EV_2_start_stop = 2
-        const val EV_3_next_round = 3
-        const val EV_5_calibrate = 5
-        const val EV_6_calibrateOne = 6
-        const val EV_7_calibratePos = 7
-        const val EV_8_deviation = 8
-        const val EV_11_dt_min = 11
-        const val EV_12_dt_plus = 12
-        const val EV_13_force_min = 13
-        const val EV_14_force_plus = 14
-        const val EV_15_new_IP = 15
-        const val EV_21_from_slider = 21
-        const val EV_22_resetCorY = 22
-        const val EV_30_force = 30
-        private var running = false
-
-    }
 }

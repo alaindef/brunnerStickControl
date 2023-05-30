@@ -18,61 +18,72 @@ object Forces {
     var conI = 0f
     var conPv = 50f
     var conIv = 0f
-
-    var targetRel = VectorF(0f, 0f)
-    var currentRel = VectorF(0.05f, 0.15f)
-
-    var forces = VectorF(0f, 0f)
-
-    val corTable = Array<VectorF>(11) { VectorF(0f, 0f) }
-    val corTableProvisional = Array<VectorF>(11) { VectorF(0f, 0f) }
-
-    var corrected = VectorF(0f, 0f)
-    var correctedXY = VectorF(0f, 0f)
-
-    var calType = "none"
-
-
-    val rangeI = sendy!!.rangeI
-    val rangeF = sendy!!.rangeF
-
-
     fun newPIDParam(value: Float, source: String) {
         when (source) {
             "conP" -> {
-                conP = value
-                Main.conPReport!!.text = " ${value.toInt()}"
+                conP = value; Main.conPReport!!.text = " ${value.toInt()}"
             }
             "conI" -> {
-                conI = value
-                Main.conIReport!!.text = " ${value.toInt()}"
+                conI = value; Main.conIReport!!.text = " ${value.toInt()}"
             }
             "conPv" -> {
-                conPv = value
-                Main.conPvReport!!.text = " ${value.toInt()}"
+                conPv = value; Main.conPvReport!!.text = " ${value.toInt()}"
             }
             "conIv" -> {
-                conIv = value
-                Main.conIvReport!!.text = " ${value.toInt()}"
+                conIv = value; Main.conIvReport!!.text = " ${value.toInt()}"
             }
         }
     }
 
-    private fun correctRel(posRel: VectorF): VectorF {
-//        range of pos: 0f .. 1f. scale up to 0 .. 100
-        posRel.x = max(0f, kotlin.math.min(0.99f, posRel.x))    //avoid outofbounds further down
-        posRel.y = max(0f, min(posRel.y, .99f))
+    var calType = "full"        //default
+    var calibMax = 4
+    var calibMaxF = calibMax.toFloat()
+    var calibJump = 100/ calibMax
+    var calibDelay = 1000
 
-        var index = posRel.divideBy(0.1f).toIntVector()
+    //    val calibDelay = 16000 / calibMax
+    var corrected = VectorF(0f, 0f)
+    var correctedXY = VectorF(0f, 0f)
 
-        val corX = if (index.x < 10)
-            corTable[index.x].x + (corTable[index.x + 1].x - corTable[index.x].x) * (posRel.x - index.x / 10f) / 0.1f
-        else 0f
-        val corY = if (index.y < 10)
-            corTable[index.y].y + (corTable[index.y + 1].y - corTable[index.y].y) * (posRel.y - index.y / 10f) / 0.1f
-        else 0f
 
-        return posRel.minus(VectorF(corX, corY))
+    // table to store corrections at the calibration points.
+    // an array of 101x101, but only calibMax x calibMax will be used
+    private val correctionsProvisional: Array<Array<VectorF>> =
+        Array(101) { Array(101) { VectorF(0f, 0f) } }
+
+    // table to store all the corrections in a field of 101x101
+    val corrections: Array<Array<VectorF>> =
+        Array(101) { Array(101) { VectorF(0f, 0f) } }
+
+    fun resetCorrections() {
+        for (i in 0..calibMax) {
+            for (j in 0..calibMax) correctionsProvisional[i][j] = VectorF(0f, 0f)
+        }
+        for (i in 0..100) for (j in 0..100) corrections[i][j] = VectorF(0f, 0f)
+    }
+
+    private fun resetProvisionalCorrections() {
+        for (i in 0..calibMax) {
+            for (j in 0..calibMax) correctionsProvisional[i][j] = VectorF(0f, 0f)
+        }
+    }
+
+    //  ----------------------------------- calibration for full and interpol  --------------------
+    fun updateCorrections(calibX: Int, calibY: Int, delta: VectorF) {
+        correctionsProvisional[calibX][calibY] = correctionsProvisional[calibX][calibY] plus delta
+    }
+
+    fun fixCorrections(cnt: Float) {
+        for (i in 0 until calibMax) {
+            for (j in 0 until calibMax) {
+                for (incX in 0 until calibJump)
+                    for (incY in 0 until calibJump)
+                        corrections[i * calibJump + incX][j * calibJump + incY] =
+                            (corrections[i * calibJump + incX][j * calibJump + incY] plus
+                                    correctionsProvisional[i][j]) divideBy cnt
+            }
+        }
+        resetProvisionalCorrections()
     }
 
     private fun interpol(pos: VectorF, ref: Array<VectorF>): VectorF {
@@ -88,37 +99,45 @@ object Forces {
         }
         return VectorF(0f, 0f)
     }
+//  ----------------------------------- calibration for full and interpol END --------------------
 
+    //  ----------------------------------- runtime for full -----------------------------------------
     fun correctFull(pos: VectorF): VectorF {
-        val cor = sendy!!.corrections[pos.x.toInt()][pos.y.toInt()] mul 1f
-        val res = pos add cor
-//        println("------------------------correctFull $cor")
+        val index = (pos mul VectorF(100f, 100f)).toIntVector()
+        val cor = corrections[index.x][index.y]         // mul 1f
+        val res = pos plus cor
+//        val res = pos plus (cor mul VectorF(2f, 2f))
         return res
     }
 
-    fun correct2Dim(pos: VectorF): VectorF {
-//        range of pos: 0f .. 1f. scale up to 0 .. 100
-        pos.x = max(0f, kotlin.math.min(0.99f, pos.x))    //avoid OutOfBounds further down
-        pos.y = max(0f, min(pos.y, 0.99f))
-
-//        var index = pos.divideBy(0.1f).toIntVector()
-        var index = (pos mul rangeF).toIntVector()
+    //  ----------------------------------- runtime for interpol ---------------------------------
+    fun correctInterpol(pos: VectorF): VectorF {
+//        range of pos: 0f .. 1f.
+        pos.x = max(0f, kotlin.math.min(.99f, pos.x))    //avoid OutOfBounds further down
+        pos.y = max(0f, min(pos.y, .99f))
+//        index : 0 .. 100, in steps of calibJump
+//        index is the coord of the topleft corner of the surrounding square
+        var index = ((pos mul 100f) divideBy calibJump.toFloat()).toIntVector() mul calibJump
 
         // refpos has the vector positions of the 4 corners of the surrounding square
         //index has range of 0..10, positions have a range 0f to 1f
-        val refPos: Array<VectorF> = arrayOf(
-            VectorF(index.x / rangeF, index.y / rangeF),
-            VectorF((index.x + 1) / rangeF, index.y / rangeF),
-            VectorF(index.x + 1 / rangeF, (index.y + 1) / rangeF),
-            VectorF((index.x) / rangeF, (index.y + 1) / rangeF)
+
+        val refPos: Array<VectorI> = arrayOf(
+            index,
+            index plus VectorI(1, 0),
+            index plus VectorI(1, 1),
+            index plus VectorI(0, 1)
         )
 
         // ref has the corrections at the 4 corners of the surrounding square
+        if (index.x > 99) println("index.x = ${index.x}         > 99")
+        if (index.y > 99) println("index.y > 99")
+
         val refValue: Array<VectorF> = arrayOf(
-            sendy!!.corrections[index.x][index.y],
-            sendy!!.corrections[index.x + 1][index.y],
-            sendy!!.corrections[index.x + 1][index.y + 1],
-            sendy!!.corrections[index.x][index.y + 1]
+            corrections[index.x][index.y],
+            corrections[index.x + 1][index.y],
+            corrections[index.x + 1][index.y + 1],
+            corrections[index.x][index.y + 1]
         )
 
         // dist has the distances of the target position to the 4 corners of the surrounding square
@@ -134,18 +153,15 @@ object Forces {
             dist[i] = sqrt((deltaPos.x).pow(2) + (deltaPos.y).pow(2))
             // if we are close to a corner, take the value of that corner, and avoid divide by zero
             if (dist[i] < 0.001) return pos minus refValue[i]
-
-            teller = teller.add(refValue[i].divideBy(dist[i]))
-            noemer = noemer.add(VectorF(1f, 1f).divideBy(dist[i]))
+            teller = teller.add(refValue[i] divideBy dist[i])
+            noemer = noemer.add(VectorF(1f, 1f) divideBy dist[i])
         }
-        val cor = (teller.divideBy(noemer)).mul(2f)             //!!!! arbitrary 2f
+        val cor = (teller.divideBy(noemer)).mul(1f)             //!!!! arbitrary 2f
 
-        println("------------------------correct2Dim $cor")
-        val res = pos minus cor
+//        println("------------------------correct2Dim $cor")
+        val res = pos plus cor
 //        println("pos= $pos   corPos= $res")
-
         return res
-//        return (pos.minus(teller.divide(noemer)))
     }
 
     fun correct2DimXY(pos: VectorF): VectorF {
@@ -155,15 +171,15 @@ object Forces {
 
         var index = pos.divideBy(0.1f).toIntVector()
 
-        val x1 = index.x / rangeF
-        val x2 = (index.x + 1) / rangeF
-        val y1 = index.y / rangeF
-        val y2 = (index.y + 1) / rangeF
+        val x1 = index.x / calibMaxF
+        val x2 = (index.x + 1) / calibMaxF
+        val y1 = index.y / calibMaxF
+        val y2 = (index.y + 1) / calibMaxF
 
-        val z11 = sendy!!.corrections[index.x][index.y]
-        val z21 = sendy!!.corrections[index.x + 1][index.y]
-        val z12 = sendy!!.corrections[index.x][index.y + 1]
-        val z22 = sendy!!.corrections[index.x + 1][index.y + 1]
+        val z11 = corrections[index.x][index.y]
+        val z21 = corrections[index.x + 1][index.y]
+        val z12 = corrections[index.x][index.y + 1]
+        val z22 = corrections[index.x + 1][index.y + 1]
 
         val x01 = x0 - x1
         val x21 = x2 - x1
@@ -175,17 +191,20 @@ object Forces {
                 (z12 mul (x21 * y01 - x01 * y01)) plus
                 (z22 mul (x01 * y01))
 
-        val res = pos minus (d0x21y21 divideBy (x21 * y21 * rangeF * rangeF))
+        val res = pos minus (d0x21y21 divideBy (x21 * y21 * calibMaxF * calibMaxF))
 
         return res
     }
 
+    var currentRel = VectorF(0.05f, 0.15f)
+
+    var forces = VectorF(0f, 0f)
     fun calculateForces(): VectorF {
+        // called at EV_3 at each round
         val pos = (Main.stickPad!!.target.pos)
         when (calType) {
             "full" -> corrected = correctFull(pos)
-            "interpol" -> corrected = correct2Dim(pos)
-            "col" -> corrected = correctRel(pos)
+            "interpol" -> corrected = correctInterpol(pos)
             else -> corrected = pos
         }
 

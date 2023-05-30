@@ -46,26 +46,23 @@ class PadView @JvmOverloads constructor(
         color = Color.BLUE
     }
 
-    fun sendTarget0(xPix: Float, yPix: Float, padWidth: Float, padHeight: Float) {
-        target.setPos(
-            (minOf(maxOf((xPix / padWidth), 0F), 0.99F)),
-            (minOf(maxOf((yPix / padHeight), 0F), 0.99F))
-        )
-        Main.mReport2!!.text = "(%.2f %.2f)".format(target.pos.x, target.pos.y)
-        Forces.targetRel = target.pos
-    }
-    fun sendTarget(pos: VectorF, size: VectorF) {
-        target.setPosV(
-            pos.divideBy(size).maxOf(VectorF(0f,0f).minOf(VectorF(0.99f,0.99f))))
-        Main.mReport2!!.text = "(%.2f %.2f)".format(target.pos.x, target.pos.y)
-        Main.mReport5a!!.text = "corrected target position)"
-        Main.mReport5!!.text = "(%.2f %.2f)".format(Forces.corrected.x, Forces.corrected.y)
-        Forces.targetRel = target.pos       // moveToTarget is called continuously and uses this
-//        println("TEST")
-//        println("=================================== from PadView.sendtarget :")
-        for (iy in 0 .. sendy.rangeI){
-            print(" ${sendy.corrections[0][iy].y}")
-        }
+    fun sendTarget(posPixel: VectorF, size: VectorF) {
+        // posPixel and size are in pixels. tpos is 0..1f
+        val tpos = ((posPixel.divideBy(size)).maxOf(VectorF(0f, 0f)).minOf(VectorF(1f, 1f)))
+        val tposIndex = (tpos mul VectorF(100f,100f)).toIntVector()
+        target.setPosV(tpos)
+
+        val corrp =Forces.correctInterpol(tpos)
+        val tpText = "(%.2f %.2f)".format(target.pos.x, target.pos.y)
+        val corrpText = "(%.2f %.2f)".format(corrp.x, corrp.y)
+        "$tpText $corrpText".also { Main.mReport2!!.text = it }
+
+        val repPos = "(%.2f %.2f)".format(tpos.x, tpos.y)
+        val repCorTar = "(%.2f %.2f)".format(Forces.corrected.x, Forces.corrected.y)
+        val corrections = Forces.corrections[tposIndex.x][tposIndex.y]
+        val repCorrections = "(%.2f %.2f)".format(corrections.x, corrections.y)
+        "$repPos  $repCorTar  $repCorrections".also { Main.mReport5!!.text = it }
+        "(target pos)  (corrected target)  (corrections)".also { Main.mReport5a!!.text = it }
     }
 
     override fun onDraw(canvas: Canvas) {
@@ -104,43 +101,5 @@ class PadView @JvmOverloads constructor(
         invalidate()
         return true
     }
-
-
-    fun calibrateAll() {
-//        view.setBackgroundColor(ContextCompat.getColor(Main.mContext!!, R.color.buttonfirstcolor))
-        // There will be 11 calibration points (yes, that number is hardcoded, shut up!)
-        // we start at the top of the pad. sendy will schedule subsequent points
-        target.setPosV(VectorF(0.7f, 0f))
-        // we cannot do the calibration of this point right now.
-        // we have to wait for the stick to do its move. Sendy will do the timing
-        // sendy will also trigger further calibration points
-        // arg1 is the index of the first point to calibrate
-        // arg2 is the direction: 1 for index from 0 to 10, -1 for index from 10 to 0
-        sendy.send(PollMaster.EV_6_calibrateOne, 0, 1, null)
-    }
-
-    fun calibrateOne(index: Int, dir: Int) {
-        // Index is the seq number of one of 11 points, range 0 .. 10
-        // dir is +1 for going from 0 to 10, -1 for going from 10 to 0
-        // a new target will put the stick on the move, which takes time
-        //so, we fix the provisional correction for the previous position, which is stable now
-        val deltaY = target.pos.y - stick.pos.y
-        Forces.corTableProvisional[index - 1].y -= deltaY
-        // now we can set the new target
-        target.setPosV( VectorF(0.7f, index / 10f))
-        sendy.send(PollMaster.EV_6_calibrateOne, index, dir, null)
-    }
-
-    fun calibrateEnd(index: Int) {
-        val deltaY = target.pos.y - stick.pos.y
-        Forces.corTableProvisional[index].y -= deltaY
-        for (i in 0..10) {
-            Forces.corTable[i].y = Forces.corTableProvisional[i].y * 1.3f
-            Main.correctionView!!.setVertex(i, VectorF(0f, Forces.corTable[i].y + 0.5f))
-            Main.correctionView!!.invalidate()
-        }
-    }
-
-
-
 }
+

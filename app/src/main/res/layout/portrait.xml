@@ -46,7 +46,7 @@
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_gravity="center"
-            android:layout_weight="4"
+            android:layout_weight="2"
             android:gravity="center"
             android:text="current position" />
 
@@ -55,11 +55,11 @@
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_gravity="center"
-            android:layout_weight="4"
+            android:layout_weight="6"
             android:gravity="center"
             android:text=""
             android:textColor="@android:color/white"
-            android:textSize="20sp" />
+            android:textSize="@dimen/text_medium" />
 
     </LinearLayout>
 
@@ -74,7 +74,7 @@
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_gravity="center"
-            android:layout_weight="4"
+            android:layout_weight="2"
             android:gravity="center"
             android:text="target position" />
 
@@ -83,11 +83,11 @@
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_gravity="center"
-            android:layout_weight="4"
+            android:layout_weight="6"
             android:gravity="center"
             android:text=""
             android:textColor="@android:color/white"
-            android:textSize="20sp" />
+            android:textSize="@dimen/text_medium" />
 
     </LinearLayout>
 
@@ -115,7 +115,7 @@
             android:gravity="center"
             android:text=""
             android:textColor="@android:color/white"
-            android:textSize="20sp" />
+            android:textSize="@dimen/text_medium" />
 
     </LinearLayout>
 
@@ -176,92 +176,99 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="60dp"
-        android:background="@android:color/holo_blue_light"
+        android:background="@android:color/holo_green_dark"
         android:weightSum="12">
 
         <com.google.android.material.textview.MaterialTextView
             android:id="@+id/tile1"
-            android:layout_width="0dp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:layout_weight="2"
-            android:background="@color/buttonfirstcolor"
-            android:contentDescription="@string/photoView"
             android:gravity="center"
+            android:minWidth="@dimen/min_width"
+            android:background="@color/button_first_color"
+            android:contentDescription="@string/photoView"
             android:onClick="sendEvent"
             android:tag="dt-"
             android:text="dt-"
-            android:textSize="30sp" />
+            android:textSize="@dimen/text_medium"
+            android:autoSizeMinTextSize="12sp"
+            android:layout_marginHorizontal="@dimen/text_margin" />
 
         <com.google.android.material.textview.MaterialTextView
             android:id="@+id/tile2"
-            android:layout_width="0dp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:layout_weight="2"
-            android:background="@color/buttonfirstcolor"
-            android:contentDescription="@string/photoView"
             android:gravity="center"
+            android:minWidth="@dimen/min_width"
+            android:background="@color/button_first_color"
             android:onClick="sendEvent"
             android:tag="dt+"
             android:text="dt+"
-            android:textSize="30sp" />
+            android:textSize="@dimen/text_medium"
+            android:autoSizeMinTextSize="12sp"
+            android:layout_marginHorizontal="@dimen/text_margin" />
 
         <com.google.android.material.textview.MaterialTextView
             android:id="@+id/tile3"
-            android:layout_width="0dp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:layout_weight="2"
-            android:background="@color/buttonfirstcolor"
-            android:contentDescription="@string/photoView"
             android:gravity="center"
+            android:background="@color/button_first_color"
+            android:minWidth="@dimen/min_width"
             android:onClick="sendEvent"
-            android:tag="cal1full"
-            android:text="calfull"
-            android:textSize="30sp" />
-
-        <com.google.android.material.textview.MaterialTextView
-            android:id="@+id/tile5"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:layout_weight="2"
-            android:background="@color/buttonfirstcolor"
-            android:contentDescription="@string/photoView"
-            android:gravity="center"
-            android:onClick="sendEvent"
-            android:tag="cal2dim"
-            android:text="cal2dim"
-            android:textSize="30sp" />
+            android:tag="caltyp"
+            android:text="caltyp"
+            android:textSize="@dimen/text_medium"
+            android:autoSizeMinTextSize="12sp"
+            android:layout_marginHorizontal="@dimen/text_margin" />
 
         <com.google.android.material.textview.MaterialTextView
             android:id="@+id/tile4"
-            android:layout_width="0dp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:layout_weight="2"
-            android:background="@color/buttonfirstcolor"
-            android:contentDescription="@string/photoView"
             android:gravity="center"
+            android:background="@color/button_first_color"
+            android:minWidth="@dimen/min_width"
             android:onClick="sendEvent"
-            android:tag="cal1col"
-            android:text="cal1col"
-            android:textSize="30sp" />
+            android:tag="calmax"
+            android:text="calmax"
+            android:textSize="@dimen/text_medium"
+            android:autoSizeMinTextSize="12sp"
+            android:layout_marginHorizontal="@dimen/text_margin" />
+
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/tile5"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:minWidth="@dimen/min_width"
+            android:background="@color/button_first_color"
+            android:onClick="sendEvent"
+            android:tag="calibrate"
+            android:text="calib!"
+            android:textSize="@dimen/text_medium"
+            android:autoSizeMinTextSize="12sp"
+            android:layout_marginHorizontal="@dimen/text_margin" />
 
         <com.google.android.material.textview.MaterialTextView
             android:id="@+id/tile6"
-            android:layout_width="0dp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:layout_weight="2"
-            android:background="@color/buttonfirstcolor"
-            android:contentDescription="@string/photoView"
             android:gravity="center"
+            android:minWidth="@dimen/min_width"
+            android:background="@color/button_first_color"
             android:onClick="sendEvent"
-            android:tag="resetcol"
+            android:tag="resetCorrections"
             android:text="rst"
-            android:textSize="30sp" />
+            android:textSize="@dimen/text_medium"
+            android:autoSizeMinTextSize="12sp"
+            android:layout_marginHorizontal="@dimen/text_margin" />
 
     </LinearLayout>
 
@@ -328,7 +335,7 @@
                 android:tag="B_poll"
                 android:text="@string/polling"
                 android:textAlignment="center"
-                android:textSize="30sp" />
+                android:textSize="@dimen/text_medium" />
 
             <Button
                 android:id="@+id/reset"
@@ -342,7 +349,7 @@
                 android:tag="B_RES"
                 android:text="@string/reset"
                 android:textAlignment="center"
-                android:textSize="30sp" />
+                android:textSize="@dimen/text_medium" />
         </LinearLayout>
 
         <LinearLayout

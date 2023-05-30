@@ -4,6 +4,8 @@
     <dimen name="padding">20sp</dimen>
     <dimen name="buttonWidth">40sp</dimen>
     <dimen name="buttonHeight">40sp</dimen>
-    <dimen name="textsize">28sp</dimen>
-    <dimen name="textsmall">10sp</dimen>
+    <dimen name="text_medium">20sp</dimen>
+    <dimen name="text_small">10sp</dimen>
+    <dimen name="text_margin">12sp</dimen>
+    <dimen name="min_width">60sp</dimen>
 </resources>

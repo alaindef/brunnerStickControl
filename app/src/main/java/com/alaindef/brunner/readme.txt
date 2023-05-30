@@ -9,3 +9,7 @@
 
 230520: "Activity class {com.alaindef.brunefd/com.alaindef.brunner.Main} does not exist."
     -> SYNC gradle!
+
+230530: I/Choreographer: Skipped 239 frames!  The application may be doing too much work on its main thread.
+    I/OpenGLRenderer: Davey! duration=4008ms;
+    -> timeout on receiver?? 4 sec. probeer sha b31a181: receiver in aparte thread

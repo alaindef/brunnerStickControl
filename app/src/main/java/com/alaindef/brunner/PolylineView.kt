@@ -41,9 +41,6 @@ class PolylineView @JvmOverloads constructor(
         })
     }
 
-
-
-
     private val paint = Paint().apply {
         color = Color.BLACK
         strokeWidth = 5f
@@ -103,7 +100,6 @@ class PolylineView @JvmOverloads constructor(
 //                    get delta in range [-0.5..+0.5]
                     val deltaY = (vertices[selectedVertexIndex].x - width / 2) / width
                     invalidate()
-                    Forces.corTable[selectedVertexIndex].y = deltaY
                 }
                 invalidate()
                 selectedVertexIndex = -1
@@ -115,19 +111,8 @@ class PolylineView @JvmOverloads constructor(
     }
 
     fun resetCorY() {
-        println("REST corY =========================================== ")
         vertices.clear()
-        for (i in 0..10) {
-            vertices.add(PointF(width / 2f, (i.toFloat() / 10) * height))
-            Forces.corTable[i].y = 0f
-            Forces.corTableProvisional[i].y = 0f
-        }
-        for (i in 0 until 10){
-            for (j in 0 ..10){
-                sendy!!.correctionsProvisional[i][j] = VectorF(0f, 0f)
-                sendy!!.corrections[i][j] = VectorF(0f, 0f)
-            }
-        }
+        for (i in 0..10) vertices.add(PointF(width / 2f, (i.toFloat() / 10) * height))
         invalidate()
     }
 

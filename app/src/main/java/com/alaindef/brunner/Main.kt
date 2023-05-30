@@ -19,6 +19,7 @@ data class VectorF(var x: Float, var y: Float) {
     infix fun add(arg: VectorF): VectorF {
         return VectorF(x + arg.x, y + arg.y)
     }
+
     infix fun plus(arg: VectorF): VectorF {
         return VectorF(x + arg.x, y + arg.y)
     }
@@ -27,9 +28,14 @@ data class VectorF(var x: Float, var y: Float) {
         return VectorF(x - arg.x, y - arg.y)
     }
 
+    infix fun minus(arg: VectorI): VectorF {
+        return VectorF(x - arg.x.toFloat(), y - arg.y.toFloat())
+    }
+
     infix fun mul(arg: Float): VectorF {
         return VectorF(x * arg, y * arg)
     }
+
     infix fun mul(arg: VectorF): VectorF {
         return VectorF(x * arg.x, y * arg.y)
     }
@@ -37,6 +43,7 @@ data class VectorF(var x: Float, var y: Float) {
     infix fun divideBy(arg: Float): VectorF {
         return VectorF(x / arg, y / arg)
     }
+
     infix fun divideBy(arg: VectorF): VectorF {
         return VectorF(x / arg.x, y / arg.y)
     }
@@ -48,6 +55,7 @@ data class VectorF(var x: Float, var y: Float) {
     fun maxOf(arg: VectorF): VectorF {
         return VectorF(maxOf(x, arg.x), maxOf(y, arg.y))
     }
+
     fun minOf(arg: VectorF): VectorF {
         return VectorF(minOf(x, arg.x), minOf(y, arg.y))
     }
@@ -57,6 +65,13 @@ data class VectorI(val x: Int, val y: Int) {
     fun max(arg: VectorI): VectorI {
         return VectorI(kotlin.math.max(x, arg.x), kotlin.math.max(y, arg.y))
     }
+    infix fun mul(arg: Int): VectorI {
+        return VectorI(x * arg, y * arg)
+    }
+    infix fun plus(arg: VectorI): VectorI {
+        return VectorI(x + arg.x, y + arg.y)
+    }
+
 }
 
 data class Square(val l: Int, val u: Int, val r: Int, val d: Int)
@@ -67,6 +82,7 @@ data class SquareI(val topLeft: VectorI, val bottomRight: VectorI)
 class Main : AppCompatActivity() {
     private val logTag = ">----MAIN---"
     fun sendEvent(view: View?) {
+        var teut = ""
         when (val ss = view!!.tag) {
             "B_poll" -> {
                 sendy.send(PollMaster.EV_2_start_stop)
@@ -80,29 +96,55 @@ class Main : AppCompatActivity() {
             }
             "dt+" -> {
                 sendy.send(PollMaster.EV_12_dt_plus, 0, 0, ss)
+                println("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
+                for (j in 0..50) {
+                    teut = "row $j:"
+                    for (i in 45..50) {
+                        teut += " (${Forces.corrections[i][j].x} ${Forces.corrections[i][j].y})"
+                    }
+                    println(teut)
+                }
             }
-            "cal1full" -> {
-                sendy.send(PollMaster.EV_7_calibratePos, 4, 700, view)
-//                sendy.send(PollMaster.EV_7_calibratePos, 100, 100, view)
+            "caltyp" -> {
+                when (Forces.calType){
+                    "full"      -> Forces.calType = "interpol"
+                    "interpol"  -> Forces.calType = "none"
+                    "none"      -> Forces.calType = "full"
+                    else        -> Forces.calType = "none"
+                }
+                mCalibTypeButton!!.text = Forces.calType
+            }
+            "calmax" -> {
+                when (Forces.calibMax){
+                    4       -> Forces.calibMax = 5
+                    5       -> Forces.calibMax = 10
+                    10      -> Forces.calibMax = 20
+                    20      -> Forces.calibMax = 50
+                    50      -> Forces.calibMax = 100
+                    100     -> Forces.calibMax = 4
+                    else    -> Forces.calibMax = 5
+                }
+                Forces.calibMaxF = Forces.calibMax.toFloat()
+                Forces.calibJump = 100 /  Forces.calibMax
+                Forces.calibDelay = if (Forces.calibMax > 10) 1000 else 500
+                mCalibMaxButton!!.text = Forces.calibMax.toString()
+            }
+            "interpol" -> {
+                Forces.calType = "interpol"     //interpolate between calib points
+            }
+            "calibrate" -> {
+                sendy.send(PollMaster.EV_7_calibratePos, 0, 0, view)
                 view.setBackgroundColor(
                     ContextCompat.getColor(Main.mContext!!, R.color.buttonsecondcolor)
                 )
-                Forces.calType = "full"
+//                Forces.calType = "none"        //no correction
+//                mCalibTypeButton!!.text = "calibrate"
+                Log.i(logTag, "calmax= ${Forces.calibMax}")
             }
-            "cal2dim" -> {
-                sendy.send(PollMaster.EV_7_calibratePos, 4, 700, view)
-                view.setBackgroundColor(
-                    ContextCompat.getColor(Main.mContext!!, R.color.buttonsecondcolor)
-                )
-                Forces.calType = "interpol"
-            }
-            "cal1col" -> {
-                sendy.send(PollMaster.EV_5_calibrate, 0, 0, view)
-                Forces.calType = "col"
-            }
-            "resetcol" -> {
+
+            "resetCorrections" -> {
+                Forces.resetCorrections()
                 correctionView!!.resetCorY()
-//                sendy.send(PollMaster.EV_22_resetCorY, 0, 0, ss)
             }
             else -> Log.wtf(logTag, "tag unknown $ss")
         }
@@ -188,6 +230,9 @@ class Main : AppCompatActivity() {
         correctionView = findViewById(R.id.yTable)
         stickPad = findViewById(R.id.del)
 
+        mCalibTypeButton = findViewById(R.id.tile3)
+        mCalibMaxButton = findViewById(R.id.tile4)
+
         if (savedInstanceState == null) {
             // sendy is an FMM (Finite Message Machine) that handles all the incomming events:
             // start and stop the polling, reset, receive target and current positions,
@@ -262,6 +307,12 @@ class Main : AppCompatActivity() {
 
         @SuppressLint("StaticFieldLeak")
         var stickPad: PadView? = null
+
+        @SuppressLint("StaticFieldLeak")
+        var mCalibTypeButton: TextView? = null
+
+        @SuppressLint("StaticFieldLeak")
+        var mCalibMaxButton: TextView? = null
     }
 }
 
