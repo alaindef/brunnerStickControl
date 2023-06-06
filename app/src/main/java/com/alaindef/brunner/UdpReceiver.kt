@@ -15,7 +15,7 @@ object UdpRecObject {
     val logTag = ">---Receiver---"
 
     init {
-        socketR = DatagramSocket(portR, InetAddress.getByName("0.0.0.0"))
+        socketR = DatagramSocket(Main.portR, InetAddress.getByName("0.0.0.0"))
         socketR!!.broadcast = true
         socketR!!.soTimeout = 1000
     }
@@ -37,8 +37,7 @@ object UdpRecObject {
         return result
     }
 
-
-    fun getCoordinates(count:Int): VectorF {
+    fun getCoordinates(count: Int): VectorF {
 //        returns values from brunner range 0.00 .. 1.00
         val policy = StrictMode.ThreadPolicy.Builder().permitAll().build()
         StrictMode.setThreadPolicy(policy)
@@ -50,23 +49,14 @@ object UdpRecObject {
         try {
             val response = DatagramPacket(buffer, buffer.size)
             socketR!!.receive(response)
-
             val quote = convertToInts(response.data, 9)
             x = java.lang.Float.intBitsToFloat(quote[3])
             y = java.lang.Float.intBitsToFloat(quote[1])
-            val stickposTxt = "pos=(${String.format("%.${2}f", x)}  ${String.format("%.${2}f", y)})"
-            val delta = Main.stickPad!!.target.pos minus VectorF(x, y)
-            val deltaTxt = " d=(${String.format("%.${2}f", delta.x)}  ${String.format("%.${2}f", delta.y)})"
-            Main.mReport1!!.text = stickposTxt + deltaTxt
 
         } catch (ex: SocketTimeoutException) {
-//            Main.mReport5!!.text = ex.message
-//            Main.mReport5a!!.text = "Timeout error"
             println("Timeout error at count $count")
-            Log.e(logTag,"Timeout error at count $count")
+            Log.e(logTag, "Timeout error at count $count")
         } catch (ex: IOException) {
-//            Main.mReport5!!.text = ex.message
-//            Main.mReport5a!!.text = "Client error"
         } catch (ex: InterruptedException) {
             ex.printStackTrace()
         }

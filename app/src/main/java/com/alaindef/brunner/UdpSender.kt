@@ -9,9 +9,8 @@ import java.net.DatagramSocket
 import java.net.InetAddress
 import java.nio.ByteBuffer
 
-class UdpSender(private val ipAddress: String, private val portSender: Int) {
+class UdpSender() {
 
-    val socketS = DatagramSocket()
     val logTag = ">---UdpSender---"
 
     fun little2big(word: Int): Int {
@@ -27,7 +26,7 @@ class UdpSender(private val ipAddress: String, private val portSender: Int) {
         return byteBuffer.array()
     }
 
-    fun sendUDP(forceX: Float, forceY: Float, IP: InetAddress, port: Int) {
+    fun sendUDP(forceX: Float, forceY: Float) {
         val policy = ThreadPolicy.Builder().permitAll().build()
         StrictMode.setThreadPolicy(policy)
 
@@ -35,9 +34,8 @@ class UdpSender(private val ipAddress: String, private val portSender: Int) {
         try {
             val socketS = DatagramSocket()
 
-            val request = DatagramPacket(byteMessage, byteMessage.size, IP, port)
+            val request = DatagramPacket(byteMessage, byteMessage.size, Main.ipAddress, Main.portS)
             socketS.send(request)
-
             socketS.close()
         } catch (e: Exception) {
             e.printStackTrace()

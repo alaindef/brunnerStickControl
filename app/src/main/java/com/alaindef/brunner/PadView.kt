@@ -49,20 +49,7 @@ class PadView @JvmOverloads constructor(
     fun sendTarget(posPixel: VectorF, size: VectorF) {
         // posPixel and size are in pixels. tpos is 0..1f
         val tpos = ((posPixel.divideBy(size)).maxOf(VectorF(0f, 0f)).minOf(VectorF(1f, 1f)))
-        val tposIndex = (tpos mul VectorF(100f,100f)).toIntVector()
         target.setPosV(tpos)
-
-        val corrp =Forces.correctInterpol(tpos)
-        val tpText = "(%.2f %.2f)".format(target.pos.x, target.pos.y)
-        val corrpText = "(%.2f %.2f)".format(corrp.x, corrp.y)
-        "$tpText $corrpText".also { Main.mReport2!!.text = it }
-
-        val repPos = "(%.2f %.2f)".format(tpos.x, tpos.y)
-        val repCorTar = "(%.2f %.2f)".format(Forces.corrected.x, Forces.corrected.y)
-        val corrections = Forces.corrections[tposIndex.x][tposIndex.y]
-        val repCorrections = "(%.2f %.2f)".format(corrections.x, corrections.y)
-        "$repPos  $repCorTar  $repCorrections".also { Main.mReport5!!.text = it }
-        "(target pos)  (corrected target)  (corrections)".also { Main.mReport5a!!.text = it }
     }
 
     override fun onDraw(canvas: Canvas) {

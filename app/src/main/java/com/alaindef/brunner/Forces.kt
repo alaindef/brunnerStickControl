@@ -35,7 +35,7 @@ object Forces {
         }
     }
 
-    var calType = "full"        //default
+    var calType = "none"        //default
     var calibMax = 4
     var calibMaxF = calibMax.toFloat()
     var calibJump = 100/ calibMax
@@ -99,16 +99,7 @@ object Forces {
         }
         return VectorF(0f, 0f)
     }
-//  ----------------------------------- calibration for full and interpol END --------------------
-
-    //  ----------------------------------- runtime for full -----------------------------------------
-    fun correctFull(pos: VectorF): VectorF {
-        val index = (pos mul VectorF(100f, 100f)).toIntVector()
-        val cor = corrections[index.x][index.y]         // mul 1f
-        val res = pos plus cor
-//        val res = pos plus (cor mul VectorF(2f, 2f))
-        return res
-    }
+//  ----------------------------------- calibration for interpol END --------------------
 
     //  ----------------------------------- runtime for interpol ---------------------------------
     fun correctInterpol(pos: VectorF): VectorF {
@@ -117,7 +108,7 @@ object Forces {
         pos.y = max(0f, min(pos.y, .99f))
 //        index : 0 .. 100, in steps of calibJump
 //        index is the coord of the topleft corner of the surrounding square
-        var index = ((pos mul 100f) divideBy calibJump.toFloat()).toIntVector() mul calibJump
+        val index = ((pos mul 100f) divideBy calibJump.toFloat()).toIntVector() mul calibJump
 
         // refpos has the vector positions of the 4 corners of the surrounding square
         //index has range of 0..10, positions have a range 0f to 1f
@@ -169,7 +160,7 @@ object Forces {
         val x0 = max(0f, kotlin.math.min(0.99f, pos.x))    //avoid OutOfBounds further down
         val y0 = max(0f, min(pos.y, 0.99f))
 
-        var index = pos.divideBy(0.1f).toIntVector()
+        val index = pos.divideBy(0.1f).toIntVector()
 
         val x1 = index.x / calibMaxF
         val x2 = (index.x + 1) / calibMaxF
@@ -203,7 +194,6 @@ object Forces {
         // called at EV_3 at each round
         val pos = (Main.stickPad!!.target.pos)
         when (calType) {
-            "full" -> corrected = correctFull(pos)
             "interpol" -> corrected = correctInterpol(pos)
             else -> corrected = pos
         }

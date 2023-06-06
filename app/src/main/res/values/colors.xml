@@ -2,4 +2,6 @@
 <resources>
     <color name="button_first_color">#A9EF91</color>
     <color name="buttonsecondcolor">#C565E5</color>
+    <color name="my_blue">@android:color/holo_blue_light</color>
+    <color name="my_red">@android:color/holo_red_light</color>
 </resources>

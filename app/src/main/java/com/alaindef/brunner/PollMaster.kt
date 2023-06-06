@@ -9,8 +9,6 @@ import android.util.Log
 import android.view.View
 import androidx.core.content.ContextCompat
 import java.lang.Integer.max
-import java.net.InetAddress
-import java.util.regex.Pattern
 
 
 class PollMaster : Thread() {
@@ -20,6 +18,7 @@ class PollMaster : Thread() {
         const val EV_1_full_reset = 1
         const val EV_2_start_stop = 2
         const val EV_3_next_round = 3
+        const val EV_6_current_pos = 6
         const val EV_7_calibratePos = 7
         const val EV_8_stick_should_arrive = 8
         const val EV_11_dt_min = 11
@@ -30,8 +29,10 @@ class PollMaster : Thread() {
         const val EV_21_from_slider = 21
         const val EV_22_resetCorY = 22
         const val EV_30_force = 30
-        private var running = false
+        var running = false
+        var cnt = 0
     }
+
     val logTag = ">---Sendy---"
 
     var calibrateButton: View? = null
@@ -56,11 +57,7 @@ class PollMaster : Thread() {
 
 
     var event: Int = 0
-    var cnt = 0
     var deltaT = 10
-
-
-    private var ipAddress: InetAddress = InetAddress.getByName("192.168.0.203")
 
     private var mHandler: ZeHandler? = null
 
@@ -76,81 +73,43 @@ class PollMaster : Thread() {
         mHandler!!.sendMessage(mHandler!!.obtainMessage(what, 0, 0, null))
     }
 
-
-    private val PATTERN: Pattern = Pattern.compile(
-        "^(([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\.){3}([01]?\\d\\d?|2[0-4]\\d|25[0-5])$"
-    )
-
-    private fun validate(ip: String?): Boolean {
-        return PATTERN.matcher(ip).matches()
-    }
-
-    fun whileNotPolling() {
-        // now we can read the dialog box for changing the IP address of the brunner interface
-        Main.mReport0!!.setBackgroundColor(-13388315)  // -13388315 is holo_blue_light (chat)
-        Main.mReport0!!.text = ""
-        if (Main.mIPDialog!!.getText() != null) {
-            val address = Main.mIPDialog!!.getText().toString()
-            if (validate(address)) {
-                ipAddress = InetAddress.getByName(address)
-                "Brunner ip $address".also { Main.mReport0!!.text = it }
-            } else
-                "INVALID ip address: $address".also { Main.mReport0!!.text = it }
-        }
-    }
-
     fun moveToTarget() {
         Forces.calculateForces()
-        udpSender.sendUDP(Forces.forces.x, Forces.forces.y, ipAddress, 15090)
-        "(${Forces.forces.x.toInt()} ${Forces.forces.y.toInt()})".also { Main.mReport3!!.text = it }
-        val res = UdpRecObject.getCoordinates(cnt)
-        // return the result to sendy range of coordinates: 0f .. 1f
-        Forces.currentRel = res            //range 0f .. 1f
-        Main.stickPad!!.stick.setPosV(res)
-//        Main.stickPad!!.stick.pos = res
-//        Main.stickPad!!.invalidate()
-
-    }
-
-    fun reportData(){
-        Main.mReport0!!.text = "$logTag   $cnt "
-        Main.mReport3!!.text = "(${Forces.forces.x.toInt()} ${Forces.forces.y.toInt()})"
-        Main.mReport4!!.text = "$deltaT"
-        Main.mReport3!!.text = "(${Forces.forces.x.toInt()} ${Forces.forces.y.toInt()})"
-        Main.mReport4!!.text = "$deltaT"
-
+        udpSender.sendUDP(Forces.forces.x, Forces.forces.y)
+        recky.send(RecMaster.EV_0,cnt,0, null)
+//        val res = UdpRecObject.getCoordinates(cnt)
+//        Forces.currentRel = res            //range 0f .. 1f
+//        Main.stickPad!!.stick.setPosV(res)
     }
 
     inner class ZeHandler  /*  https://developer.android.com/reference/android/os/Handler */
         (looper: Looper?) : Handler(looper!!) {
-
 
         override fun handleMessage(incomingMessage: Message) {
             // process incoming messages here
             val arg1 = incomingMessage.arg1
             val arg2 = incomingMessage.arg2
             val arg3 = incomingMessage.obj
-            reportData()
+            Main.whilePolling(cnt, deltaT)
             event = incomingMessage.what
             when (event) {
                 EV_0_reset -> {
                     Forces.resetForces()
-                    udpSender.sendUDP(Forces.forces.x, Forces.forces.y, ipAddress, 15090)
+                    udpSender.sendUDP(Forces.forces.x, Forces.forces.y)
                     return
                 }
                 EV_1_full_reset -> {
                     running = false
-                    whileNotPolling()
+                    calibrating = false
                     Forces.resetForces()
                     cnt = 0
                     deltaT = 5
-                    udpSender.sendUDP(Forces.forces.x, Forces.forces.y, ipAddress, 15090)
+                    udpSender.sendUDP(Forces.forces.x, Forces.forces.y)
                     return
                 }
                 EV_2_start_stop -> {
                     if (running) {
                         running = false
-                        whileNotPolling()
                     } else {
                         running = true
                         send(EV_3_next_round)
@@ -158,17 +117,20 @@ class PollMaster : Thread() {
                 }
                 EV_3_next_round -> {
                     if (running) {
-                        cnt++
-                        Main.mReport0!!.text = "$cnt: running ..."
-                        Main.mReport0!!.setBackgroundColor(Color.RED)
                         moveToTarget()
                         Handler().postDelayed({ send(EV_3_next_round) }, deltaT.toLong())
                     }
+                }
+                EV_6_current_pos -> {
+                    val res = arg3 as VectorF           //range 0f .. 1f
+                    Forces.currentRel = res
+                    Main.stickPad!!.stick.setPosV(res)
                 }
                 EV_7_calibratePos -> {
                     val calibX = 0
                     val calibY = 0
 
+                    calibrating = true
                     calibrateButton = arg3 as androidx.appcompat.widget.AppCompatTextView
                     calibrateButton!!.setBackgroundColor(
                         ContextCompat.getColor(Main.mContext!!, R.color.buttonsecondcolor)
@@ -195,6 +157,7 @@ class PollMaster : Thread() {
 
                     Forces.updateCorrections(calibX, calibY, targetPos minus stickPos)
 
+                    if (!calibrating) return
                     if (((calibY < calibMax) or (stepY < 0)) and ((calibY > 0) or (stepY > 0))) {
                         //we are between y=0 and y=max
                         Main.stickPad!!.target.setPos(
@@ -228,7 +191,14 @@ class PollMaster : Thread() {
                                     (calibY + stepY) / calibMaxF
                                 )
                                 Handler().postDelayed(
-                                    { send(EV_8_stick_should_arrive, calibX, (calibY + stepY), null) },
+                                    {
+                                        send(
+                                            EV_8_stick_should_arrive,
+                                            calibX,
+                                            (calibY + stepY),
+                                            null
+                                        )
+                                    },
                                     calibDelay.toLong()
                                 )
                                 Log.i(logTag, "===> REVERSE CALIB  ")
@@ -243,14 +213,7 @@ class PollMaster : Thread() {
                                     )
                                 )
                                 stepX = 1; stepY = 1
-                                Log.i(logTag, "===> end CALIB  ")
-
                                 Forces.fixCorrections(2f)
-
-                                Log.i(logTag, "corr (0 0)  (${Forces.corrections[0][0]})")
-                                Log.i(logTag, "corr (99 0)  (${Forces.corrections[99][0]})")
-                                Log.i(logTag, "corr (0 99)  (${Forces.corrections[0][99]})")
-                                Log.i(logTag, "corr (99 99)  (${Forces.corrections[99][99]})")
                             }
                         }
                     }
@@ -259,33 +222,25 @@ class PollMaster : Thread() {
                     Main.stickPad!!.target.setPos(.8f, Main.stickPad!!.target.pos.y + 0.1f)
                     Main.stickPad!!.invalidate()
                 }
-                EV_15_new_IP -> if (!running) whileNotPolling()
-
+                EV_15_new_IP -> if (!running) Main.whileNotPolling()
                 EV_11_dt_min -> {
                     if (deltaT <= 10) deltaT -= 1 else if (deltaT <= 100) deltaT -= 10 else deltaT -= 100
                     deltaT = max(deltaT, 1)
-                    Main.mReport4!!.text = "$deltaT"
                 }
                 EV_12_dt_plus -> {
                     if (deltaT < 10) deltaT += 1 else if (deltaT < 100) deltaT += 10 else deltaT += 100
-                    Main.mReport4!!.text = "$deltaT"
                 }
                 EV_13_force_min -> {
                     Forces.forces.x -= 100f
-                    Main.mReport3!!.text = "$logTag\nforceX = ${Forces.forces.x.toInt()}"
                 }
                 EV_14_force_plus -> {
                     Forces.forces.x += 100f
-                    Main.mReport3!!.text = "$logTag\nforceX = ${Forces.forces.x.toInt()}"
                 }
                 EV_21_from_slider -> {
                     Forces.newPIDParam(arg1.toFloat(), arg3.toString())
-//                    println("sendy receives pos $arg1 from $arg3")
                 }
                 else -> {
                     Log.e(logTag, "EVENT $event unknown")
-                    Main.mReport5a!!.text = "sendy: incoming EVENT unknown"
-                    Main.mReport5!!.text = "$event"
                 }
             }
         }
