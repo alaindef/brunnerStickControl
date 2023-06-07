@@ -54,8 +54,7 @@ object UdpRecObject {
             y = java.lang.Float.intBitsToFloat(quote[1])
 
         } catch (ex: SocketTimeoutException) {
-            println("Timeout error at count $count")
-            Log.e(logTag, "Timeout error at count $count")
+            Log.w(logTag, "Timeout error at count $count")
         } catch (ex: IOException) {
         } catch (ex: InterruptedException) {
             ex.printStackTrace()

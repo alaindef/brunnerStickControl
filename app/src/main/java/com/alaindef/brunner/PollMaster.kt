@@ -1,7 +1,6 @@
 package com.alaindef.brunner
 
 /** 230417 created by alaindef */
-import android.graphics.Color
 import android.os.Handler
 import android.os.Looper
 import android.os.Message
@@ -23,8 +22,6 @@ class PollMaster : Thread() {
         const val EV_8_stick_should_arrive = 8
         const val EV_11_dt_min = 11
         const val EV_12_dt_plus = 12
-        const val EV_13_force_min = 13
-        const val EV_14_force_plus = 14
         const val EV_15_new_IP = 15
         const val EV_21_from_slider = 21
         const val EV_22_resetCorY = 22
@@ -43,18 +40,6 @@ class PollMaster : Thread() {
     // targetpos - stickpos
     var stepX = 1                 // +1 for right, -1 for left
     var stepY = 1                 // +1 for Down, -1 for Up
-
-    //a square of 11x11 for calibrating 121 points. interpolation required during run
-    val startPos = VectorI(0, 0)
-    val endPos = VectorI(10, 10)
-    val bounds = SquareI(startPos, endPos)
-
-    //a square od 101x101 for calibrating all points. no interpolation required
-
-    var rangeI = 100
-    var rangeF = 100f
-    val field = SquareI(VectorI(0, 0), VectorI(100, 100))
-
 
     var event: Int = 0
     var deltaT = 10
@@ -77,9 +62,6 @@ class PollMaster : Thread() {
         Forces.calculateForces()
         udpSender.sendUDP(Forces.forces.x, Forces.forces.y)
         recky.send(RecMaster.EV_0,cnt,0, null)
-//        val res = UdpRecObject.getCoordinates(cnt)
-//        Forces.currentRel = res            //range 0f .. 1f
-//        Main.stickPad!!.stick.setPosV(res)
     }
 
     inner class ZeHandler  /*  https://developer.android.com/reference/android/os/Handler */
@@ -118,7 +100,7 @@ class PollMaster : Thread() {
                 EV_3_next_round -> {
                     if (running) {
                         moveToTarget()
-                        Handler().postDelayed({ send(EV_3_next_round) }, deltaT.toLong())
+                        Handler(Looper.getMainLooper()).postDelayed({ send(EV_3_next_round) }, deltaT.toLong())
                     }
                 }
                 EV_6_current_pos -> {
@@ -127,6 +109,8 @@ class PollMaster : Thread() {
                     Main.stickPad!!.stick.setPosV(res)
                 }
                 EV_7_calibratePos -> {
+                    // calibX goes from 0 to 100 in (calibMax+1) times
+                    // e.g. for calibMax=10, there wil be 11 calibration points along each x-line
                     val calibX = 0
                     val calibY = 0
 
@@ -139,10 +123,11 @@ class PollMaster : Thread() {
                         calibX * Forces.calibMax.toFloat() / 100f,
                         calibY * Forces.calibMax.toFloat() / 100f
                     )
-                    Handler().postDelayed(
+                    Handler(Looper.getMainLooper()).postDelayed(
                         { send(EV_8_stick_should_arrive, calibX, calibY, null) },
                         calibDelay.toLong()
                     )
+                    Forces.resetCorrectionsProvisional()
                 }
                 EV_8_stick_should_arrive -> {
                     //stick should have reached the target by now
@@ -155,7 +140,7 @@ class PollMaster : Thread() {
                     val targetPos = Main.stickPad!!.target.pos
                     val stickPos = Main.stickPad!!.stick.pos
 
-                    Forces.updateCorrections(calibX, calibY, targetPos minus stickPos)
+                    Forces.updateCorrectionsProvisional(calibX, calibY, targetPos minus stickPos)
 
                     if (!calibrating) return
                     if (((calibY < calibMax) or (stepY < 0)) and ((calibY > 0) or (stepY > 0))) {
@@ -164,7 +149,7 @@ class PollMaster : Thread() {
                             calibX / calibMaxF,
                             (calibY + stepY) / calibMaxF
                         )
-                        Handler().postDelayed(
+                        Handler(Looper.getMainLooper()).postDelayed(
                             { send(EV_8_stick_should_arrive, calibX, calibY + stepY, null) },
                             calibDelay.toLong()
                         )
@@ -176,7 +161,7 @@ class PollMaster : Thread() {
                                 calibY / calibMaxF
                             )
                             stepY = -stepY                    // reverse y direction
-                            Handler().postDelayed(
+                            Handler(Looper.getMainLooper()).postDelayed(
                                 { send(EV_8_stick_should_arrive, calibX + stepX, calibY, null) },
                                 calibDelay.toLong()
                             )
@@ -190,7 +175,7 @@ class PollMaster : Thread() {
                                     (calibX) / calibMaxF,
                                     (calibY + stepY) / calibMaxF
                                 )
-                                Handler().postDelayed(
+                                Handler(Looper.getMainLooper()).postDelayed(
                                     {
                                         send(
                                             EV_8_stick_should_arrive,
@@ -202,7 +187,7 @@ class PollMaster : Thread() {
                                     calibDelay.toLong()
                                 )
                                 Log.i(logTag, "===> REVERSE CALIB  ")
-                                Forces.fixCorrections(1f)
+//                                Forces.fixCorrections(1f)
                             } else {
                                 // we are back at x=0, we can stop now
                                 calibrating = false
@@ -213,7 +198,8 @@ class PollMaster : Thread() {
                                     )
                                 )
                                 stepX = 1; stepY = 1
-                                Forces.fixCorrections(2f)
+                                Forces.fixCorrections(1.5f)
+                                Log.i(logTag, "===> END CALIB  ")
                             }
                         }
                     }
@@ -224,23 +210,17 @@ class PollMaster : Thread() {
                 }
                 EV_15_new_IP -> if (!running) Main.whileNotPolling()
                 EV_11_dt_min -> {
-                    if (deltaT <= 10) deltaT -= 1 else if (deltaT <= 100) deltaT -= 10 else deltaT -= 100
+                    deltaT -= if (deltaT <= 10) 1 else if (deltaT <= 100) 10 else 100
                     deltaT = max(deltaT, 1)
                 }
                 EV_12_dt_plus -> {
-                    if (deltaT < 10) deltaT += 1 else if (deltaT < 100) deltaT += 10 else deltaT += 100
-                }
-                EV_13_force_min -> {
-                    Forces.forces.x -= 100f
-                }
-                EV_14_force_plus -> {
-                    Forces.forces.x += 100f
+                    deltaT += if (deltaT < 10) 1 else if (deltaT < 100) 10 else 100
                 }
                 EV_21_from_slider -> {
                     Forces.newPIDParam(arg1.toFloat(), arg3.toString())
                 }
                 else -> {
-                    Log.e(logTag, "EVENT $event unknown")
+                    Log.wtf(logTag, "EVENT $event unknown")
                 }
             }
         }

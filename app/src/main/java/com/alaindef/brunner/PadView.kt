@@ -69,12 +69,10 @@ class PadView @JvmOverloads constructor(
 
         when (event.action) {
             MotionEvent.ACTION_DOWN -> {
-//                Main.mReport5a!!.text = "action down ($xPixel $yPixel)"
                 sendTarget(posPixel, size)
                 path.moveTo(xPixel, yPixel)
             }
             MotionEvent.ACTION_MOVE -> {
-//                Main.mReport5!!.text = "action move ($xPixel $yPixel)"
                 sendTarget(posPixel, size)
                 paint.color = Color.BLUE
                 path.lineTo(xPixel, yPixel)

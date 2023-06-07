@@ -1,19 +1,32 @@
 package com.alaindef.brunner
 
 import android.graphics.Color
+import android.util.Log
 
-class PositionRel constructor (val id: String, var pos: VectorF, val color: Int) {
+class PositionRel constructor(private val id: String, var pos: VectorF, private val color: Int) {
 
-    init{
-        println("init ======== > $id set ---------: ($pos.x  $pos.y)  $color targetcol= $targetColor stickcol=$stickColor")
+
+    private val logTag = ">---Position---"
+
+    companion object {
+        const val targetColor = Color.BLUE
+        const val stickColor = Color.MAGENTA
     }
 
-    fun setPos(xNew: Float, yNew: Float){
+    init {
+        Log.i(
+            logTag,
+            "init ======== > $id set ---------: ($pos.x  $pos.y)  $color targetcol= $targetColor stickcol=$stickColor"
+        )
+    }
+
+    fun setPos(xNew: Float, yNew: Float) {
         pos.x = xNew
         pos.y = yNew
         Main.stickPad!!.invalidate()
     }
-   fun setPosV(new:VectorF){
+
+    fun setPosV(new: VectorF) {
         pos = new
         Main.stickPad!!.invalidate()
     }
@@ -36,8 +49,4 @@ class PositionRel constructor (val id: String, var pos: VectorF, val color: Int)
         return VectorI(pos.x.toInt(), pos.y.toInt())
     }
 
-    companion object {
-        const val targetColor = Color.BLUE
-        const val stickColor = Color.MAGENTA
-    }
 }

@@ -64,13 +64,22 @@ data class VectorF(var x: Float, var y: Float) {
 }
 
 data class VectorI(val x: Int, val y: Int) {
-    fun max(arg: VectorI): VectorI {
+    fun maxV(arg: VectorI): VectorI {
         return VectorI(kotlin.math.max(x, arg.x), kotlin.math.max(y, arg.y))
+    }
+
+    fun minV(arg: VectorI): VectorI {
+        return VectorI(kotlin.math.min(x, arg.x), kotlin.math.min(y, arg.y))
     }
 
     infix fun mul(arg: Int): VectorI {
         return VectorI(x * arg, y * arg)
     }
+
+    infix fun divideBy(arg: Int): VectorI {
+        return VectorI(x / arg, y / arg)
+    }
+
 
     infix fun plus(arg: VectorI): VectorI {
         return VectorI(x + arg.x, y + arg.y)
@@ -78,11 +87,7 @@ data class VectorI(val x: Int, val y: Int) {
 
 }
 
-data class Square(val l: Int, val u: Int, val r: Int, val d: Int)
-
-data class SquareI(val topLeft: VectorI, val bottomRight: VectorI)
-
-@Suppress("unused")
+@Suppress("DEPRECATION")
 class Main : AppCompatActivity() {
     private val logTag = ">----MAIN---"
     fun sendEvent(view: View?) {
@@ -120,7 +125,7 @@ class Main : AppCompatActivity() {
                 }
                 Forces.calibMaxF = Forces.calibMax.toFloat()
                 Forces.calibJump = 100 / Forces.calibMax
-                Forces.calibDelay = if (Forces.calibMax > 10) 1000 else 500
+                Forces.calibDelay = if (Forces.calibMax < 10) 1000 else 500
                 mCalibMaxButton!!.text = Forces.calibMax.toString()
             }
             "interpol" -> {
@@ -141,6 +146,12 @@ class Main : AppCompatActivity() {
                 correctionView!!.resetCorY()
                 sendy.calibrating = false
                 mReport0!!.setBackgroundColor(ContextCompat.getColor(mContext!!, R.color.my_blue))
+                mReport0!!.setBackgroundColor(ContextCompat.getColor(mContext!!, R.color.my_blue))
+                if (sendy.calibrateButton != null)
+                    sendy.calibrateButton!!.setBackgroundColor(
+                        ContextCompat.getColor(mContext!!, R.color.button_first_color)
+                    ) else Log.e(logTag, "calibrateButton not yet initialised")
+
             }
             else -> Log.wtf(logTag, "tag unknown $ss")
         }
@@ -149,6 +160,28 @@ class Main : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
+        mReport0 = null
+        mReport1 = null
+        mReport2 = null
+        mReport3 = null
+        mReport4a = null
+        mReport4 = null
+        mReport5a = null
+        mReport5 = null
+        mContext = null
+        mReset = null
+        conPReport = null
+        conIReport = null
+        conPvReport = null
+        conIvReport = null
+        correctionView = null
+        stickPad = null
+        mCalibTypeButton = null
+        mCalibMaxButton = null
+
+        mContext = null
+        mContextForDummies = null
+        mIPDialog = null
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
@@ -159,7 +192,7 @@ class Main : AppCompatActivity() {
         )
     }
 
-    @SuppressLint("ClickableViewAccessibility")
+    @SuppressLint("ClickableViewAccessibility", "SwitchIntDef")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         StrictMode.setVmPolicy(
@@ -173,8 +206,12 @@ class Main : AppCompatActivity() {
         }
 
         when (resources.configuration.orientation) {
-            Configuration.ORIENTATION_PORTRAIT -> setContentView(R.layout.portrait)
-//            Configuration.ORIENTATION_LANDSCAPE -> setContentView(R.layout.mainland)
+            Configuration.ORIENTATION_PORTRAIT -> {
+                setContentView(R.layout.portrait)
+            }
+            Configuration.ORIENTATION_LANDSCAPE -> {
+                setContentView(R.layout.portrait)
+            }
         }
 
         mContext = this.applicationContext
@@ -234,18 +271,12 @@ class Main : AppCompatActivity() {
             sendy.start()
             recky.start()
         }
-        if (sendy.isAlive) Log.e(logTag, "sendy lives") else Log.e(logTag, "sendy is dead")
-        if (recky.isAlive) Log.e(logTag, "recky lives") else Log.e(logTag, "recky is dead")
+        if (sendy.isAlive) Log.i(logTag, "sendy lives") else Log.e(logTag, "sendy is dead")
+        if (recky.isAlive) Log.i(logTag, "recky lives") else Log.e(logTag, "recky is dead")
     }
 
     companion object {
-        const val version = 0.1
-        const val DIM: Float = 0.5f // for Alpha, between 0 and 1 for textview
-
         // between 0 and 255 for imageview
-        @JvmField
-        var ANIMATION_LAG = 300
-
         @SuppressLint("StaticFieldLeak")
         var mIPDialog: TextView? = null
 
@@ -270,14 +301,11 @@ class Main : AppCompatActivity() {
         @SuppressLint("StaticFieldLeak")
         var mReport4: TextView? = null
 
-//        @SuppressLint("StaticFieldLeak")
+        @SuppressLint("StaticFieldLeak")
         var mReport5a: TextView? = null
 
         @SuppressLint("StaticFieldLeak")
         var mReport5: TextView? = null
-
-        @SuppressLint("StaticFieldLeak")
-        var mReport6: TextView? = null
 
         @SuppressLint("StaticFieldLeak")
         var mContext: Context? = null
@@ -303,6 +331,7 @@ class Main : AppCompatActivity() {
         @SuppressLint("StaticFieldLeak")
         var stickPad: PadView? = null
 
+        @SuppressLint("StaticFieldLeak")
         var mCalibTypeButton: TextView? = null
 
         @SuppressLint("StaticFieldLeak")
@@ -323,12 +352,12 @@ class Main : AppCompatActivity() {
         }
 
         fun whilePolling(cnt: Int, deltaT: Int) {
-            mReport0!!.text = "$cnt "
+            "$cnt ".also { mReport0!!.text = it }
             mReport4!!.text = "$deltaT"
-            mReport3!!.text = "(${Forces.forces.x.toInt()} ${Forces.forces.y.toInt()})"
+            "(${Forces.forces.x.toInt()} ${Forces.forces.y.toInt()})".also { mReport3!!.text = it }
             if (PollMaster.running) {
                 PollMaster.cnt++
-                mReport0!!.text = "$cnt: running ..."
+                "$cnt: running ...".also { mReport0!!.text = it }
                 mReport0!!.setBackgroundColor(ContextCompat.getColor(mContext!!, R.color.my_red))
             } else {
                 mReport0!!.setBackgroundColor(ContextCompat.getColor(mContext!!, R.color.my_blue))
@@ -340,22 +369,26 @@ class Main : AppCompatActivity() {
             val y = Forces.currentRel.y
             val stickposTxt = "pos=(${String.format("%.${2}f", x)}  ${String.format("%.${2}f", y)})"
             val delta = stickPad!!.target.pos minus VectorF(x, y)
-            val deltaTxt = " d=(${String.format("%.${2}f", delta.x)}  ${String.format("%.${2}f", delta.y)})"
+            val deltaTxt =
+                " d=(${String.format("%.${2}f", delta.x)}  ${String.format("%.${2}f", delta.y)})"
             "$stickposTxt$deltaTxt".also { mReport1!!.text = it }
 
             // report2
-            val tpos = stickPad!!.target.pos
-            val corrp = Forces.correctInterpol(tpos)
-            val tpText = "(%.2f %.2f)".format(tpos.x, tpos.y)
-            val corrpText = "(%.2f %.2f)".format(corrp.x, corrp.y)
-            "$tpText $corrpText".also { mReport2!!.text = it }
+            val tPos = stickPad!!.target.pos
+            val corrP = VectorF(0f, 0f)
+            val tpText = "(%.2f %.2f)".format(tPos.x, tPos.y)
+            val corrPText = "(%.2f %.2f)".format(corrP.x, corrP.y)
+            "$tpText $corrPText".also { mReport2!!.text = it }
+
+            // report3
+            "(${Forces.forces.x.toInt()} ${Forces.forces.y.toInt()})".also { mReport3!!.text = it }
 
             // report5
-            val tposIndex = (tpos mul VectorF(100f,100f)).toIntVector()
-            "(${Forces.forces.x.toInt()} ${Forces.forces.y.toInt()})".also { mReport3!!.text = it }
-            val repPos = "(%.2f %.2f)".format(tpos.x, tpos.y)
+            val tPosIndex = (tPos mul VectorF(100f, 100f)).toIntVector()
+            val repPos = "(%.2f %.2f)".format(tPos.x, tPos.y)
             val repCorTar = "(%.2f %.2f)".format(Forces.corrected.x, Forces.corrected.y)
-            val corrections = Forces.corrections[tposIndex.x][tposIndex.y]
+            val corIndex = tPosIndex divideBy Forces.calibJump
+            val corrections = Forces.corrections[corIndex.x][corIndex.y]
             val repCorrections = "(%.2f %.2f)".format(corrections.x, corrections.y)
             "$repPos  $repCorTar  $repCorrections".also { mReport5!!.text = it }
             "(target pos)  (corrected target)  (corrections)".also { mReport5a!!.text = it }
@@ -372,12 +405,10 @@ class Main : AppCompatActivity() {
                     "INVALID ip address: $address".also { mReport0!!.text = it }
             }
         }
-
-
     }
 }
 
-//adf230511 recky not needed (2 threads seems too much for android) var recky = RecMaster()
+@SuppressLint("StaticFieldLeak")
 var sendy = PollMaster()
 var recky = RecMaster()
 val udpSender: UdpSender = UdpSender()

@@ -43,7 +43,7 @@ class RecMaster : Thread() {
                     sendy.send(PollMaster.EV_6_current_pos, 0, 0, res)
                 }
                 else -> {
-                    Log.e(logTag, "$cnt: EVENT $event unknown")
+                    Log.wtf(logTag, "$cnt: EVENT $event unknown")
                 }
             }
         }
