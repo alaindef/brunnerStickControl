@@ -151,7 +151,8 @@ class Main : AppCompatActivity() {
                     sendy.calibrateButton!!.setBackgroundColor(
                         ContextCompat.getColor(mContext!!, R.color.button_first_color)
                     ) else Log.e(logTag, "calibrateButton not yet initialised")
-
+                // adf test for stub - put stick in center
+                stickPad!!.stick.setPosV(VectorF(0.5f, 0.5f))
             }
             else -> Log.wtf(logTag, "tag unknown $ss")
         }

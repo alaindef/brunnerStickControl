@@ -154,7 +154,7 @@ object Forces {
         return res
     }
 
-    var currentRel = VectorF(0.05f, 0.15f)
+    var currentRel = VectorF(0.5f, 0.5f)
 
     var forces = VectorF(0f, 0f)
     fun calculateForces(): VectorF {

@@ -17,7 +17,7 @@ object UdpRecObject {
     init {
         socketR = DatagramSocket(Main.portR, InetAddress.getByName("0.0.0.0"))
         socketR!!.broadcast = true
-        socketR!!.soTimeout = 1000
+        socketR!!.soTimeout = 100
     }
 
     private fun convertToInts(bytes: ByteArray, nbrOfInts: Int): IntArray {
@@ -55,6 +55,8 @@ object UdpRecObject {
 
         } catch (ex: SocketTimeoutException) {
             Log.w(logTag, "Timeout error at count $count")
+            x = 0.5f
+            y = 0.5f
         } catch (ex: IOException) {
         } catch (ex: InterruptedException) {
             ex.printStackTrace()
