@@ -13,3 +13,5 @@
 230530: I/Choreographer: Skipped 239 frames!  The application may be doing too much work on its main thread.
     I/OpenGLRenderer: Davey! duration=4008ms;
     -> timeout on receiver?? 4 sec. probeer sha b31a181: receiver in aparte thread
+
+230616 sendforces in padview

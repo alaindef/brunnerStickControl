@@ -17,7 +17,7 @@ object UdpRecObject {
     init {
         socketR = DatagramSocket(Main.portR, InetAddress.getByName("0.0.0.0"))
         socketR!!.broadcast = true
-        socketR!!.soTimeout = 100
+        socketR!!.soTimeout = 1000
     }
 
     private fun convertToInts(bytes: ByteArray, nbrOfInts: Int): IntArray {

@@ -16,7 +16,9 @@ object Forces {
     var conI = 0f
     var conPv = 50f
     var conIv = 0f
-    fun newPIDParam(value: Float, source: String) {
+    var specialForce = 0f       //used while not polling: set by slider "F",
+    // activated by button "forceReport" (next to slider)
+    fun newParam(value: Float, source: String) {
         when (source) {
             "conP" -> {
                 conP = value; " ${value.toInt()}".also { Main.conPReport!!.text = it }
@@ -29,6 +31,10 @@ object Forces {
             }
             "conIv" -> {
                 conIv = value; " ${value.toInt()}".also { Main.conIvReport!!.text = it }
+            }
+            "force" -> {
+                Main.stickPad!!.multiplier = VectorF(1 + value*100f, 1+value*200f)
+                " ${value.toInt()}".also { Main.forceReport!!.text = it }
             }
         }
     }

@@ -80,7 +80,6 @@ data class VectorI(val x: Int, val y: Int) {
         return VectorI(x / arg, y / arg)
     }
 
-
     infix fun plus(arg: VectorI): VectorI {
         return VectorI(x + arg.x, y + arg.y)
     }
@@ -91,6 +90,8 @@ data class VectorI(val x: Int, val y: Int) {
 class Main : AppCompatActivity() {
     private val logTag = ">----MAIN---"
     fun sendEvent(view: View?) {
+        // called when a button is pressed. param view is the button, carrying the "tag" field.
+        // see layout file portrait.xml
         when (val ss = view!!.tag) {
             "B_poll" -> {
                 sendy.send(PollMaster.EV_2_start_stop)
@@ -128,9 +129,6 @@ class Main : AppCompatActivity() {
                 Forces.calibDelay = if (Forces.calibMax < 10) 1000 else 500
                 mCalibMaxButton!!.text = Forces.calibMax.toString()
             }
-            "interpol" -> {
-                Forces.calType = "interpol"     //interpolate between calib points
-            }
             "calibrate" -> {
                 sendy.send(PollMaster.EV_7_calibratePos, 0, 0, view)
                 view.setBackgroundColor(
@@ -153,7 +151,15 @@ class Main : AppCompatActivity() {
                     ) else Log.e(logTag, "calibrateButton not yet initialised")
                 // adf test for stub - put stick in center
                 stickPad!!.stick.setPosV(VectorF(0.5f, 0.5f))
+                stickPad!!.target.setPosV(VectorF(0.5f, 0.5f))
+                udpSender.sendUDP(0f, 0f)
             }
+            "B_apply_force" -> {
+//                Log.wtf(logTag, "forces applied = ${Forces.forces}")
+//                udpSender.sendUDP(Forces.forces.x, Forces.forces.y)
+                Log.wtf(logTag, "tag not used $ss")
+            }
+
             else -> Log.wtf(logTag, "tag unknown $ss")
         }
     }
@@ -175,6 +181,7 @@ class Main : AppCompatActivity() {
         conIReport = null
         conPvReport = null
         conIvReport = null
+        forceReport = null
         correctionView = null
         stickPad = null
         mCalibTypeButton = null
@@ -258,6 +265,7 @@ class Main : AppCompatActivity() {
         conIReport = findViewById(R.id.conIreport)
         conPvReport = findViewById(R.id.conPvreport)
         conIvReport = findViewById(R.id.conIvreport)
+        forceReport = findViewById(R.id.forcereport)
 
         correctionView = findViewById(R.id.yTable)
         stickPad = findViewById(R.id.del)
@@ -325,6 +333,9 @@ class Main : AppCompatActivity() {
 
         @SuppressLint("StaticFieldLeak")
         var conIvReport: TextView? = null
+
+        @SuppressLint("StaticFieldLeak")
+        var forceReport: TextView? = null
 
         @SuppressLint("StaticFieldLeak")
         var correctionView: PolylineView? = null
@@ -405,6 +416,11 @@ class Main : AppCompatActivity() {
                 } else
                     "INVALID ip address: $address".also { mReport0!!.text = it }
             }
+            // we also set the force according to target position relative to the center of the pad
+            // this wil not affect operation while running/polling
+            // it is used to send that force to the stick, for testing purposes
+            Forces.forces = (stickPad!!.target.pos minus VectorF(0.5f, 0.5f)) mul 1000f
+
         }
     }
 }

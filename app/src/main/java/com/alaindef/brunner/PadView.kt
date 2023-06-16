@@ -6,6 +6,7 @@ import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.Path
 import android.util.AttributeSet
+import android.util.Log
 import android.view.MotionEvent
 
 class PadView @JvmOverloads constructor(
@@ -16,6 +17,8 @@ class PadView @JvmOverloads constructor(
 
     val stick = PositionRel("STICK", VectorF(.2f, .05f), PositionRel.stickColor)
     val target = PositionRel("TARGET", VectorF(.2f, 0f), PositionRel.targetColor)
+
+    var multiplier = VectorF(1f, 1f)
 
     private val path = Path()
     private val paint = Paint().apply {
@@ -52,6 +55,22 @@ class PadView @JvmOverloads constructor(
         target.setPosV(tpos)
     }
 
+    fun sendForces(posPixel: VectorF, size: VectorF) {
+        // TEST:
+        // we also set the force according to target position relative to the center of the pad
+        // this wil not affect operation while running/polling
+        // it is used to send that force to the stick, for testing purposes
+        val tpos = ((posPixel.divideBy(size)).maxOf(VectorF(0f, 0f)).minOf(VectorF(1f, 1f)))
+        if (!PollMaster.running) {
+            Forces.forces = (VectorF(0.5f, 0.5f) minus tpos) mul multiplier
+            udpSender.sendUDP(Forces.forces.x, Forces.forces.y)
+        }
+        // the following us to track the stic, but does not work (because no polling going on)
+//        val res = UdpRecObject.getCoordinates(0)
+//        Main.stickPad!!.stick.setPosV(res)
+    }
+
+
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
         canvas.drawPath(path, paint)
@@ -79,6 +98,7 @@ class PadView @JvmOverloads constructor(
             }
             MotionEvent.ACTION_UP -> {
                 path.reset()
+                sendForces(posPixel, size)
             }
             else -> return false
         }

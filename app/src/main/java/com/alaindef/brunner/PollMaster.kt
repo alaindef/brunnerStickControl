@@ -61,7 +61,7 @@ class PollMaster : Thread() {
     fun moveToTarget() {
         Forces.calculateForces()
         udpSender.sendUDP(Forces.forces.x, Forces.forces.y)
-        recky.send(RecMaster.EV_0,cnt,0, null)
+        recky.send(RecMaster.EV_0, cnt, 0, null)
     }
 
     inner class ZeHandler  /*  https://developer.android.com/reference/android/os/Handler */
@@ -90,9 +90,8 @@ class PollMaster : Thread() {
                     return
                 }
                 EV_2_start_stop -> {
-                    if (running) {
-                        running = false
-                    } else {
+                    if (running) running = false
+                    else {
                         running = true
                         send(EV_3_next_round)
                     }
@@ -100,7 +99,10 @@ class PollMaster : Thread() {
                 EV_3_next_round -> {
                     if (running) {
                         moveToTarget()
-                        Handler(Looper.getMainLooper()).postDelayed({ send(EV_3_next_round) }, deltaT.toLong())
+                        Handler(Looper.getMainLooper()).postDelayed({
+                            send(EV_3_next_round)
+                        }, deltaT.toLong()
+                        )
                     }
                 }
                 EV_6_current_pos -> {
@@ -204,11 +206,6 @@ class PollMaster : Thread() {
                         }
                     }
                 }
-                EV_30_force -> {
-                    Main.stickPad!!.target.setPos(.8f, Main.stickPad!!.target.pos.y + 0.1f)
-                    Main.stickPad!!.invalidate()
-                }
-                EV_15_new_IP -> if (!running) Main.whileNotPolling()
                 EV_11_dt_min -> {
                     deltaT -= if (deltaT <= 10) 1 else if (deltaT <= 100) 10 else 100
                     deltaT = max(deltaT, 1)
@@ -216,8 +213,15 @@ class PollMaster : Thread() {
                 EV_12_dt_plus -> {
                     deltaT += if (deltaT < 10) 1 else if (deltaT < 100) 10 else 100
                 }
+                EV_15_new_IP -> if (!running) Main.whileNotPolling()
                 EV_21_from_slider -> {
-                    Forces.newPIDParam(arg1.toFloat(), arg3.toString())
+                    val value = arg1.toFloat()
+                    val source = arg3.toString()
+                    Forces.newParam(value, source)
+                }
+                EV_30_force -> {
+                    Main.stickPad!!.target.setPos(.8f, Main.stickPad!!.target.pos.y + 0.1f)
+                    Main.stickPad!!.invalidate()
                 }
                 else -> {
                     Log.wtf(logTag, "EVENT $event unknown")
