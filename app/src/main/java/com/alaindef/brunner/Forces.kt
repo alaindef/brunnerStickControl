@@ -160,15 +160,14 @@ object Forces {
         return res
     }
 
-    var currentRel = VectorF(0.5f, 0.5f)
-
     var forces = VectorF(0f, 0f)
     fun calculateForces(): VectorF {
         // called at EV_3 at each round
-        val pos = (Main.stickPad!!.target.pos)
+        val targetPos = (Main.stickPad!!.target.pos)
+        val stickPos = Main.stickPad!!.stick.pos
         corrected = when (calType) {
-            "interpol" -> correctInterpol(pos)
-            else -> pos
+            "interpol" -> correctInterpol(targetPos)
+            else -> targetPos
         }
 
         horizontalPID.setP(100f * conP)
@@ -176,14 +175,14 @@ object Forces {
         horizontalPID.setDirection(true)
         horizontalPID.setOutputLimits(4000f)
 
-        forces.x = horizontalPID.getOutput(currentRel.x, corrected.x)
+        forces.x = horizontalPID.getOutput(stickPos.x, corrected.x)
 
         verticalPID.setP(160f * conPv)
         verticalPID.setI(conIv * 5f)
         verticalPID.setDirection(true)
         verticalPID.setOutputLimits(4000f)
 
-        forces.y = verticalPID.getOutput(currentRel.y, corrected.y)
+        forces.y = verticalPID.getOutput(stickPos.y, corrected.y)
 
         return forces
     }

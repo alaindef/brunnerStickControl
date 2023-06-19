@@ -86,7 +86,7 @@ data class VectorI(val x: Int, val y: Int) {
 
 }
 
-@Suppress("DEPRECATION")
+//@Suppress("DEPRECATION")
 class Main : AppCompatActivity() {
     private val logTag = ">----MAIN---"
     fun sendEvent(view: View?) {
@@ -377,8 +377,8 @@ class Main : AppCompatActivity() {
             }
 
             // report1
-            val x = Forces.currentRel.x
-            val y = Forces.currentRel.y
+            val x = stickPad!!.stick.pos.x
+            val y = stickPad!!.stick.pos.y
             val stickposTxt = "pos=(${String.format("%.${2}f", x)}  ${String.format("%.${2}f", y)})"
             val delta = stickPad!!.target.pos minus VectorF(x, y)
             val deltaTxt =

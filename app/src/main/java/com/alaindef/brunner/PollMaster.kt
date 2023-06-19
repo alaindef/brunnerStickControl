@@ -107,7 +107,6 @@ class PollMaster : Thread() {
                 }
                 EV_6_current_pos -> {
                     val res = arg3 as VectorF           //range 0f .. 1f
-                    Forces.currentRel = res
                     Main.stickPad!!.stick.setPosV(res)
                 }
                 EV_7_calibratePos -> {
