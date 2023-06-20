@@ -89,23 +89,14 @@ data class VectorI(val x: Int, val y: Int) {
 //@Suppress("DEPRECATION")
 class Main : AppCompatActivity() {
     private val logTag = ">----MAIN---"
-    fun sendEvent(view: View?) {
+    fun buttonClick(view: View?) {
         // called when a button is pressed. param view is the button, carrying the "tag" field.
         // see layout file portrait.xml
         when (val ss = view!!.tag) {
-            "B_poll" -> {
-                sendy.send(PollMaster.EV_2_start_stop)
-            }
-            "B_RES" -> {
-//                omer.send(PollMaster.EV_0, 0, 0, ss)  //handled by onclick listener
-//                because long press is also used
-            }
-            "dt-" -> {
-                sendy.send(PollMaster.EV_11_dt_min, 0, 0, ss)
-            }
-            "dt+" -> {
-                sendy.send(PollMaster.EV_12_dt_plus, 0, 0, ss)
-            }
+            "B_poll" -> sendy.send(PollMaster.EV_2_start_stop)
+            "B_RES" -> sendy.resetFull()
+            "dt-" -> sendy.dtMin()
+            "dt+" -> sendy.dtPlus()
             "caltyp" -> {
                 when (Forces.calType) {
                     "interpol" -> Forces.calType = "none"
@@ -159,7 +150,6 @@ class Main : AppCompatActivity() {
 //                udpSender.sendUDP(Forces.forces.x, Forces.forces.y)
                 Log.wtf(logTag, "tag not used $ss")
             }
-
             else -> Log.wtf(logTag, "tag unknown $ss")
         }
     }
@@ -218,7 +208,7 @@ class Main : AppCompatActivity() {
                 setContentView(R.layout.portrait)
             }
             Configuration.ORIENTATION_LANDSCAPE -> {
-                setContentView(R.layout.portrait)
+                setContentView(R.layout.landscape)
             }
         }
 
@@ -253,13 +243,6 @@ class Main : AppCompatActivity() {
         mContext = this.applicationContext
 
         mReset = findViewById<View>(R.id.reset) as Button
-        mReset?.setOnClickListener {
-            sendy.send(PollMaster.EV_0_reset)
-        }
-        mReset?.setOnLongClickListener {
-            sendy.send(PollMaster.EV_1_full_reset)
-            true
-        }
 
         conPReport = findViewById(R.id.conPreport)
         conIReport = findViewById(R.id.conIreport)
@@ -278,7 +261,6 @@ class Main : AppCompatActivity() {
             // start and stop the polling, reset, receive target and current positions,
             // request to change the IP address of the brunner interface, change polling intervals
             sendy.start()
-            recky.start()
         }
         if (sendy.isAlive) Log.i(logTag, "sendy lives") else Log.e(logTag, "sendy is dead")
         if (recky.isAlive) Log.i(logTag, "recky lives") else Log.e(logTag, "recky is dead")
@@ -352,7 +334,7 @@ class Main : AppCompatActivity() {
 
         const val portR = 15095
         const val portS = 15090
-        var ipAddress: InetAddress = InetAddress.getByName("192.168.0.203")
+        var ipAddress: InetAddress = InetAddress.getByName("192.168.0.204")
 
 
         private val PATTERN: Pattern = Pattern.compile(
@@ -406,7 +388,7 @@ class Main : AppCompatActivity() {
             "(target pos)  (corrected target)  (corrections)".also { mReport5a!!.text = it }
         }
 
-        fun whileNotPolling() {
+        fun whileNotRunning() {
             // now we can read the dialog box for changing the IP address of the brunner interface
             if (mIPDialog!!.getText() != null) {
                 val address = mIPDialog!!.getText().toString()

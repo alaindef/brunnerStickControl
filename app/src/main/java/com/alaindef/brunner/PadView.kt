@@ -55,7 +55,7 @@ class PadView @JvmOverloads constructor(
         target.setPosV(tpos)
     }
 
-    fun sendForces(posPixel: VectorF, size: VectorF) {
+    private fun sendForces(posPixel: VectorF, size: VectorF) {
         // TEST:
         // we also set the force according to target position relative to the center of the pad
         // this wil not affect operation while running/polling

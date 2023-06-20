@@ -15,3 +15,7 @@
     -> timeout on receiver?? 4 sec. probeer sha b31a181: receiver in aparte thread
 
 230616 sendforces in padview
+
+230620 GSM as STUB:
+    run brunnerSTUB
+    in brunner.UdpRecever:         socketR!!.soTimeout = 30

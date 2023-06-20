@@ -14,7 +14,7 @@ class ViewSlider @JvmOverloads constructor(
 
     init {
         addOnChangeListener { slider: Slider, value, fromUser: Boolean ->
-            sendy.send(PollMaster.EV_21_from_slider, slider.value.toInt(), 0, resources.getResourceEntryName(id))
+            Forces.newParam(value, resources.getResourceEntryName(id).toString())
         }
     }
 }

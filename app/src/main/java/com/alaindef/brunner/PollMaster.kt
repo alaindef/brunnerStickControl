@@ -54,14 +54,32 @@ class PollMaster : Thread() {
         mHandler!!.sendMessage(mHandler!!.obtainMessage(what, arg1, arg2, obj)) //todo why 0 ?
     }
 
+    fun resetFull() {
+        running = false
+        calibrating = false
+        Forces.resetForces()
+        cnt = 0
+        deltaT = 5
+        udpSender.sendUDP(Forces.forces.x, Forces.forces.y)
+    }
+
+    fun dtMin() {
+        deltaT -= if (deltaT <= 10) 1 else if (deltaT <= 100) 10 else 100
+        deltaT = max(deltaT, 1)
+    }
+
+    fun dtPlus() {
+        deltaT += if (deltaT < 10) 1 else if (deltaT < 100) 10 else 100
+    }
+
     fun send(what: Int) {
         mHandler!!.sendMessage(mHandler!!.obtainMessage(what, 0, 0, null))
     }
 
     fun moveToTarget() {
-        Forces.calculateForces()
-        udpSender.sendUDP(Forces.forces.x, Forces.forces.y)
-        recky.send(RecMaster.EV_0, cnt, 0, null)
+        val forces = Forces.calculateForces()
+        udpSender.sendUDP(forces.x, forces.y)
+        Main.stickPad!!.stick.setPosV(UdpRecObject.getCoordinates(cnt))
     }
 
     inner class ZeHandler  /*  https://developer.android.com/reference/android/os/Handler */
@@ -75,20 +93,6 @@ class PollMaster : Thread() {
             Main.whilePolling(cnt, deltaT)
             event = incomingMessage.what
             when (event) {
-                EV_0_reset -> {
-                    Forces.resetForces()
-                    udpSender.sendUDP(Forces.forces.x, Forces.forces.y)
-                    return
-                }
-                EV_1_full_reset -> {
-                    running = false
-                    calibrating = false
-                    Forces.resetForces()
-                    cnt = 0
-                    deltaT = 5
-                    udpSender.sendUDP(Forces.forces.x, Forces.forces.y)
-                    return
-                }
                 EV_2_start_stop -> {
                     if (running) running = false
                     else {
@@ -99,15 +103,10 @@ class PollMaster : Thread() {
                 EV_3_next_round -> {
                     if (running) {
                         moveToTarget()
-                        Handler(Looper.getMainLooper()).postDelayed({
-                            send(EV_3_next_round)
-                        }, deltaT.toLong()
+                        Handler(Looper.getMainLooper()).postDelayed(
+                            { send(EV_3_next_round) }, deltaT.toLong()
                         )
                     }
-                }
-                EV_6_current_pos -> {
-                    val res = arg3 as VectorF           //range 0f .. 1f
-                    Main.stickPad!!.stick.setPosV(res)
                 }
                 EV_7_calibratePos -> {
                     // calibX goes from 0 to 100 in (calibMax+1) times
@@ -205,23 +204,7 @@ class PollMaster : Thread() {
                         }
                     }
                 }
-                EV_11_dt_min -> {
-                    deltaT -= if (deltaT <= 10) 1 else if (deltaT <= 100) 10 else 100
-                    deltaT = max(deltaT, 1)
-                }
-                EV_12_dt_plus -> {
-                    deltaT += if (deltaT < 10) 1 else if (deltaT < 100) 10 else 100
-                }
-                EV_15_new_IP -> if (!running) Main.whileNotPolling()
-                EV_21_from_slider -> {
-                    val value = arg1.toFloat()
-                    val source = arg3.toString()
-                    Forces.newParam(value, source)
-                }
-                EV_30_force -> {
-                    Main.stickPad!!.target.setPos(.8f, Main.stickPad!!.target.pos.y + 0.1f)
-                    Main.stickPad!!.invalidate()
-                }
+                EV_15_new_IP -> if (!running) Main.whileNotRunning()
                 else -> {
                     Log.wtf(logTag, "EVENT $event unknown")
                 }
