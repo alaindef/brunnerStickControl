@@ -6,7 +6,6 @@ import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.Path
 import android.util.AttributeSet
-import android.util.Log
 import android.view.MotionEvent
 
 class PadView @JvmOverloads constructor(
@@ -49,7 +48,7 @@ class PadView @JvmOverloads constructor(
         color = Color.BLUE
     }
 
-    fun sendTarget(posPixel: VectorF, size: VectorF) {
+    fun newTarget(posPixel: VectorF, size: VectorF) {
         // posPixel and size are in pixels. tpos is 0..1f
         val tpos = ((posPixel.divideBy(size)).maxOf(VectorF(0f, 0f)).minOf(VectorF(1f, 1f)))
         target.setPosV(tpos)
@@ -88,11 +87,11 @@ class PadView @JvmOverloads constructor(
 
         when (event.action) {
             MotionEvent.ACTION_DOWN -> {
-                sendTarget(posPixel, size)
+                newTarget(posPixel, size)
                 path.moveTo(xPixel, yPixel)
             }
             MotionEvent.ACTION_MOVE -> {
-                sendTarget(posPixel, size)
+                newTarget(posPixel, size)
                 paint.color = Color.BLUE
                 path.lineTo(xPixel, yPixel)
             }
