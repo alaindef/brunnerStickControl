@@ -119,6 +119,7 @@ class PollMaster : Thread() {
                     calibrateButton!!.setBackgroundColor(
                         ContextCompat.getColor(Main.mContext!!, R.color.buttonsecondcolor)
                     )
+//                    calibX and calibY not yet needed. start with (0 0
                     Main.stickPad!!.target.setPos(
                         calibX * Forces.calibMax.toFloat() / 100f,
                         calibY * Forces.calibMax.toFloat() / 100f
